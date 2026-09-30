@@ -364,8 +364,8 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
     <a class="si" href="#" data-side="groups"><i data-ic="groups" data-s="20"></i>Groups</a>
     <a class="si" href="#" data-side="roles"><i data-ic="roles" data-s="20"></i>Roles</a>
     <a class="si" href="#" data-side="locations"><i data-ic="pin" data-s="20"></i>Locations</a>
-    <a class="si" href="#"><i data-ic="star" data-fill="1" data-s="20"></i>Favourites</a>
-    <a class="si" href="#"><i data-ic="block" data-s="20"></i>Blocked</a>
+    <a class="si" href="#" data-side="favourites"><i data-ic="star" data-fill="1" data-s="20"></i>Favourites</a>
+    <a class="si" href="#" data-side="blocked"><i data-ic="block" data-s="20"></i>Blocked</a>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -709,7 +709,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
       <h1>Blocked Numbers</h1>
       <p class="sub1">Everyone you have stopped hearing from, and one place to block someone new.</p>
     </div>
-    <div class="acts"><button class="btn" id="btnBkExport"><i data-ic="download"></i>Export</button><button class="btn pri" id="btnBkNew" data-need="blockedAdd"><i data-ic="shield"></i>Block a number</button></div>
+    <div class="acts"><button class="btn sec" id="btnBkExport" data-need="export"><i data-ic="download"></i>Export</button><button class="btn pri" id="btnBkNew" data-need="numbers"><i data-ic="shield"></i>Block a number</button></div>
   </div>
   <div class="tool" style="padding:0;margin-top:22px;justify-content:space-between">
     <label class="fsearch">
@@ -738,7 +738,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
               <div class="ico"><i data-ic="users"></i></div>
               <h2 id="bkEmptyT">Nobody is blocked</h2>
               <p id="bkEmptyP">Numbers you block will be listed here.</p>
-              <button class="btn pri" id="bkEmptyBtn" style="margin-top:14px" data-need="blockedAdd"><i data-ic="shield"></i>Block a number</button>
+              <button class="btn pri" id="bkEmptyBtn" style="margin-top:14px" data-need="numbers"><i data-ic="shield"></i>Block a number</button>
               <button class="btn" id="bkEmptyClear" data-h="background:#eff6ff;" style="margin-top:14px;display:none;border-color:#2563eb;color:#2563eb;background:#fff;font-weight:600"><i data-ic="x"></i>Clear filters</button>
             </div>
           </td></tr>
@@ -758,6 +758,63 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
         <button class="pg on" data-bkpg title="Page 1">1</button>
         <button class="pg" data-bkpg title="Next page" disabled>›</button>
         <button class="pg" data-bkpg title="Last page" disabled>»</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="viewFavourites" style="display:none">
+  <div class="phead">
+    <div>
+      <h1 style="display:flex;align-items:center;gap:8px">Favourites<span data-tip="People you’ve starred, for quick access from anywhere." style="display:inline-grid;place-items:center;width:20px;height:20px;color:#94a3b8;cursor:help"><i data-ic="info" data-s="16"></i></span></h1>
+      <p class="sub1">The people you reach most — starred from their profile or the People list.</p>
+    </div>
+  </div>
+  <div class="tool" style="padding:0;margin-top:22px;justify-content:space-between">
+    <label class="fsearch">
+      <i data-ic="search"></i>
+      <input id="fvsearch" placeholder="Search favourites" autocomplete="off">
+      <button class="xbtn" id="fvsClear" style="display:none" title="Clear search"><i data-ic="x"></i></button>
+    </label>
+    <div class="showing" style="margin-left:0"><span class="gdot" style="background:#0d9488;margin:0 4px 0 0"></span><span id="fvCount">0 favourites</span></div>
+  </div>
+  <section class="card" data-scrollcard="1" style="margin-top:14px;min-height:0">
+    <div class="scroll">
+      <table style="min-width:820px">
+        <thead><tr>
+          <th style="background:#fff;border-top:0">Person</th>
+          <th style="background:#fff;border-top:0">Role</th>
+          <th style="background:#fff;border-top:0">Status</th>
+          <th style="background:#fff;border-top:0">Location</th>
+          <th style="background:#fff;border-top:0">Presence</th>
+          <th class="ctr" style="background:#fff;border-top:0;width:110px">Actions</th>
+        </tr></thead>
+        <tbody id="fvbody">
+          <tr id="fvEmpty" style="display:none"><td colspan="6">
+            <div class="empty">
+              <div class="ico"><i data-ic="star"></i></div>
+              <h2 id="fvEmptyT">No favourites yet</h2>
+              <p id="fvEmptyP">Star someone from their profile, or from the People list, to see them here.</p>
+              <button class="btn" id="fvEmptyGo" data-h="background:#eff6ff;" style="margin-top:14px;border-color:#2563eb;color:#2563eb;background:#fff;font-weight:600"><i data-ic="dir"></i>Go to People</button>
+              <button class="btn" id="fvEmptyClear" data-h="background:#eff6ff;" style="margin-top:14px;display:none;border-color:#2563eb;color:#2563eb;background:#fff;font-weight:600"><i data-ic="x"></i>Clear filters</button>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card" style="margin-top:12px;min-height:0;border-radius:14px">
+    <div class="pager">
+      <button class="pp" data-dd="fvperpage"><span data-lbl>25</span><i data-ic="chev"></i></button>
+      <span>per page</span>
+      <span id="fvPgText" style="margin-left:6px;color:#64748b">0 favourites</span>
+      <button class="rf" id="fvRefresh" title="Refresh"><i data-ic="refresh"></i></button>
+      <div class="pages">
+        <button class="pg" data-fvpg title="First page" disabled>«</button>
+        <button class="pg" data-fvpg title="Previous page" disabled>‹</button>
+        <button class="pg on" data-fvpg title="Page 1">1</button>
+        <button class="pg" data-fvpg title="Next page" disabled>›</button>
+        <button class="pg" data-fvpg title="Last page" disabled>»</button>
       </div>
     </div>
   </section>
@@ -968,51 +1025,51 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
         <div style="width:230px;flex-shrink:0"><select class="sel" id="bkWho">
           <option value="number">A number</option>
           <option value="several">Several at once</option>
-          <option value="area">Everyone from an area or country</option>
+          <option value="prefix">Every number starting with…</option>
           <option value="hidden">Callers who hide their number</option>
         </select></div>
       </div>
       <div class="scard" id="bkNumRow">
         <div><div class="stt" style="font-size:15px">Number</div><div class="sdd">Type it the way it was shown to you. Paste several separated by commas or new lines. A number without a country code is read as US.</div></div>
-        <div style="width:230px;flex-shrink:0"><textarea id="bkNum" placeholder="+1 415 555 1212" style="box-sizing:border-box;width:100%;height:70px;border:1px solid #cbd5e1;border-radius:11px;padding:10px 12px;font:inherit;font-size:14.5px;resize:vertical;outline:0"></textarea><div class="fe" data-ge="bknum" style="display:none;color:#dc2626;font-size:12.5px;margin-top:5px"></div></div>
+        <div style="width:230px;flex-shrink:0"><textarea id="bkNum" placeholder="+1 415 555 1212" style="box-sizing:border-box;width:100%;height:40px;border:1px solid #cbd5e1;border-radius:11px;padding:9px 12px;font:inherit;font-size:14.5px;resize:vertical;outline:0"></textarea><div class="fe" data-ge="bknum" style="display:none;color:#dc2626;font-size:12.5px;margin-top:5px"></div></div>
       </div>
-      <div class="scard" id="bkAreaRow" style="display:none">
-        <div><div class="stt" style="font-size:15px">Area or country</div><div class="sdd">Every number that calls or texts from here will be blocked.</div></div>
-        <div style="width:230px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
-          <select class="sel" id="bkCountry"></select>
-          <input class="fin" id="bkArea" placeholder="Area code (optional)" autocomplete="off" style="height:40px">
-        </div>
+      <div class="scard" id="bkPrefixRow" style="display:none">
+        <div><div class="stt" style="font-size:15px">Prefix</div><div class="sdd">The country code and, usually, the area code: +1 415 stops every San Francisco number, +44 every UK number.</div></div>
+        <div style="width:230px;flex-shrink:0"><input class="fin" id="bkPrefix" placeholder="+1 415" autocomplete="off" style="height:40px"><div class="fe" data-ge="bkprefix" style="display:none;color:#dc2626;font-size:12.5px;margin-top:5px"></div></div>
       </div>
       <div class="scard">
         <div><div class="stt" style="font-size:15px">What to stop</div><div class="sdd">Blocking calls blocks faxes too — they arrive over the same line.</div></div>
         <div style="width:230px;flex-shrink:0"><select class="sel" id="bkStop">
           <option value="all">Calls, faxes and texts</option>
-          <option value="callsfax">Calls and faxes only</option>
+          <option value="callsfax">Calls and faxes</option>
+          <option value="texts">Texts</option>
         </select></div>
       </div>
       <div class="scard">
         <div><div class="stt" style="font-size:15px">What the caller gets</div><div class="sdd">The caller hears the out-of-service tones and the call ends. Nothing reaches you.</div></div>
         <div style="width:230px;flex-shrink:0"><select class="sel" id="bkGets">
           <option value="block">Block everything</option>
-          <option value="busy">Busy tone</option>
-          <option value="ring">Ring once, then disconnect</option>
+          <option value="voicemail">Send to voicemail</option>
+          <option value="spam">Mark as spam</option>
         </select></div>
       </div>
       <div class="scard">
         <div><div class="stt" style="font-size:15px">Whose numbers</div><div class="sdd">You can block a caller for the whole company, or for any of its numbers.</div></div>
         <div style="width:230px;flex-shrink:0"><select class="sel" id="bkScope">
           <option value="mine">My numbers</option>
-          <option value="company">Company numbers</option>
+          <option value="lines">Lines I run</option>
+          <option value="company">Every number the company owns</option>
         </select></div>
       </div>
       <div class="scard">
         <div><div class="stt" style="font-size:15px">Reason</div><div class="sdd">Why — so the list still makes sense in six months.</div></div>
         <div style="width:230px;flex-shrink:0"><select class="sel" id="bkReason">
           <option value="">Not given</option>
-          <option value="Spam">Spam</option>
-          <option value="Scam">Scam</option>
-          <option value="Harassment">Harassment</option>
-          <option value="Robocall">Robocall</option>
+          <option value="Spam or robocall">Spam or robocall</option>
+          <option value="Telemarketing">Telemarketing</option>
+          <option value="Fraud attempt">Fraud attempt</option>
+          <option value="Harassment or abuse">Harassment or abuse</option>
+          <option value="Wrong number">Wrong number</option>
           <option value="Other">Other</option>
         </select></div>
       </div>
@@ -1283,6 +1340,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
   <div class="dfoot">
     <button class="btn sec" id="dCall"><i data-ic="phone"></i>Call</button>
     <button class="btn sec" id="dMsg"><i data-ic="msg"></i>Message</button>
+    <button class="btn sec" id="dFav"><i data-ic="star" data-s="16"></i><span id="dFavL">Favourite</span></button>
     <button class="btn sec" id="dRem" style="color:#dc2626"><i data-ic="trash"></i><span id="dRemL">Remove</span></button>
   </div>
 </aside>
@@ -1774,6 +1832,7 @@ function openDrawer(r){
   $('#dNum').textContent=[d.num,d.num2].filter(Boolean).join(' / ')||'None'; $('#dPres').textContent=d.presence;
   $('#dRemL').textContent=d.removed==='1'?'Restore':'Remove';
   $('#dRem').style.color=d.removed==='1'?'#15803d':'#dc2626'; showEl($('#dRem'),can('people'));
+  paintDFav(r);
   dOv.style.display='block'; drawer.style.display='flex'; closeMenu(); if(appHeader){appHeader.style.position='static';appHeader.style.zIndex='1'}
   requestAnimationFrame(function(){dOv.style.opacity=1;drawer.style.transform='translateX(0)'});
 }
@@ -1784,6 +1843,8 @@ function closeDrawer(){
 dOv.addEventListener('click',closeDrawer); $('#dClose').addEventListener('click',closeDrawer);
 $('#dCall').addEventListener('click',function(){toast(ctx.dataset.num?'Calling '+ctx.dataset.name+' on '+ctx.dataset.num+'…':'No number assigned to '+ctx.dataset.name)});
 $('#dMsg').addEventListener('click',function(){toast('Opening chat with '+ctx.dataset.name+'…')});
+function paintDFav(r){var on=r.dataset.fav==='1';$('#dFavL').textContent=on?'Favourited':'Favourite';$('#dFav').style.color=on?'#b45309':'';$('#dFav').style.borderColor=on?'#fde68a':'';$('#dFav').style.background=on?'#fffbeb':''}
+$('#dFav').addEventListener('click',function(){toggleFav(ctx);paintDFav(ctx)});
 $('#dRem').addEventListener('click',function(){ctx.dataset.removed==='1'?restoreRows([ctx]):removeRows([ctx])});
 document.addEventListener('click',function(e){var t=e.target.closest('[data-toast]');if(t)toast(t.dataset.toast)});
 
@@ -2020,6 +2081,7 @@ function confirmSuspend(list,un){
 var ACT={
   view:    {icon:'user',   label:function(){return 'View profile'},          run:function(r){openPerson(r,false)}},
   restore: {icon:'undo',   label:function(){return 'Restore person'},need:function(){return can('people')},        run:function(r){restoreRows([r])}},
+  fav:     {icon:'star',   label:function(r){return r.dataset.fav==='1'?'Remove from Favourites':'Add to Favourites'}, run:function(r){toggleFav(r)}},
   call:    {icon:'phone',  label:function(){return 'Call'},                   run:function(r){var d=r.dataset;toast(d.num?'Calling '+d.name+' on '+d.num+'…':'No number assigned to '+d.name)}},
   msg:     {icon:'msg',    label:function(){return 'Message'},                run:function(r){toast('Opening chat with '+r.dataset.name+'…')}},
   video:   {icon:'video',  label:function(){return 'Start video'},            run:function(r){toast('Starting a video call with '+r.dataset.name+'…')}},
@@ -2040,8 +2102,8 @@ var ACT={
   remove:  {icon:'trash',  label:function(){return 'Remove person'},need:function(){return can('people')},when:function(r){return r.dataset.self!=='1'},          danger:true, run:function(r){removeRows([r])}}
 };
 var MENUS={
-  admin:  [['call','msg','video'],['edit','activity','changeCid','removeCid','fax']],
-  user:   [['call','msg','video'],['edit','activity','role','reqRole','resend','assignCid','reqCid','fax'],['suspend','reqSuspend','remove','reqRemove']],
+  admin:  [['call','msg','video','fav'],['edit','activity','changeCid','removeCid','fax']],
+  user:   [['call','msg','video','fav'],['edit','activity','role','reqRole','resend','assignCid','reqCid','fax'],['suspend','reqSuspend','remove','reqRemove']],
   removed:[['view','restore']]
 };
 function menuKind(r){return r.dataset.removed==='1'?'removed':(r.dataset.role==='Account owner'?'admin':'user')}
@@ -2055,8 +2117,8 @@ function buildRowMenu(r){
     if(!items.length)return;
     h+=M_SEP;
     items.forEach(function(k){
-      var a=ACT[k], red=a.danger, ic=a.iconFn?a.iconFn(r):a.icon;
-      h+='<button data-act="'+k+'" data-h="background:'+(red?'#fef2f2':'#f1f5f9')+';" style="'+M_OPT+'color:'+(red?'#dc2626':'#1e293b')+'">'+ico(ic,red?'#dc2626':'#64748b')+'<span>'+esc(a.label(r))+'</span></button>';
+      var a=ACT[k], red=a.danger, ic=a.iconFn?a.iconFn(r):a.icon, favOn=k==='fav'&&r.dataset.fav==='1';
+      h+='<button data-act="'+k+'" data-h="background:'+(red?'#fef2f2':'#f1f5f9')+';" style="'+M_OPT+'color:'+(red?'#dc2626':favOn?'#b45309':'#1e293b')+'">'+ico(ic,red?'#dc2626':favOn?'#b45309':'#64748b')+'<span>'+esc(a.label(r))+'</span></button>';
     });
   });
   return h;
@@ -2592,7 +2654,7 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('keydown',function(e){
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(['#modal','#gmodal','#sdlg','#cdlg','#idlg','#kdlg','#rvdlg','#redlg','#radlg','#rqdlg','#ldlg','#signin'].some(function(id){return $(id).style.display==='flex'}))return;$('#gsearch').focus();$('#gsearch').select();openK()}
-  if(e.key==='Escape'){if($('#cdlg').style.display==='flex'){hideConfirm();return}if($('#rqdlg').style.display==='flex'){closeReqs();return}if($('#ldlg').style.display==='flex'){closeLoc();return}if($('#radlg').style.display==='flex'){closeAssign();return}if($('#redlg').style.display==='flex'){attemptCloseRoleEditor();return}if($('#rvdlg').style.display==='flex'){closeRoleView();return}if($('#kdlg').style.display==='flex'){closeKeys();return}if($('#adlg').style.display==='flex'){closeActivity();return}if($('#roledlg').style.display==='flex'){closeRoleDialog();return}if($('#ciddlg').style.display==='flex'){closeCidDialog();return}if($('#faxdlg').style.display==='flex'){closeFax();return}if($('#expdlg').style.display==='flex'){closeExport();return}if($('#idlg').style.display==='flex'){closeImp();return}if($('#sdlg').style.display==='flex'){closeSD();return}if($('#cdlg').style.display==='flex'){hideConfirm();return}closeMenu();closeDrawer();attemptCloseModal();attemptCloseG()}
+  if(e.key==='Escape'){if($('#cdlg').style.display==='flex'){hideConfirm();return}if($('#rqdlg').style.display==='flex'){closeReqs();return}if($('#ldlg').style.display==='flex'){closeLoc();return}if($('#bkdlg').style.display==='flex'){attemptCloseBlock();return}if($('#radlg').style.display==='flex'){closeAssign();return}if($('#redlg').style.display==='flex'){attemptCloseRoleEditor();return}if($('#rvdlg').style.display==='flex'){closeRoleView();return}if($('#kdlg').style.display==='flex'){closeKeys();return}if($('#adlg').style.display==='flex'){closeActivity();return}if($('#roledlg').style.display==='flex'){closeRoleDialog();return}if($('#ciddlg').style.display==='flex'){closeCidDialog();return}if($('#faxdlg').style.display==='flex'){closeFax();return}if($('#expdlg').style.display==='flex'){closeExport();return}if($('#idlg').style.display==='flex'){closeImp();return}if($('#sdlg').style.display==='flex'){closeSD();return}if($('#cdlg').style.display==='flex'){hideConfirm();return}closeMenu();closeDrawer();attemptCloseModal();attemptCloseG()}
 });
 
 
@@ -2622,23 +2684,23 @@ function applyHash(h){
     var m;
     if((m=/^#person\/(.+)$/.exec(h))){var r=personById(m[1]);if(r){openPerson(r);return}}
     if((m=/^#group\/(.+)$/.exec(h))){var g=groups.filter(function(x){return x.id===m[1]})[0];if(g){openDetail(g);return}}
-    showView(h==='#groups'?'groups':h==='#roles'?'roles':h==='#locations'?'locations':'people');
+    showView(h==='#groups'?'groups':h==='#roles'?'roles':h==='#locations'?'locations':h==='#blocked'?'blocked':h==='#favourites'?'favourites':'people');
   }finally{navLock=false}
 }
 window.addEventListener('popstate',function(){backTo=null;applyHash(location.hash)});
-var curView='', VIEW_IDS={people:'#viewPeople',groups:'#viewGroups',roles:'#viewRoles',locations:'#viewLocs',gdetail:'#viewGDetail'};
+var curView='', VIEW_IDS={people:'#viewPeople',groups:'#viewGroups',roles:'#viewRoles',locations:'#viewLocs',blocked:'#viewBlocked',favourites:'#viewFavourites',gdetail:'#viewGDetail'};
 var backTo=null, keepBack=false;
 function paintBack(){var el=$('#backBar');el.style.display=backTo?'inline-flex':'none';if(backTo)$('#backLbl').textContent='Back to '+backTo.label}
 function goWithBack(v,label,from){backTo={label:label,view:from};keepBack=true;showView(v);keepBack=false;paintBack()}
 $('#backBar').addEventListener('click',function(e){e.preventDefault();var t=backTo;backTo=null;showView(t?t.view:'people')});
 function showView(v){
-  if(v==='people'){pushNav('#people');apply()} if(v==='groups')pushNav('#groups'); if(v==='roles')pushNav('#roles'); if(v==='locations')pushNav('#locations');
+  if(v==='people'){pushNav('#people');apply()} if(v==='groups')pushNav('#groups'); if(v==='roles')pushNav('#roles'); if(v==='locations')pushNav('#locations'); if(v==='blocked')pushNav('#blocked'); if(v==='favourites')pushNav('#favourites');
   var changed=curView!==v; curView=v;
   Object.keys(VIEW_IDS).forEach(function(k){var el=$(VIEW_IDS[k]),on=k===v;el.style.display=on?'':'none';
     if(on&&changed){el.style.transition='none';el.style.opacity='0';void el.offsetHeight;el.style.transition='opacity .18s ease';el.style.opacity='1'}});
   var side=v==='gdetail'?(dMode==='person'?'people':'groups'):v;
   $$('a[data-side]').forEach(function(a){styleSide(a,a.dataset.side===side)});
-  closeMenu(); window.scrollTo(0,0); if(v==='groups')renderGroups(); if(v==='roles')renderRoles(); if(v==='locations')renderLocs(); if(v==='gdetail')renderDetail();
+  closeMenu(); window.scrollTo(0,0); if(v==='groups')renderGroups(); if(v==='roles')renderRoles(); if(v==='locations')renderLocs(); if(v==='blocked')renderBlocked(); if(v==='favourites')renderFavourites(); if(v==='gdetail')renderDetail();
   setTimeout(fitScrollCards,0);
   if(!navLock&&!keepBack&&changed)backTo=null; if(v!=='gdetail')paintBack(); else $('#backBar').style.display='none';
 }
@@ -4536,6 +4598,158 @@ function openLocPeople(btn,l){
 $('[data-menu="lpeople"]').addEventListener('click',function(e){e.stopPropagation();var l=LPX,t;
   if((t=e.target.closest('[data-lpp]'))){var r=personById(t.getAttribute('data-lpp'));closeMenu();if(r){backTo={label:'Locations',view:'locations'};keepBack=true;openPerson(r);keepBack=false}return}
   if(e.target.closest('[data-lpshow]')){closeMenu();filters.location=l.name;updateChip('location');goWithBack('people','Locations','locations')}});
+
+/* ---------- Blocked numbers ---------- */
+var BLOCKS=[], bkq='', BK=null, bkOwn=false;
+var BK_STOP_T={all:'Calls, faxes and texts',callsfax:'Calls and faxes',texts:'Texts'};
+var BK_GETS_T={block:'Block everything',voicemail:'Send to voicemail',spam:'Mark as spam'};
+var BK_SCOPE_T={mine:'My numbers',lines:'Lines I run',company:'Every number the company owns'};
+function bkWhoText(b){
+  if(b.who==='hidden')return 'Callers who hide their number';
+  if(b.who==='prefix')return 'Every number starting with '+esc(b.prefix||'');
+  return b.numbers.length===1?esc(fmtNum(b.numbers[0])):b.numbers.length+' numbers';
+}
+function bkSubText(b){
+  if(b.label)return esc(b.label);
+  if((b.who==='number'||b.who==='several')&&b.numbers.length>1)return esc(b.numbers.slice(1).map(fmtNum).join(', '));
+  return '';
+}
+function renderBlocked(){
+  var q=bkq.trim().toLowerCase();
+  var list=BLOCKS.filter(function(b){return !q||[bkWhoText(b),b.label,b.note,b.reason,b.by].join(' ').toLowerCase().indexOf(q)>-1});
+  $$('tr[data-bkrow]',$('#bkbody')).forEach(function(t){t.remove()});
+  var rows=list.map(function(b){
+    return '<tr class="row" data-bkrow="'+b.id+'">'
+      +'<td><div style="font-weight:600;color:#0f172a">'+bkWhoText(b)+'</div>'+(bkSubText(b)?'<div style="font-size:12px;color:#64748b;margin-top:2px">'+bkSubText(b)+'</div>':'')+'</td>'
+      +'<td>'+BK_STOP_T[b.stops]+'</td>'
+      +'<td>'+BK_GETS_T[b.gets]+'</td>'
+      +'<td>'+BK_SCOPE_T[b.scope]+'</td>'
+      +'<td>'+(b.reason?esc(b.reason):'<span style="color:#94a3b8">Not given</span>')+'</td>'
+      +'<td>'+esc(b.by)+'</td>'
+      +'<td>'+b.stopped+'</td>'
+      +'<td class="ctr">'+rBtn('data-bkact="del"','Unblock this number','trash','red')+'</td>'
+      +'</tr>';
+  }).join('');
+  $('#bkEmpty').insertAdjacentHTML('beforebegin',rows);
+  var none=!BLOCKS.length;
+  $('#bkEmpty').style.display=list.length?'none':'';
+  $('#bkEmptyT').textContent=none?'Nobody is blocked':'No blocks match your search';
+  $('#bkEmptyP').textContent=none?'Numbers you block will be listed here.':'Try a different search.';
+  $('#bkEmptyBtn').style.display=(none&&can('numbers'))?'inline-flex':'none';
+  $('#bkEmptyClear').style.display=none?'none':'inline-flex';
+  $('#bksClear').style.display=bkq?'':'none';
+  $('#bkCount').textContent=BLOCKS.length+(BLOCKS.length===1?' blocked':' blocked');
+  $('#bkStoppedCount').textContent=BLOCKS.reduce(function(s,b){return s+b.stopped},0)+' calls and texts stopped';
+  $('#bkPgText').textContent=list.length?'1–'+list.length+' of '+list.length+(list.length===1?' block':' blocks'):'0 blocks';
+}
+$('#bkbody').addEventListener('click',function(e){
+  var tr=e.target.closest('tr[data-bkrow]'); if(!tr)return; var id=tr.getAttribute('data-bkrow'), b=BLOCKS.filter(function(x){return x.id===id})[0]; if(!b)return;
+  if(e.target.closest('[data-bkact="del"]'))confirmUnblock(b);
+});
+function confirmUnblock(b){
+  showConfirm('Unblock '+bkWhoText(b)+'?','They’ll be able to reach you again on the next call or text.','Unblock',function(){
+    var i=BLOCKS.indexOf(b); if(i<0)return; BLOCKS.splice(i,1); renderBlocked();
+    note('Unblocked','Undo',function(){BLOCKS.splice(Math.min(i,BLOCKS.length),0,b);renderBlocked()});
+  },true);
+}
+$('#bksearch').addEventListener('input',function(e){bkq=e.target.value;renderBlocked()});
+$('#bksClear').addEventListener('click',function(){bkq='';$('#bksearch').value='';renderBlocked();$('#bksearch').focus()});
+$('#bkEmptyClear').addEventListener('click',function(){$('#bksClear').click()});
+$('#bkRefresh').addEventListener('click',function(){var i=$('#bkRefresh svg');i.style.transition='transform .6s';i.style.transform='rotate(360deg)';setTimeout(function(){i.style.transition='none';i.style.transform='none';renderBlocked()},600)});
+$('#btnBkExport').addEventListener('click',function(){toast(BLOCKS.length?'Exporting '+BLOCKS.length+(BLOCKS.length===1?' block':' blocks')+'…':'Nothing to export yet')});
+function paintBkWho(){
+  var who=$('#bkWho').value;
+  $('#bkNumRow').style.display=(who==='number'||who==='several')?'':'none';
+  $('#bkPrefixRow').style.display=who==='prefix'?'':'none';
+}
+$('#bkWho').addEventListener('change',paintBkWho);
+function bkErr(msg){var e=$('[data-ge="bknum"]');e.textContent=msg||'';e.style.display=msg?'block':'none';$('#bkNum').style.borderColor=msg?'#ef4444':'#cbd5e1'}
+function bkPfxErr(msg){var e=$('[data-ge="bkprefix"]');e.textContent=msg||'';e.style.display=msg?'block':'none';$('#bkPrefix').style.borderColor=msg?'#ef4444':'#cbd5e1'}
+$('#bkNum').addEventListener('input',function(){bkErr('')});
+$('#bkPrefix').addEventListener('input',function(){bkPfxErr('')});
+function openBlock(){
+  if(!can('numbers'))return;
+  BK={};
+  $('#bkWho').value='number'; $('#bkNum').value=''; $('#bkPrefix').value=''; $('#bkStop').value='all'; $('#bkGets').value='block'; $('#bkScope').value='mine'; $('#bkReason').value=''; $('#bkLabel').value=''; $('#bkNote').value='';
+  bkErr(''); bkPfxErr(''); paintBkWho(); $('#bkB').scrollTop=0;
+  bkOwn=grabOv(); $('#bkdlg').style.display='flex'; closeMenu(); mOpen($('#bkdlg'));
+  setTimeout(function(){$('#bkWho').focus({preventScroll:true})},30);
+}
+function bkDirty(){return !!($('#bkNum').value.trim()||$('#bkPrefix').value.trim()||$('#bkLabel').value.trim()||$('#bkNote').value.trim())}
+function attemptCloseBlock(){
+  if($('#bkdlg').style.display==='flex'&&bkDirty()){showConfirm('Discard this block?','You’ve entered details that haven’t been saved yet. Keep editing, or discard them and close.','Discard',closeBlock,true,'Keep editing');return}
+  closeBlock();
+}
+function closeBlock(){if($('#bkdlg').style.display!=='flex')return;$('#bkdlg').style.display='none';dropOv(bkOwn);BK=null;mReturnFocus()}
+function saveBlock(){
+  var who=$('#bkWho').value, nums=[], prefix='';
+  if(who==='number'||who==='several'){
+    nums=$('#bkNum').value.split(/[,\n]/).map(function(s){return s.trim()}).filter(Boolean);
+    if(!nums.length){bkErr('Add at least one number.');$('#bkNum').focus();return}
+    var bad=nums.filter(function(n){return !/^\+?\d{6,14}$/.test(n.replace(/[\s()-]/g,''))});
+    if(bad.length){bkErr('Enter valid numbers only — check '+bad.map(function(n){return '“'+n+'”'}).join(', '));$('#bkNum').focus();return}
+  }
+  if(who==='prefix'){
+    prefix=$('#bkPrefix').value.trim();
+    if(!prefix){bkPfxErr('Add a prefix, e.g. +1 415.');$('#bkPrefix').focus();return}
+  }
+  var rec={id:'bk'+Date.now().toString(36),who:who,numbers:nums,prefix:prefix,stops:$('#bkStop').value,gets:$('#bkGets').value,scope:$('#bkScope').value,reason:$('#bkReason').value,label:$('#bkLabel').value.trim(),note:$('#bkNote').value.trim(),by:(me()?me().dataset.name:'You'),ts:Date.now(),stopped:0};
+  BLOCKS.unshift(rec); closeBlock(); renderBlocked();
+  toast((who==='hidden'?'Hidden callers':who==='prefix'?'Prefix '+prefix:nums.length>1?nums.length+' numbers':'Number')+' blocked');
+}
+$('#btnBkNew').addEventListener('click',openBlock); $('#bkEmptyBtn').addEventListener('click',openBlock);
+$('#bkX').addEventListener('click',attemptCloseBlock); $('#bkNo').addEventListener('click',attemptCloseBlock);
+$('#bkYes').addEventListener('click',saveBlock);
+$('#bkdlg').addEventListener('mousedown',function(e){if(e.target===$('#bkdlg'))attemptCloseBlock()});
+
+/* ---------- Favourites ---------- */
+var fvq='';
+function toggleFav(r){
+  var on=r.dataset.fav==='1'; r.dataset.fav=on?'0':'1';
+  toast(r.dataset.name+(on?' removed from Favourites':' added to Favourites'));
+  if($('#viewFavourites').style.display!=='none')renderFavourites();
+}
+function renderFavourites(){
+  var q=fvq.trim().toLowerCase();
+  var favs=rows().filter(function(r){return r.dataset.fav==='1'&&r.dataset.removed!=='1'});
+  var list=favs.filter(function(r){var d=r.dataset;return !q||(d.name+' '+d.email+' '+d.role+' '+d.loc+' '+d.city).toLowerCase().indexOf(q)>-1});
+  $$('tr[data-fvrow]',$('#fvbody')).forEach(function(t){t.remove()});
+  var rowsHtml=list.map(function(r){
+    var d=r.dataset, av=AVS[(+d.av)%AVS.length], sb=BADGE[SK[d.status]||'grey'], pc=PC[d.presence]||PC.Offline;
+    return '<tr data-fvrow="'+d.id+'" style="position:relative;z-index:1;transition:background-color .1s">'
+      +'<td style="'+TDS+'"><button data-fvopen style="border:0;background:none;font:inherit;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;padding:4px 8px;margin:-4px -8px;border-radius:8px;width:100%" title="Open profile">'
+        +'<span style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0;background:'+av[0]+';color:'+av[1]+'">'+esc(ini(d.name))+'</span>'
+        +'<span style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:700;color:#0f172a">'+esc(d.name)+'</span><span style="color:#64748b;font-size:12px;margin-top:1px;font-weight:400">'+esc(d.email)+'</span></span>'
+      +'</button></td>'
+      +'<td style="'+TDS+'">'+esc(d.role)+'</td>'
+      +'<td style="'+TDS+'"><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600;background:'+sb[0]+';color:'+sb[1]+'">'+esc(d.status)+'</span></td>'
+      +'<td style="'+TDS+'"><div style="display:flex;flex-direction:column;align-items:flex-start;color:#1e293b"><span>'+esc(d.loc)+'</span><span style="color:#64748b;font-size:12px;margin-top:1px;font-weight:400">'+esc(d.city)+'</span></div></td>'
+      +'<td style="'+TDS+'"><span style="white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:'+pc.t+'"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+pc.d+'"></span>'+esc(d.presence)+'</span></td>'
+      +'<td style="'+TDS+'text-align:center"><div style="display:inline-flex;gap:8px;align-items:center">'+rBtn('data-fvact="unfav"','Remove from Favourites','star','amber')+'</div></td>'
+      +'</tr>';
+  }).join('');
+  $('#fvEmpty').insertAdjacentHTML('beforebegin',rowsHtml);
+  var none=!favs.length;
+  $('#fvEmpty').style.display=list.length?'none':'';
+  $('#fvEmptyT').textContent=none?'No favourites yet':'No favourites match your search';
+  $('#fvEmptyP').textContent=none?'Star someone from their profile, or from the People list, to see them here.':'Try a different search.';
+  $('#fvEmptyGo').style.display=none?'inline-flex':'none';
+  $('#fvEmptyClear').style.display=none?'none':'inline-flex';
+  $('#fvsClear').style.display=fvq?'':'none';
+  $('#fvCount').textContent=favs.length+(favs.length===1?' favourite':' favourites');
+  $('#fvPgText').textContent=list.length?'1–'+list.length+' of '+list.length+(list.length===1?' favourite':' favourites'):'0 favourites';
+}
+$('#fvbody').addEventListener('click',function(e){
+  var tr=e.target.closest('tr[data-fvrow]'); if(!tr)return; var r=personById(tr.getAttribute('data-fvrow')); if(!r)return;
+  if(e.target.closest('[data-fvact="unfav"]')){toggleFav(r);return}
+  if(e.target.closest('[data-fvopen]'))openDrawer(r);
+});
+$('#fvsearch').addEventListener('input',function(e){fvq=e.target.value;renderFavourites()});
+$('#fvsClear').addEventListener('click',function(){fvq='';$('#fvsearch').value='';renderFavourites();$('#fvsearch').focus()});
+$('#fvEmptyClear').addEventListener('click',function(){$('#fvsClear').click()});
+$('#fvEmptyGo').addEventListener('click',function(){showView('people')});
+$('#fvRefresh').addEventListener('click',function(){var i=$('#fvRefresh svg');i.style.transition='transform .6s';i.style.transform='rotate(360deg)';setTimeout(function(){i.style.transition='none';i.style.transform='none';renderFavourites()},600)});
+
 /* ----- dialog: 1 Details → 2 Review ----- */
 var LD=null;
 var L_IN='height:44px;border:1px solid #cbd5e1;border-radius:11px;padding:0 12px;font:inherit;font-size:15px;outline:0;background:#fff;color:#0f172a;width:100%;box-sizing:border-box;transition:border-color .12s,box-shadow .12s;';
