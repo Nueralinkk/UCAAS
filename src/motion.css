@@ -1,0 +1,28 @@
+@keyframes mpop{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes mfade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+#cdlg>div,#sdlg>div,#idlg>div,#expdlg>div,#kdlg>div,#adlg>div,#roledlg>div,#faxdlg>div,#ciddlg>div,#rvdlg>div,#redlg>div,#radlg>div{animation:mpop .2s cubic-bezier(.2,.8,.3,1)}
+[data-menu]{animation:mfade .13s ease-out}
+#toast{animation:mfade .2s ease-out}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+/* ---- audit fixes: keyboard focus, press feedback, disabled ---- */
+:focus-visible{outline:2px solid #2563eb;outline-offset:2px;border-radius:8px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;border-color:#3b82f6 !important;box-shadow:0 0 0 3px #dbeafe !important}
+html[data-theme="dark"] input:focus-visible,html[data-theme="dark"] select:focus-visible,html[data-theme="dark"] textarea:focus-visible{box-shadow:0 0 0 3px #1e3a8a !important}
+button:active:not([disabled]){transform:translateY(1px)}
+button[disabled]{cursor:not-allowed !important;opacity:.45}
+/* ---- audit fixes: contrast floor for text and a 12px type floor, inside the tabs and their dialogs ---- */
+main [style*="font-size:12px;color:#94a3b8"],main [style*="font-size:12.5px;color:#94a3b8"],main [style*="font-size:13px;color:#94a3b8"],main [style*="font-size:13.5px;color:#94a3b8"],main [style*="color:#94a3b8;font-size:12"],main [style*="color:#94a3b8;font-size:13"],
+[role="dialog"] [style*="font-size:12px;color:#94a3b8"],[role="dialog"] [style*="font-size:12.5px;color:#94a3b8"],[role="dialog"] [style*="font-size:13px;color:#94a3b8"],[role="dialog"] [style*="font-size:13.5px;color:#94a3b8"],[role="dialog"] [style*="color:#94a3b8;font-size:12"],[role="dialog"] [style*="color:#94a3b8;font-size:13"],
+#signin [style*="color:#94a3b8"]{color:#64748b !important}
+html[data-theme="dark"] main [style*="color:#94a3b8"],html[data-theme="dark"] [role="dialog"] [style*="color:#94a3b8"],html[data-theme="dark"] #signin [style*="color:#94a3b8"]{color:#8a9ab3 !important}
+main [style*="font-size:10.5px"],[role="dialog"] [style*="font-size:10.5px"]{font-size:11.5px !important}
+main [style*="font-size:11px"],[role="dialog"] [style*="font-size:11px"]{font-size:12px !important}
+/* ---- audit fixes: cap the content column on very wide screens ---- */
+main{max-width:1520px;margin:0 auto}
+@media (max-width:760px){#rvNav,#reNav{display:none !important}}
+/* pager: current page always solid blue; arrows dark and visible even when there is only one page */
+[data-pg],[data-gpg],[data-rpg]{color:#334155 !important;background:#e2e8f0 !important;box-shadow:inset 0 0 0 1px #cbd5e1;font-weight:700}
+[data-pg][disabled],[data-gpg][disabled],[data-rpg][disabled]{opacity:1 !important;cursor:not-allowed !important}
+[data-pg][title="Page 1"],[data-gpg][title="Page 1"],#viewRoles [title="Page 1"]{background:#2563eb !important;color:#fff !important;box-shadow:0 0 0 3px #dbeafe !important;font-weight:700}
+html[data-theme="dark"] [data-pg],html[data-theme="dark"] [data-gpg],html[data-theme="dark"] [data-rpg]{color:#e5eaf3 !important;background:#334155 !important;box-shadow:inset 0 0 0 1px #475569}
+html[data-theme="dark"] [data-pg][title="Page 1"],html[data-theme="dark"] [data-gpg][title="Page 1"],html[data-theme="dark"] #viewRoles [title="Page 1"]{background:#2563eb !important;color:#fff !important;box-shadow:0 0 0 3px #1e3a8a !important}
