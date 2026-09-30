@@ -47,6 +47,7 @@ const IC = {
   pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
   star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
   block: '<circle cx="12" cy="6" r="3.6"/><path d="M14.6 13.6H7.4a3.9 3.9 0 0 0 0 7.8h5.6"/><circle cx="17.4" cy="17.5" r="4"/><path d="M14.6 20.3l5.6-5.6"/>',
+  shield: '<path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/>',
   logo: 'VB:0 0 28 30|<g stroke="#0d9bd7" fill="none" stroke-linecap="round"><path d="M5.6 1.4Q-4 11 5.6 20.6" stroke-width="1.9"/><path d="M8 4.2Q2.8 11.6 8 18.8" stroke-width="1.7"/><path d="M10.4 6.4Q5.4 11.2 10.4 16" stroke-width="1.7"/><path d="M22.8 1.4Q32.4 11 22.8 20.6" stroke-width="1.9"/><path d="M20.4 4.2Q25.6 11.6 20.4 18.8" stroke-width="1.7"/><path d="M18 6.4Q23 11.2 18 16" stroke-width="1.7"/></g><path d="M14 10.4L11.6 19.6H16.8Z" fill="#0d9bd7" stroke="none"/><g stroke="#0d9bd7" stroke-linecap="round"><path d="M11 22.2L18.2 21.4" stroke-width="1.1"/><path d="M9.8 25.2L19 24.2" stroke-width="1.6"/><path d="M9.8 27.9H19" stroke-width="1.7"/></g>',
   refresh: '<path d="M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',

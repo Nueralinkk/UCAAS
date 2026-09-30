@@ -103,13 +103,13 @@ h1{font-size:24px;font-weight:700;color:#0f172a;letter-spacing:-.4px}
 .bbtn.dng:hover{background:#fee2e2}
 .bbtn svg{width:14px;height:14px}
 .scroll{overflow-x:auto;overflow-y:auto;flex:1;min-height:0}
-table{width:100%;min-width:960px;border-collapse:collapse}
-th{text-align:left;font-size:12px;font-weight:600;letter-spacing:.6px;color:#64748b;text-transform:uppercase;padding:0 14px;height:48px;border-top:1px solid #eef1f5;border-bottom:1px solid #eef1f5;white-space:nowrap;background:#fafbfd}
+table{width:100%;min-width:960px;border-collapse:separate;border-spacing:0}
+th{text-align:left;font-size:12px;font-weight:600;letter-spacing:.6px;color:#64748b;text-transform:uppercase;padding:0 14px;height:48px;border-top:1px solid #eef1f5;border-bottom:1px solid #eef1f5;white-space:nowrap;background:#fafbfd;position:sticky;top:0;z-index:2}
 .sortb{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:#64748b;padding:6px 6px;margin:0 -6px;border-radius:8px}
 .sortb:hover{background:#eef2f6;color:#0f172a}
 .arr{color:#94a3b8;font-size:11px;letter-spacing:0}
 td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef1f5;vertical-align:middle}
-.row{transition:background-color .1s}
+.row{transition:background-color .1s;position:relative;z-index:1}
 .row:hover{background:#f8fafc}
 .cb{width:16px;height:16px;margin:0;accent-color:#2563eb;cursor:pointer}
 .cchk{width:44px;padding-left:16px}
@@ -299,17 +299,6 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
 .sdd{color:#334155;font-size:14.5px;margin-top:4px}
 .ssel{height:40px;padding:0 20px;border:1px solid #2563eb;border-radius:10px;color:#2563eb;font-size:15px;font-weight:500;background:#fff;flex-shrink:0}
 .ssel:hover{background:#eff6ff}
-.rcard{border:1px solid #e8ecf3;border-radius:14px;padding:16px;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.05)}
-.rt{font-size:17px;font-weight:700;color:#0f172a}
-.rs{color:#64748b;font-size:13px;margin-top:2px}
-.rl{font-size:13.5px;color:#334155;margin:14px 0 6px}
-.chp{padding:8px 14px;border-radius:10px;background:#eef1f6;color:#475569;font-size:13.5px;margin:0 8px 6px 0;border:1px solid transparent}
-.chp:hover{background:#e2e8f0}
-.who{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;color:#475569;font-size:13.5px;min-height:40px}
-.rsel{width:100%;height:44px;border:0;border-radius:10px;background:#eef1f6;padding:0 12px;font-size:15px;color:#334155;outline:0}
-.tbox{border:1px solid #e8ecf3;border-radius:12px;padding:14px 16px;background:#fff;margin-top:6px}
-.gnow{height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:10px;color:#2563eb;font-size:14.5px;font-weight:500;background:#fff}
-.gnow:hover{background:#eff6ff}
 
 /* group detail */
 .crumb{color:#64748b;font-size:13.5px;padding:2px 6px;border-radius:8px}
@@ -642,11 +631,11 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
       <span id="rPgText" style="margin-left:6px;color:#64748b">1–4 of 4 roles</span>
       <button class="rf" id="rRefresh" title="Refresh"><i data-ic="refresh"></i></button>
       <div class="pages">
-        <button class="pg" data-rpg disabled>«</button>
-        <button class="pg" data-rpg disabled>‹</button>
-        <button class="pg on" title="Page 1">1</button>
-        <button class="pg" data-rpg disabled>›</button>
-        <button class="pg" data-rpg disabled>»</button>
+        <button class="pg" data-rpg title="First page" disabled>«</button>
+        <button class="pg" data-rpg title="Previous page" disabled>‹</button>
+        <button class="pg on" data-rpg title="Page 1">1</button>
+        <button class="pg" data-rpg title="Next page" disabled>›</button>
+        <button class="pg" data-rpg title="Last page" disabled>»</button>
       </div>
     </div>
   </section>
@@ -704,11 +693,71 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
       <span id="lPgText" style="margin-left:6px;color:#64748b">1–2 of 2 locations</span>
       <button class="rf" id="lRefresh" title="Refresh"><i data-ic="refresh"></i></button>
       <div class="pages">
-        <button class="pg" data-lpg disabled>«</button>
-        <button class="pg" data-lpg disabled>‹</button>
-        <button class="pg on" title="Page 1">1</button>
-        <button class="pg" data-lpg disabled>›</button>
-        <button class="pg" data-lpg disabled>»</button>
+        <button class="pg" data-lpg title="First page" disabled>«</button>
+        <button class="pg" data-lpg title="Previous page" disabled>‹</button>
+        <button class="pg on" data-lpg title="Page 1">1</button>
+        <button class="pg" data-lpg title="Next page" disabled>›</button>
+        <button class="pg" data-lpg title="Last page" disabled>»</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="viewBlocked" style="display:none">
+  <div class="phead">
+    <div>
+      <h1>Blocked Numbers</h1>
+      <p class="sub1">Everyone you have stopped hearing from, and one place to block someone new.</p>
+    </div>
+    <div class="acts"><button class="btn" id="btnBkExport"><i data-ic="download"></i>Export</button><button class="btn pri" id="btnBkNew" data-need="blockedAdd"><i data-ic="shield"></i>Block a number</button></div>
+  </div>
+  <div class="tool" style="padding:0;margin-top:22px;justify-content:space-between">
+    <label class="fsearch">
+      <i data-ic="search"></i>
+      <input id="bksearch" placeholder="Search by number, name, reason or who" autocomplete="off">
+      <button class="xbtn" id="bksClear" style="display:none" title="Clear search"><i data-ic="x"></i></button>
+    </label>
+    <div class="showing" style="margin-left:0"><span class="gdot" style="background:#0d9488;margin:0 4px 0 0"></span><span id="bkCount">0 blocked</span><span style="margin-left:8px;color:#94a3b8" id="bkStoppedCount">0 calls and texts stopped</span></div>
+  </div>
+  <section class="card" data-scrollcard="1" style="margin-top:14px;min-height:0">
+    <div class="scroll">
+      <table style="min-width:1080px">
+        <thead><tr>
+          <th style="background:#fff;border-top:0">Blocked</th>
+          <th style="background:#fff;border-top:0">Stops</th>
+          <th style="background:#fff;border-top:0">Caller gets</th>
+          <th style="background:#fff;border-top:0">Applies to</th>
+          <th style="background:#fff;border-top:0">Reason</th>
+          <th style="background:#fff;border-top:0">Blocked by</th>
+          <th style="background:#fff;border-top:0;width:80px">Stopped</th>
+          <th class="ctr" style="background:#fff;border-top:0;width:90px">Action</th>
+        </tr></thead>
+        <tbody id="bkbody">
+          <tr id="bkEmpty" style="display:none"><td colspan="8">
+            <div class="empty">
+              <div class="ico"><i data-ic="users"></i></div>
+              <h2 id="bkEmptyT">Nobody is blocked</h2>
+              <p id="bkEmptyP">Numbers you block will be listed here.</p>
+              <button class="btn pri" id="bkEmptyBtn" style="margin-top:14px" data-need="blockedAdd"><i data-ic="shield"></i>Block a number</button>
+              <button class="btn" id="bkEmptyClear" data-h="background:#eff6ff;" style="margin-top:14px;display:none;border-color:#2563eb;color:#2563eb;background:#fff;font-weight:600"><i data-ic="x"></i>Clear filters</button>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="card" style="margin-top:12px;min-height:0;border-radius:14px">
+    <div class="pager">
+      <button class="pp" data-dd="bkperpage"><span data-lbl>25</span><i data-ic="chev"></i></button>
+      <span>per page</span>
+      <span id="bkPgText" style="margin-left:6px;color:#64748b">0 blocks</span>
+      <button class="rf" id="bkRefresh" title="Refresh"><i data-ic="refresh"></i></button>
+      <div class="pages">
+        <button class="pg" data-bkpg title="First page" disabled>«</button>
+        <button class="pg" data-bkpg title="Previous page" disabled>‹</button>
+        <button class="pg on" data-bkpg title="Page 1">1</button>
+        <button class="pg" data-bkpg title="Next page" disabled>›</button>
+        <button class="pg" data-bkpg title="Last page" disabled>»</button>
       </div>
     </div>
   </section>
@@ -776,7 +825,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
     <div class="mf" style="padding-top:18px"><button class="btn sec" id="cdNo">Cancel</button><button class="btn" id="cdYes" style="font-weight:600"></button></div>
   </div>
 </div>
-<div class="modal" id="sdlg" style="z-index:100" role="dialog" aria-modal="true">
+<div class="modal" id="sdlg" style="z-index:101" role="dialog" aria-modal="true">
   <div class="mcard" id="sdCard" style="width:360px;max-width:100%;max-height:calc(100vh - 32px);display:flex;flex-direction:column">
     <div style="display:flex;align-items:flex-start;gap:14px;padding:20px 22px 14px;border-bottom:1px solid #eef1f5"><span style="width:42px;height:42px;border-radius:50%;background:#eef2f7;display:grid;place-items:center;color:#475569;flex-shrink:0"><i data-ic="cog" data-s="20"></i></span><div style="flex:1;min-width:0"><h2 id="sdT" style="font-size:18px;color:#0f172a">Settings</h2></div><button class="xb" id="sdX" data-tip="Close" aria-label="Close"><i data-ic="x"></i></button></div>
     <div id="sdB" style="padding:14px 22px 6px;overflow-y:auto;flex:1"></div>
@@ -857,11 +906,18 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
       <div style="flex:1;min-width:0"><h2 id="reT" style="font-size:18px;color:#0f172a">Role</h2><p id="reSub" style="margin-top:3px;color:#64748b;font-size:13.5px;line-height:1.45"></p></div>
       <button class="xb" id="reX" data-tip="Close" aria-label="Close"><i data-ic="x"></i></button>
     </div>
-    <div style="display:flex;flex:1;min-height:0"><div id="reNav" style="width:190px;flex-shrink:0;overflow-y:auto;border-right:1px solid #eef1f5;padding:12px 10px;background:#fff"><label class="fsearch" style="width:100%;height:34px;border-radius:9px;margin-bottom:6px"><i data-ic="search"></i><input id="reQ" placeholder="Find a permission" autocomplete="off"></label><div data-qn style="font-size:11.5px;color:#64748b;margin:0 4px 6px;min-height:14px"></div><div id="reNavL"></div></div><div id="reB" style="padding:16px 22px 8px;overflow-y:auto;flex:1;background:#fafbfd"></div></div>
+    <div class="gtabs" id="reTabs">
+      <button class="gtab on" data-ret="1">Role information</button>
+      <button class="gtab" data-ret="2">Permissions</button>
+    </div>
+    <div id="rep1" style="padding:16px 22px;overflow-y:auto;flex:1;min-height:0"></div>
+    <div id="rep2" style="display:none;flex:1;min-height:0"><div id="reNav" style="width:190px;flex-shrink:0;overflow-y:auto;border-right:1px solid #eef1f5;padding:12px 10px;background:#fff"><label class="fsearch" style="width:100%;height:34px;border-radius:9px;margin-bottom:6px"><i data-ic="search"></i><input id="reQ" placeholder="Find a permission" autocomplete="off"></label><div data-qn style="font-size:11.5px;color:#64748b;margin:0 4px 6px;min-height:14px"></div><div id="reNavL"></div></div><div id="reB" style="padding:16px 22px 8px;overflow-y:auto;flex:1;background:#fafbfd"></div></div>
+    <div id="rep3" style="display:none;padding:16px 22px;overflow-y:auto;flex:1;min-height:0"></div>
     <div class="mf" style="padding:14px 22px 18px;border-top:1px solid #eef1f5;align-items:center">
       <span id="reFooterN" style="font-size:13px;color:#64748b;font-weight:500;margin-right:auto"></span>
+      <button class="btn" id="reBack" data-h="background:#f1f5f9;" style="display:none;border-color:transparent;background:transparent;font-weight:500;color:#334155"><span style="display:flex;transform:rotate(180deg)"><i data-ic="chevr"></i></span>Back</button>
       <button class="btn" id="reNo" data-h="background:#f1f5f9;" style="border-color:transparent;background:transparent;font-weight:500;color:#334155">Cancel</button>
-      <button class="btn pri" id="reYes">Save</button>
+      <button class="btn pri" id="reYes">Next</button>
     </div>
   </div>
 </div>
@@ -896,6 +952,85 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
       <button class="btn" id="lBack" data-h="background:#f1f5f9;" style="display:none;border-color:transparent;background:transparent;font-weight:500;color:#334155"><span style="display:flex;transform:rotate(180deg)"><i data-ic="chevr"></i></span>Back</button>
       <button class="btn" id="lNo" data-h="background:#f1f5f9;" style="border-color:transparent;background:transparent;font-weight:500;color:#334155">Cancel</button>
       <button class="btn pri" id="lYes">Save &amp; Continue</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="bkdlg" style="z-index:100" role="dialog" aria-modal="true">
+  <div class="mcard" style="width:760px;max-width:100%;max-height:calc(100vh - 32px);display:flex;flex-direction:column">
+    <div style="display:flex;align-items:flex-start;gap:14px;padding:20px 22px 14px;border-bottom:1px solid #eef1f5">
+      <span style="width:42px;height:42px;border-radius:50%;background:#eef2f7;display:grid;place-items:center;color:#475569;flex-shrink:0"><i data-ic="shield" data-s="20"></i></span>
+      <div style="flex:1;min-width:0"><h2 style="font-size:18px;color:#0f172a">Block a number</h2><p style="margin-top:3px;color:#64748b;font-size:13.5px;line-height:1.45">Takes effect on the next call or text from that number. There is nothing to switch on afterwards.</p></div>
+      <button class="xb" id="bkX" data-tip="Close" aria-label="Close"><i data-ic="x"></i></button>
+    </div>
+    <div id="bkB" style="padding:16px 22px;overflow-y:auto;flex:1;min-height:0">
+      <div class="scard">
+        <div><div class="stt" style="font-size:15px">Who to block</div><div class="sdd">A single number, several at once, everyone from an area or country, or callers who hide their number.</div></div>
+        <div style="width:230px;flex-shrink:0"><select class="sel" id="bkWho">
+          <option value="number">A number</option>
+          <option value="several">Several at once</option>
+          <option value="area">Everyone from an area or country</option>
+          <option value="hidden">Callers who hide their number</option>
+        </select></div>
+      </div>
+      <div class="scard" id="bkNumRow">
+        <div><div class="stt" style="font-size:15px">Number</div><div class="sdd">Type it the way it was shown to you. Paste several separated by commas or new lines. A number without a country code is read as US.</div></div>
+        <div style="width:230px;flex-shrink:0"><textarea id="bkNum" placeholder="+1 415 555 1212" style="box-sizing:border-box;width:100%;height:70px;border:1px solid #cbd5e1;border-radius:11px;padding:10px 12px;font:inherit;font-size:14.5px;resize:vertical;outline:0"></textarea><div class="fe" data-ge="bknum" style="display:none;color:#dc2626;font-size:12.5px;margin-top:5px"></div></div>
+      </div>
+      <div class="scard" id="bkAreaRow" style="display:none">
+        <div><div class="stt" style="font-size:15px">Area or country</div><div class="sdd">Every number that calls or texts from here will be blocked.</div></div>
+        <div style="width:230px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <select class="sel" id="bkCountry"></select>
+          <input class="fin" id="bkArea" placeholder="Area code (optional)" autocomplete="off" style="height:40px">
+        </div>
+      </div>
+      <div class="scard">
+        <div><div class="stt" style="font-size:15px">What to stop</div><div class="sdd">Blocking calls blocks faxes too — they arrive over the same line.</div></div>
+        <div style="width:230px;flex-shrink:0"><select class="sel" id="bkStop">
+          <option value="all">Calls, faxes and texts</option>
+          <option value="callsfax">Calls and faxes only</option>
+        </select></div>
+      </div>
+      <div class="scard">
+        <div><div class="stt" style="font-size:15px">What the caller gets</div><div class="sdd">The caller hears the out-of-service tones and the call ends. Nothing reaches you.</div></div>
+        <div style="width:230px;flex-shrink:0"><select class="sel" id="bkGets">
+          <option value="block">Block everything</option>
+          <option value="busy">Busy tone</option>
+          <option value="ring">Ring once, then disconnect</option>
+        </select></div>
+      </div>
+      <div class="scard">
+        <div><div class="stt" style="font-size:15px">Whose numbers</div><div class="sdd">You can block a caller for the whole company, or for any of its numbers.</div></div>
+        <div style="width:230px;flex-shrink:0"><select class="sel" id="bkScope">
+          <option value="mine">My numbers</option>
+          <option value="company">Company numbers</option>
+        </select></div>
+      </div>
+      <div class="scard">
+        <div><div class="stt" style="font-size:15px">Reason</div><div class="sdd">Why — so the list still makes sense in six months.</div></div>
+        <div style="width:230px;flex-shrink:0"><select class="sel" id="bkReason">
+          <option value="">Not given</option>
+          <option value="Spam">Spam</option>
+          <option value="Scam">Scam</option>
+          <option value="Harassment">Harassment</option>
+          <option value="Robocall">Robocall</option>
+          <option value="Other">Other</option>
+        </select></div>
+      </div>
+      <div class="scard" style="align-items:flex-start">
+        <div><div class="stt" style="font-size:15px">Label and note</div><div class="sdd">A name for the list, and anything worth remembering.</div></div>
+        <div style="width:230px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <input class="fin" id="bkLabel" placeholder="e.g. Roof repair scam" maxlength="60" autocomplete="off" style="height:40px">
+          <input class="fin" id="bkNote" placeholder="e.g. Called four times on Monday" maxlength="140" autocomplete="off" style="height:40px">
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-top:6px;padding:12px 14px;border-radius:10px;background:#eff6ff;color:#1e3a8a;font-size:12.5px;line-height:1.55">
+        <span style="flex-shrink:0;margin-top:1px;color:#1d4ed8"><i data-ic="info" data-s="15"></i></span>
+        <span>Emergency numbers, short codes and your own numbers can’t be blocked. Blocking one of your numbers stops that caller reaching you; blocking for the company stops them reaching any number the company owns, and needs an admin. Texts from a blocked sender are never delivered, whatever you’ve set the caller to hear.</span>
+      </div>
+    </div>
+    <div class="mf" style="padding:14px 22px 18px;border-top:1px solid #eef1f5;align-items:center">
+      <button class="btn" id="bkNo" data-h="background:#f1f5f9;" style="border-color:transparent;background:transparent;font-weight:500;color:#334155">Cancel</button>
+      <button class="btn pri" id="bkYes"><i data-ic="shield"></i>Block number</button>
     </div>
   </div>
 </div>
@@ -947,7 +1082,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
       <td class="cchk"><input type="checkbox" class="cb" data-gchk tabindex="-1"></td>
       <td><button class="person" data-gopen title="Open group"><span class="av" data-gav>ND</span><span class="nm" data-gname>Name</span></button></td>
       <td><button class="cell" data-gopen title="Open group"><span data-gmgr>—</span></button></td>
-      <td><button class="cell" data-gpeople title="Show the people in this group"><span class="pcnt" data-gcnt>1</span></button></td>
+      <td><button class="cell" data-gpeople title="Show the people in this group" style="flex-direction:row;align-items:center;gap:7px"><span data-gav2 style="display:inline-flex;align-items:center"></span><span class="pcnt" data-gcnt>1</span></button></td>
       <td data-gavail></td>
       <td><button class="cell mono" data-gcopy data-copy="" title="Click to copy"><span data-gext>7560</span></button></td>
       <td class="ctr"><div style="display:inline-flex;gap:8px"><button class="icbe" data-gopen data-tip="Open / edit group" aria-label="Open / edit group"><i data-ic="pencil"></i></button><button class="icbd" data-gdel data-tip="Delete group" aria-label="Delete group"><i data-ic="trash"></i></button></div></td>
@@ -973,10 +1108,10 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
 </div>
 
 <!-- ============ GROUP MODAL ============ -->
-<div class="modal" id="gmodal" style="top:78px;padding:0;align-items:stretch;justify-content:flex-end;pointer-events:none" role="dialog" aria-modal="true">
-  <div class="wcard" role="dialog" aria-label="Department" style="pointer-events:auto;width:min(934px,100%);height:100%;max-height:none;border-radius:0;border-left:1px solid #e5e9f0;box-shadow:-12px 0 32px rgba(15,23,42,.14)">
+<div class="modal" id="gmodal" style="z-index:100;pointer-events:none" role="dialog" aria-modal="true">
+  <div class="wcard" role="dialog" aria-label="Department" style="pointer-events:auto;width:min(934px,100%)">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px 4px;flex-shrink:0">
-      <div style="display:flex;align-items:center;gap:10px"><h2 id="gmTitle" style="font-size:18px;font-weight:600;color:#0f172a">Create a group</h2><span id="gmProg" style="font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap"></span></div>
+      <div style="display:flex;align-items:center;gap:10px"><h2 id="gmTitle" style="font-size:18px;font-weight:600;color:#0f172a">Create a group</h2><div style="position:relative"><button type="button" id="gmProg" aria-haspopup="true" aria-expanded="false" style="font-size:12px;font-weight:700;border-radius:999px;padding:3px 8px 3px 10px;white-space:nowrap;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-family:inherit"></button><div id="gmProgMenu" role="menu" style="display:none;position:absolute;top:calc(100% + 8px);left:0;width:300px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 16px 40px rgba(15,23,42,.16);padding:6px;z-index:30"></div></div></div>
       <button id="gmClose" data-tip="Close" aria-label="Close" data-h="background:#f1f5f9;" style="width:44px;height:44px;border-radius:50%;border:1px solid #cbd5e1;background:#fff;display:grid;place-items:center;color:#475569;cursor:pointer;padding:0"><i data-ic="x"></i></button>
     </div>
     <div class="gtabs">
@@ -1003,39 +1138,6 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
         <div class="scard" data-tg="transcribe" role="switch" tabindex="0" style="cursor:pointer"><div><div class="stt">Automatic Transcription</div><div class="sdd" id="gsTr">Automatic transcription is disabled.</div></div><span class="sw" data-sw><span class="swk" data-swk></span></span></div>
         <div class="scard" data-tg="aiMon" role="switch" tabindex="0" style="cursor:pointer"><div><div class="stt">AI Call Monitoring</div><div class="sdd">When enabled transcripts will be automatically triggered.</div></div><span class="sw" data-sw><span class="swk" data-swk></span></span></div>
         <div class="scard"><div><div class="stt">Display Number</div><div class="sdd" id="gsDisp">Display number is not configured</div></div><button class="ssel" data-gsel="disp">Select</button></div>
-
-        
-        
-        <div class="gg" style="align-items:start">
-        <div class="rcard" data-col="open">
-          <div class="rt">Open</div><div class="rs">Inside the opening hours above.</div>
-          <div class="rl">First, the caller</div>
-          <div><button class="chp" data-first="ops">rings the operators</button><button class="chp" data-first="menu">hears a menu</button></div>
-          <div class="rl">Who rings</div>
-          <div class="who" data-who>Nobody to choose from yet.</div>
-          <div class="rl">In what order</div>
-          <select class="rsel" data-order><option value="all">Ring everyone at once</option><option value="order">Ring in order</option><option value="round">Round robin</option><option value="idle">Longest idle</option></select>
-          <div class="rl">If nobody answers</div>
-          <select class="rsel" data-noans><option value="">Nothing set</option><option value="vm">Send to voicemail</option><option value="fwd">Forward to a number</option><option value="hang">Hang up</option></select>
-        </div>
-        <div class="rcard" data-col="closed">
-          <div class="rt">Closed</div><div class="rs">Outside them, and on every holiday.</div>
-          <div class="rl">First, the caller</div>
-          <div><button class="chp" data-first="ops">rings the operators</button><button class="chp" data-first="menu">hears a menu</button></div>
-          <div class="rl">Who rings</div>
-          <div class="who" data-who>Nobody to choose from yet.</div>
-          <div class="rl">In what order</div>
-          <select class="rsel" data-order><option value="all">Ring everyone at once</option><option value="order">Ring in order</option><option value="round">Round robin</option><option value="idle">Longest idle</option></select>
-          <div class="rl">If nobody answers</div>
-          <select class="rsel" data-noans><option value="">Nothing set</option><option value="vm">Send to voicemail</option><option value="fwd">Forward to a number</option><option value="hang">Hang up</option></select>
-        </div>
-        </div>
-        <label class="rad" style="font-size:13.5px;color:#334155;margin:14px 0 12px 4px"><input type="checkbox" id="gHoliday" style="width:16px;height:16px">On a holiday, keep the open configuration instead of the closed one.</label>
-        <div class="tbox">
-          <div style="font-size:13.5px;color:#0f172a">Test as if it were <b id="gTz" style="margin-left:6px">— no timezone is set, so this is read as UTC</b></div>
-          <input class="fin" id="gTestAt" type="datetime-local" style="width:224px;height:40px;margin-top:8px">
-          <div style="display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap"><button class="gnow" id="gNow">Now</button><span id="gTestRes" style="font-size:13.5px;color:#334155"></span></div>
-        </div>
       </div>
 
       <div id="gp3" style="display:none">
@@ -1663,7 +1765,7 @@ function renderRow(r){
 }
 
 /* ---------- drawer ---------- */
-var ctx=null, dOv=$('#dOv'), drawer=$('#drawer');
+var ctx=null, dOv=$('#dOv'), drawer=$('#drawer'), appHeader=document.querySelector('header');
 function openDrawer(r){
   ctx=r; var d=r.dataset, av=AVS[(+d.av)%AVS.length];
   var a=$('#dAv'); a.textContent=ini(d.name); a.style.background=av[0]; a.style.color=av[1];
@@ -1672,12 +1774,12 @@ function openDrawer(r){
   $('#dNum').textContent=[d.num,d.num2].filter(Boolean).join(' / ')||'None'; $('#dPres').textContent=d.presence;
   $('#dRemL').textContent=d.removed==='1'?'Restore':'Remove';
   $('#dRem').style.color=d.removed==='1'?'#15803d':'#dc2626'; showEl($('#dRem'),can('people'));
-  dOv.style.display='block'; drawer.style.display='flex'; closeMenu();
+  dOv.style.display='block'; drawer.style.display='flex'; closeMenu(); if(appHeader){appHeader.style.position='static';appHeader.style.zIndex='1'}
   requestAnimationFrame(function(){dOv.style.opacity=1;drawer.style.transform='translateX(0)'});
 }
 function closeDrawer(){
   if(drawer.style.display!=='flex')return; dOv.style.opacity=0; drawer.style.transform='translateX(100%)';
-  setTimeout(function(){dOv.style.display='none';drawer.style.display='none'},220);
+  setTimeout(function(){dOv.style.display='none';drawer.style.display='none';if(appHeader){appHeader.style.position='';appHeader.style.zIndex=''}},220);
 }
 dOv.addEventListener('click',closeDrawer); $('#dClose').addEventListener('click',closeDrawer);
 $('#dCall').addEventListener('click',function(){toast(ctx.dataset.num?'Calling '+ctx.dataset.name+' on '+ctx.dataset.num+'…':'No number assigned to '+ctx.dataset.name)});
@@ -1736,8 +1838,10 @@ function setCid(r,v){r.dataset.num2=v;renderRow(r)}
 function fmtUS(n){var m=n.match(/^\+1(\d{3})(\d{3})(\d{4})$/);return m?'+1 '+m[1]+' '+m[2]+' '+m[3]:n}
 /* Secondary dialogs share the page overlay. grabOv() switches it on and reports whether this dialog
   owns it; dropOv(own) hands it back, keeping it if the wizard or drawer still needs it. */
-function grabOv(){var own=dOv.style.display!=='block'; dOv.style.display='block'; dOv.style.opacity=1; dOv.style.zIndex=99; closeMenu(); return own}
-function dropOv(own){var other=modal.style.display==='flex'; dOv.style.zIndex=other?94:''; if(own&&!other&&drawer.style.display!=='flex'){dOv.style.opacity=0;dOv.style.display='none'}}
+/* a sticky-positioned <header> can composite above a fixed backdrop despite its lower z-index (a
+   sticky-vs-fixed stacking quirk) — de-elevated here while the backdrop owns the screen, restored on drop */
+function grabOv(){var own=dOv.style.display!=='block'; dOv.style.display='block'; dOv.style.opacity=1; dOv.style.zIndex=99; closeMenu(); if(own&&appHeader){appHeader.style.position='static';appHeader.style.zIndex='1'} return own}
+function dropOv(own){var other=modal.style.display==='flex'; dOv.style.zIndex=other?94:''; if(own&&!other&&drawer.style.display!=='flex'){dOv.style.opacity=0;dOv.style.display='none';if(appHeader){appHeader.style.position='';appHeader.style.zIndex=''}}}
 
 var CD=null, cidOwn=false;
 function cidOwner(n){return rows().filter(function(r){return r.dataset.num2===n})[0]}
@@ -2075,10 +2179,10 @@ function goPerson(i){pull();W.cur=i;push();renderW();focusField('first')}
 function openModal(){if(!can('people'))return;
   W={step:1,cur:0,persons:[],opt:'link',pw:'',pws:[],tried:false}; W.persons.push(newPerson());
   push(); renderW(); renderOpts(); $('#wb').scrollTop=0;
-  modal.style.display='flex'; dOv.style.display='block'; dOv.style.opacity=1; dOv.style.zIndex=94; closeMenu(); mOpen(modal);
+  modal.style.display='flex'; dOv.style.display='block'; dOv.style.opacity=1; dOv.style.zIndex=94; closeMenu(); if(appHeader){appHeader.style.position='static';appHeader.style.zIndex='1'} mOpen(modal);
   setTimeout(function(){$('#fFirst').focus({preventScroll:true})},30);
 }
-function closeModal(){if(modal.style.display!=='flex')return;modal.style.display='none';dOv.style.zIndex='';if(drawer.style.display!=='flex'){dOv.style.opacity=0;dOv.style.display='none'}mReturnFocus()}
+function closeModal(){if(modal.style.display!=='flex')return;modal.style.display='none';dOv.style.zIndex='';if(drawer.style.display!=='flex'){dOv.style.opacity=0;dOv.style.display='none';if(appHeader){appHeader.style.position='';appHeader.style.zIndex=''}}mReturnFocus()}
 function toStep1(){W.step=1;renderW();$('#wb').scrollTop=0}
 function wNext(){
   if(W.step===2){submit();return}
@@ -2550,6 +2654,12 @@ var gbody=$('#gbody'), gEmpty=$('#gEmpty'), gTpl=$('#gRowTpl'), mTpl=$('#mRowTpl
 var grpOptTpl=$('[data-menu="group"] [data-opt]').cloneNode(true);
 function gInitials(n){var w=n.trim().split(/\s+/).filter(function(x){return /[A-Za-z0-9]/.test(x)}).map(function(x){return x.replace(/[^A-Za-z0-9]/g,'')});if(!w.length)return '?';return (w[0][0]+(w[1]?w[1][0]:(w[0][1]||''))).toUpperCase()}
 function gMembers(g){return rows().filter(function(r){return inGroup(r,g.name)&&r.dataset.removed!=='1'})}
+function gPeopleStack(g,n){
+  if(!n)return '';
+  var mems=gMembers(g).slice(0,3);
+  return mems.map(function(r,i){return '<span style="margin-left:'+(i?'-12':'0')+'px;display:inline-flex">'+avP(r,36)+'</span>'}).join('')
+    +(n>3?'<span style="margin-left:-12px;width:36px;height:36px;border-radius:50%;background:#eef2f7;border:2px solid #fff;display:grid;place-items:center;font-size:13px;font-weight:700;color:#475569;flex-shrink:0">+'+(n-3)+'</span>':'');
+}
 function personById(id){return rows().filter(function(r){return r.dataset.id===id})[0]}
 function gMgrName(g){var r=g.manager&&personById(g.manager);return r?r.dataset.name:''}
 function syncGroupOptions(){
@@ -2638,7 +2748,7 @@ function renderGroups(){
     r.removeAttribute('id'); r.setAttribute('data-grow',g.id);
     var a=$('[data-gav]',r); a.textContent=gInitials(g.name); a.style.background=av[0]; a.style.color=av[1];
     $('[data-gname]',r).textContent=g.name; $('[data-gmgr]',r).textContent=m||'—'; if(!m)$('[data-gmgr]',r).style.color='#64748b';
-    $('[data-gcnt]',r).textContent=n; $('[data-gext]',r).textContent=g.ext; $('[data-gcopy]',r).setAttribute('data-copy',g.ext);
+    $('[data-gcnt]',r).textContent=n; $('[data-gav2]',r).innerHTML=gPeopleStack(g,n); $('[data-gext]',r).textContent=g.ext; $('[data-gcopy]',r).setAttribute('data-copy',g.ext);
     $('[data-gavail]',r).innerHTML=gAvailHTML(g);
     $('[data-gchk]',r).checked=!!gSel[g.id]; $('[data-gchk]',r).closest('td').style.display=canSelect()?'':'none';
     if(!can('people')){$('[data-gdel]',r).remove();var op=$('td:last-child [data-gopen]',r);op.setAttribute('data-tip','Open group');op.setAttribute('aria-label','Open group')}
@@ -2660,6 +2770,8 @@ $('#gsClear').addEventListener('click',function(e){e.preventDefault();gq='';$('#
 $$('[data-gsort]').forEach(function(b){b.addEventListener('click',function(){var k=b.dataset.gsort;if(gSK===k)gSD*=-1;else{gSK=k;gSD=1}renderGroups()})});
 $('#gRefresh').addEventListener('click',function(){var i=$('#gRefresh svg');i.style.transition='transform .6s';i.style.transform='rotate(360deg)';setTimeout(function(){i.style.transition='none';i.style.transform='none';renderGroups();toast('Groups refreshed')},600)});
 $$('[data-gpg]').forEach(function(b){b.addEventListener('click',function(){toast(b.textContent==='1'?'You are on page 1':'That is the only page')})});
+$$('[data-rpg]').forEach(function(b){b.addEventListener('click',function(){toast(b.textContent==='1'?'You are on page 1':'That is the only page')})});
+$$('[data-lpg]').forEach(function(b){b.addEventListener('click',function(){toast(b.textContent==='1'?'You are on page 1':'That is the only page')})});
 function gActionClick(e){
   var tr=e.target.closest('[data-grow]'), a; if(!tr)return;
   var g=groups.filter(function(x){return x.id===tr.getAttribute('data-grow')})[0]; if(!g)return;
@@ -2755,6 +2867,13 @@ function gErrs(){
   if(GW.media.vm.on&&GW.vmNotify==='address'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(GW.vmEmail))e.vmEmail='Enter a valid email address';
   return e;
 }
+/* live name-availability check — red/green as you type, not gated behind a failed Next attempt */
+function paintNameCheck(){
+  var fe=$('[data-ge="name"]'), inp=$('#gName'), nm=GW.name.trim(), errs=gErrs();
+  if(!nm){fe.style.display=gTried?'block':'none';fe.textContent=gTried?errs.name:'';fe.style.color='#dc2626';inp.style.borderColor=gTried?'#ef4444':'#cbd5e1';return}
+  if(errs.name){fe.textContent=errs.name;fe.style.color='#dc2626';fe.style.display='block';inp.style.borderColor='#ef4444';return}
+  fe.textContent='Name is available';fe.style.color='#15803d';fe.style.display='block';inp.style.borderColor='#cbd5e1';
+}
 function paintSw(el,on){el.style.background=on?'#2563eb':'#cbd5e1';$('[data-swk]',el).style.left=on?'18px':'2px'}
 function syncOrder(){var ids=GW.members;GW.order=GW.order.filter(function(id){return ids.indexOf(id)>-1}).concat(ids.filter(function(id){return GW.order.indexOf(id)<0}))}
 IC_.warn='<path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.4v.1"/>'; IC_.up='<path d="M6 15l6-6 6 6"/>'; IC_.down='<path d="M6 9l6 6 6-6"/>';
@@ -2849,7 +2968,7 @@ function renderRing(){
   $('#gRBody').innerHTML=ids.map(function(id,i){
     var r=personById(id); if(!r)return '';
     var d=r.dataset, on=isOnline(r), pres=d.presence, iss=issuesOf(r), skip=!iss.length&&GW.skipBusy&&(pres==='Busy'||pres==='Do not disturb');
-    var pos='<td style="'+TDS+'width:56px"><span style="width:26px;height:26px;border-radius:50%;background:#eaf1ff;color:#2563eb;font-weight:700;font-size:12px;display:grid;place-items:center">'+(i+1)+'</span></td>';
+    var pos='<td style="'+TDS+'width:56px"><span style="width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center;box-shadow:0 1px 3px rgba(37,99,235,.4)">'+(i+1)+'</span></td>';
     var name='<td style="'+TDS+'"><div style="display:flex;align-items:center;gap:12px">'+avP(r,40)+'<div style="min-width:0"><div style="font-weight:600;color:#0f172a">'+esc(d.name)+'</div><div style="font-size:12px;color:#64748b"><b style="color:#2563eb;font-size:11px;letter-spacing:.3px">'+personTag(d.role)+'</b> · '+esc(d.email)+'</div></div></div></td>';
     var ext='<td style="'+TDS+'width:120px;white-space:nowrap;color:#475569"><span style="display:inline-flex;align-items:center;gap:6px">'+ico2('grid','#94a3b8',13)+esc(d.num||'—')+'</span></td>';
     var st='<td style="'+TDS+'width:160px;white-space:nowrap"><span title="'+(iss.length?esc(iss[0].why):'')+'" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;color:'+(skip||iss.length?'#b45309':on?'#047857':'#64748b')+'"><span style="width:8px;height:8px;border-radius:50%;background:'+(skip||iss.length?'#f59e0b':on?'#10b981':'#94a3b8')+'"></span>'+(iss.length?'Won’t ring · '+esc(iss[0].t):skip?'Skipped · '+(pres==='Busy'?'Busy':'DND'):on?'Online':'Offline')+'</span></td>';
@@ -2901,10 +3020,11 @@ function setupMissing(g){return setupItems(g,gMembers(g).map(function(r){return 
 function renderG(){
   var e=gTried?gErrs():{}, t=GW.tab;
   $('#gmTitle').textContent=gEditing?'Update Department ('+gEditing.name+')':'Create a group';
-  updateProgBadge();
+  updateProgBadge(); closeProgMenu();
   $$('[data-gt]',GM).forEach(function(b){var on=+b.dataset.gt===t;b.style.color=on?'#2563eb':'#334155';b.style.borderBottomColor=on?'#2563eb':'transparent'});
   for(var i=1;i<=5;i++)$('#gp'+i).style.display=i===t?'':'none';
-  ['name','ext','extra','backup','vmEmail'].forEach(function(k){var fe=$('[data-ge="'+k+'"]'),inp=$({name:'#gName',ext:'#gExt',extra:'#gExtra',backup:'#gBackup',vmEmail:'#gVmEmail'}[k]);fe.textContent=e[k]||'';fe.style.display=e[k]?'block':'none';inp.style.borderColor=e[k]?'#ef4444':'#cbd5e1'});
+  ['ext','extra','backup','vmEmail'].forEach(function(k){var fe=$('[data-ge="'+k+'"]'),inp=$({ext:'#gExt',extra:'#gExtra',backup:'#gBackup',vmEmail:'#gVmEmail'}[k]);fe.textContent=e[k]||'';fe.style.display=e[k]?'block':'none';inp.style.borderColor=e[k]?'#ef4444':'#cbd5e1'});
+  paintNameCheck();
   $('[data-ge="regional"]').textContent=e.regional||''; $('[data-ge="regional"]').style.display=e.regional?'block':'none'; $('#gRegCard').style.borderColor=e.regional?'#ef4444':'#e8ecf3';
   $('[data-ge="people"]').textContent=e.people||''; $('[data-ge="people"]').style.display=e.people?'block':'none'; $('#gPeopleCard').style.borderColor=e.people?'#ef4444':'#e8ecf3';
   var showX=GW.noAns==='forward'||(GW.noAns==='voicemail'&&GW.vm==='other');
@@ -2934,9 +3054,9 @@ function focusG(e){
 function openG(g){if(!can('people'))return;
   gEditing=g||null; gTried=false; gDelArm=null; $('#gDeleteL').textContent='Delete group';
   GW=g?JSON.parse(JSON.stringify(g)):{id:'g'+Date.now(),name:'',desc:'',loc:'MCM',ext:genGExt(),ring:'10',noAns:'voicemail',vm:'mine',extra:'',manager:'',regional:'',country:'',hours:defHours(),rec:'off',transcribe:false,aiMon:false,callWaiting:true,skipBusy:true,media:defMedia(),disp:null,holidayKeep:false,strategy:'all',order:[],greeting:'default',tts:'',audio:'',music:'default',rounds:'2',backup:'',vmNotify:'all',vmEmail:'',vmAttach:true,ci:groups.length};
-  GW.members=g?gMembers(g).map(function(r){return r.dataset.id}):[]; GW.tab=1; GW.testAt=''; GW.route={open:{first:'ops',who:[],order:'all',noans:''},closed:{first:'ops',who:[],order:'all',noans:''}};
+  GW.members=g?gMembers(g).map(function(r){return r.dataset.id}):[]; GW.tab=1;
   gPush(); $('#gMSearch').value=''; renderG(); GDirty0=JSON.stringify(GW); $('#gwb').scrollTop=0;
-  GM.style.display='flex'; closeMenu(); mOpen(GM);
+  gmOwn=grabOv(); GM.style.display='flex'; closeMenu(); mOpen(GM);
   setTimeout(function(){$('#gName').focus({preventScroll:true})},30);
 }
 /* true while the wizard differs from the state it was opened with (the auto-set test clock excluded — it’s not user data) */
@@ -2945,10 +3065,27 @@ function attemptCloseG(){
   if(GM.style.display==='flex'&&gDirty()){showConfirm(gEditing?'Discard these changes?':'Discard this group?',gEditing?'You’ve made changes that haven’t been saved yet. Keep editing, or discard them and close.':'You’ve started setting up a group. Keep editing, or discard it and close.','Discard',closeG,true,'Keep editing');return}
   closeG();
 }
-function closeG(){if(GM.style.display!=='flex')return;GM.style.display='none';mReturnFocus()}
+function closeG(){if(GM.style.display!=='flex')return;GM.style.display='none';dropOv(gmOwn);mReturnFocus()}
 /* A step you haven’t reached yet can only be entered one at a time, from Next, and only once the
   current step is valid — clicking ahead to a later tab does nothing until it’s unlocked. */
-function updateProgBadge(){var pb=$('#gmProg');if(!pb)return;var rg=reviewGaps(),all=rg.done===rg.req.length;pb.textContent=rg.done+' of '+rg.req.length+(all?' · All set':' setup steps done');pb.style.background=all?'#dcfce7':'#fef3c7';pb.style.color=all?'#15803d':'#b45309'}
+function updateProgBadge(){
+  var pb=$('#gmProg');if(!pb)return;var rg=reviewGaps(),all=rg.done===rg.req.length;
+  pb.innerHTML=esc(rg.done+' of '+rg.req.length+(all?' · All set':' setup steps done'))+'<svg viewBox="0 0 24 24" width="9" height="9" style="stroke:currentColor;fill:none;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M6 9l6 6 6-6"/></svg>';
+  pb.style.background=all?'#dcfce7':'#fef3c7';pb.style.color=all?'#15803d':'#b45309';
+  paintProgMenu(rg);
+}
+function paintProgMenu(rg){
+  var m=$('#gmProgMenu');if(!m)return;rg=rg||reviewGaps();
+  m.innerHTML=rg.items.map(function(it,i){
+    var ic=it.ok?'<span style="width:18px;height:18px;border-radius:50%;background:#10b981;color:#fff;display:grid;place-items:center;flex-shrink:0">'+ico2('check','#fff',11)+'</span>':it.opt?'<span style="box-sizing:border-box;width:18px;height:18px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0"></span>':'<span style="box-sizing:border-box;width:18px;height:18px;border-radius:50%;border:2px solid #f59e0b;background:#fef3c7;flex-shrink:0"></span>';
+    return '<div style="display:flex;align-items:flex-start;gap:9px;padding:7px 6px;'+(i?'border-top:1px solid #f1f5f9':'')+'">'+ic+'<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#0f172a">'+esc(it.t)+(it.opt?' <span style="font-weight:500;color:#94a3b8">(optional)</span>':'')+'</span><span style="display:block;font-size:11.5px;color:#64748b;margin-top:1px">'+it.d+'</span></span>'+(it.ok?'':'<button type="button" data-gotab="'+it.tab+'" style="border:0;background:none;color:#2563eb;font:inherit;font-size:11.5px;font-weight:700;padding:2px 0;cursor:pointer;flex-shrink:0;white-space:nowrap">'+esc(it.act)+'</button>')+'</div>';
+  }).join('');
+}
+function closeProgMenu(){var m=$('#gmProgMenu');if(m)m.style.display='none';var b=$('#gmProg');if(b)b.setAttribute('aria-expanded','false')}
+function toggleProgMenu(){var m=$('#gmProgMenu');if(!m)return;if(m.style.display==='block'){closeProgMenu();return}closeMenu();paintProgMenu();m.style.display='block';$('#gmProg').setAttribute('aria-expanded','true')}
+$('#gmProg').addEventListener('click',function(e){e.stopPropagation();toggleProgMenu()});
+document.addEventListener('click',function(e){var m=$('#gmProgMenu');if(m&&m.style.display==='block'&&!e.target.closest('#gmProgMenu')&&!e.target.closest('#gmProg'))closeProgMenu()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var m=$('#gmProgMenu');if(m&&m.style.display==='block')closeProgMenu()}});
 function gGo(n){
   gPull();
   if(GW.tab===1&&n>1){gTried=true;var e=gErrs();if(e.name||e.ext){renderG();focusG(e);return}}
@@ -3050,33 +3187,10 @@ function hoursSummary(h){
   var t=runs.length?runs.map(function(r){return (r.a===r.b?DN[DORDER[r.a]]:DN[DORDER[r.a]]+'–'+DN[DORDER[r.b]])+' '+r.t}).join(', '):'Closed all week';
   return 'Weekly · '+t+(h.holidays.length?' · '+h.holidays.length+(h.holidays.length===1?' holiday':' holidays'):'');
 }
-function hoursState(str){
-  var h=GW.hours, m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(str||'');
-  if(h.mode!=='weekly'||!m)return {open:true};
-  var date=m[1]+'-'+m[2]+'-'+m[3], hol=h.holidays.filter(function(x){return x.date===date})[0];
-  if(hol)return {open:false,holiday:hol.name||'Holiday'};
-  var x=h.days[new Date(+m[1],+m[2]-1,+m[3]).getDay()], t=m[4]+':'+m[5];
-  return {open:!!x.on&&(x.all24||x.ranges.some(function(r){return t>=r.from&&t<r.to}))};
-}
-function closedText(c){
-  var t=c.type;
-  if(t==='voicemail')return 'sent to voicemail ('+(c.vm==='mine'?'my voicemail':'another voicemail'+(c.val?' '+c.val:''))+')';
-  if(t==='announcement')return 'an announcement is played';
-  if(t==='ext')return 'forwarded to extension '+c.val;
-  if(t==='external')return 'forwarded to '+c.val;
-  if(t==='ivr')return 'forwarded to the IVR “'+c.val+'”';
-  if(t==='group')return 'forwarded to the group “'+c.val+'”';
-  return 'ended with a busy tone';
-}
 function dispSummary(d){
   if(!d)return 'Display number is not configured';
   var m={none:'No masking',strip:'Strip '+d.val+' digit'+(d.val==='1'?'':'s'),replace:'Replace with “'+d.val+'”',prefix:'Prefix “'+d.val+'”',end:'End “'+d.val+'”'}[d.mask];
   return 'Incoming number '+(d.incoming==='yes'?'shown':'hidden')+' · '+m;
-}
-function colConfigured(c){return c.who.length>0||c.first==='menu'||c.order!=='all'||!!c.noans}
-function colText(c){
-  var t=c.first==='menu'?'the caller hears a menu':'the caller rings '+(c.who.length?c.who.map(function(id){var r=personById(id);return r?esc(r.dataset.name):''}).join(', '):'the operators')+' ('+ORD[c.order]+')';
-  return t+(c.noans?'; if nobody answers: '+NOA[c.noans]:'');
 }
 function renderSettings(){
   var tz=TZS[GW.regional];
@@ -3085,26 +3199,6 @@ function renderSettings(){
   $('#gsTr').textContent=GW.transcribe?'Automatic transcription is enabled.':'Automatic transcription is disabled.';
   var has={regional:!!tz,hours:GW.hours.mode==='weekly',rec:GW.rec!=='off',disp:!!GW.disp};
   Object.keys(has).forEach(function(k){$('[data-gsel="'+k+'"]').textContent=has[k]?'Change':'Select'});
-  if(!GW.testAt)GW.testAt=tzNow(); $('#gTestAt').value=GW.testAt; $('#gHoliday').checked=!!GW.holidayKeep;
-  $('#gTz').textContent=tz?'— read as '+tzLabel(GW.regional):'— no timezone is set, so this is read as UTC';
-  ['open','closed'].forEach(function(k){
-    var c=GW.route[k], card=$('[data-col="'+k+'"]',GM);
-    c.who=c.who.filter(function(id){return GW.members.indexOf(id)>-1});
-    $$('[data-first]',card).forEach(function(b){var on=b.dataset.first===c.first;b.style.background=on?'#eaf1ff':'#eef1f6';b.style.color=on?'#1d4ed8':'#475569';b.style.borderColor=on?'#93b4f5':'transparent'});
-    var box=$('[data-who]',card); box.innerHTML='';
-    if(!GW.members.length){box.textContent='Nobody to choose from yet.'}
-    else GW.members.forEach(function(id){var r=personById(id); if(!r)return; var on=c.who.indexOf(id)>-1, bt=document.createElement('button');
-      bt.setAttribute('data-whoid',id); bt.textContent=r.dataset.name;
-      bt.style.cssText='padding:5px 10px;margin:0 6px 6px 0;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid '+(on?'#2563eb':'#d5dde8')+';background:'+(on?'#eaf1ff':'#fff')+';color:'+(on?'#1d4ed8':'#334155'); box.appendChild(bt)});
-    $('[data-order]',card).value=c.order; $('[data-noans]',card).value=c.noans;
-  });
-  var wk=GW.hours.mode==='weekly', closed=GW.route.closed;
-  var st=hoursState(GW.testAt), keep=!!st.holiday&&GW.holidayKeep, useOpen=st.open||keep, label, tail;
-  if(st.holiday)label=keep?'<b style="color:#047857">Open</b> (holiday: '+esc(st.holiday)+', keeping the open configuration)':'<b style="color:#b91c1c">Closed</b> (holiday: '+esc(st.holiday)+')';
-  else label=st.open?'<b style="color:#047857">Open</b> (hours)':'<b style="color:#b91c1c">Closed</b> (hours)';
-  if(useOpen){var c=GW.route.open;tail=colConfigured(c)?colText(c):'nothing is configured for this state, so the call is handled exactly as it is today'}
-  else tail=wk?'the call is '+esc(closedText(GW.hours.closed)):(colConfigured(closed)?colText(closed):'nothing is configured for this state, so the call is handled exactly as it is today');
-  $('#gTestRes').innerHTML=label+' — '+tail;
 }
 
 /* ---------- settings dialogs (regional / hours / recording / display number) ---------- */
@@ -3253,7 +3347,7 @@ function saveSD(){
     if(!e){d.val=d.mask==='none'?'':v2;GW.disp=d}
   }
   if(e){$('#sdErr').textContent=e;return}
-  closeSD(); renderSettings();
+  closeSD(); renderG();
 }
 function openSel(btn,key){openSD(key)}
 var sdl=$('#sdlg');
@@ -3302,9 +3396,6 @@ sdl.addEventListener('keydown',function(e){
 
 function gHandle(e){
   if(!GW)return; var t=e.target;
-  if(t.hasAttribute('data-order')||t.hasAttribute('data-noans')){var cc=GW.route[t.closest('[data-col]').dataset.col];if(t.hasAttribute('data-order'))cc.order=t.value;else cc.noans=t.value;renderSettings();return}
-  if(t.id==='gTestAt'){GW.testAt=t.value;renderSettings();return}
-  if(t.id==='gHoliday'){GW.holidayKeep=t.checked;renderSettings();return}
   if(t.id==='gMSearch'){renderMembers();return}
   if(t.hasAttribute('data-mchk')){var mid=t.getAttribute('data-mchk'),mi=GW.members.indexOf(mid);if(t.checked&&mi<0)GW.members.push(mid);if(!t.checked&&mi>-1){GW.members.splice(mi,1);if(GW.manager===mid)GW.manager=''}renderMembers();return}
   if(t.hasAttribute('data-mgr')){GW.manager=t.getAttribute('data-mgr');renderMembers();return}
@@ -3320,9 +3411,6 @@ GM.addEventListener('click',function(e){
   var t;
   if((t=e.target.closest('[data-gt]'))){gGo(+t.dataset.gt);return}
   if((t=e.target.closest('[data-gsel]'))){openSel(t,t.dataset.gsel);return}
-  if((t=e.target.closest('[data-first]'))){GW.route[t.closest('[data-col]').dataset.col].first=t.dataset.first;renderSettings();return}
-  if((t=e.target.closest('[data-whoid]'))){var wc=GW.route[t.closest('[data-col]').dataset.col],wi=wc.who.indexOf(t.getAttribute('data-whoid'));if(wi>-1)wc.who.splice(wi,1);else wc.who.push(t.getAttribute('data-whoid'));renderSettings();return}
-  if(e.target.closest('#gNow')){GW.testAt=tzNow();renderSettings();return}
   if((t=e.target.closest('[data-tg]'))){GW[t.dataset.tg]=!GW[t.dataset.tg];renderG();return}
   if((t=e.target.closest('[data-st]'))){GW.strategy=t.dataset.st;renderG();return}
   if((t=e.target.closest('[data-gotab]'))){gGo(+t.dataset.gotab);return}
@@ -3912,6 +4000,7 @@ function rSwap(from,to){var top=mStack.pop();$(from).style.display='none';rOwn[t
 function closeRoleView(){rClose('#rvdlg');RV=null}
 function reDirty(){if(!RE)return false;return JSON.stringify({n:$('#reName').value.trim(),d:($('#reDesc')?$('#reDesc').value.trim():''),p:RE.perms})!==RE0}
 function attemptCloseRoleEditor(){
+  if(RE&&RE.created){finishCreatedRole();return}
   if($('#redlg').style.display==='flex'&&reDirty()){showConfirm(RE&&RE.mode==='edit'?'Discard these changes?':'Discard this role?','You’ve made changes that haven’t been saved yet. Keep editing, or discard them and close.','Discard',closeRoleEditor,true,'Keep editing');return}
   closeRoleEditor();
 }
@@ -3945,8 +4034,18 @@ function accHTML(c,x,editable){
 function accSet(acc,open){var b=$('[data-accb]',acc),v=$('[data-accv]',acc);acc.setAttribute('data-open',open?'1':'');b.style.maxHeight=open?b.scrollHeight+'px':'0px';b.style.opacity=open?'1':'0';v.style.transform=open?'rotate(180deg)':'';acc.style.borderColor=open?'#bfdbfe':'#e2e8f0'}
 function accAll(box,open){$$('[data-acc]',box).forEach(function(a){accSet(a,open)})}
 function accClick(e){var h=e.target.closest('[data-acch]');if(!h)return false;var acc=h.closest('[data-acc]');accSet(acc,acc.getAttribute('data-open')!=='1');return true}
-function railHTML(perms){return PERMS.map(function(cat,c){var ks=catKeys(c),n=ks.filter(function(p){return perms[p.k]}).length,m=ks.length;
-  return '<button data-rnav="'+c+'" data-h="background:#f1f5f9;" style="display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:7px 10px;border-radius:8px;border:0;background:none;font:inherit;font-size:12.5px;color:#334155;cursor:pointer;text-align:left;transition:background-color .12s"><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(cat.n)+'</span><span data-rnavn style="font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;white-space:nowrap;background:'+(n===m?'#dcfce7':n?'#dbeafe':'#eef2f6')+';color:'+(n===m?'#15803d':n?'#1d4ed8':'#94a3b8')+'">'+n+'/'+m+'</span></button>'}).join('')}
+var RAIL_GROUPS=[
+  {t:'Communication & calling',c:[0,1,2,6,7,11,16,17]},
+  {t:'People & workspace',c:[4,8,18]},
+  {t:'Admin & billing',c:[3,10,12,13,14]},
+  {t:'Monitoring & reports',c:[5,9,15]}
+];
+function railRow(perms,c){var cat=PERMS[c],ks=catKeys(c),n=ks.filter(function(p){return perms[p.k]}).length,m=ks.length;
+  return '<button data-rnav="'+c+'" data-h="background:#f1f5f9;" style="display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:8px 10px;margin-bottom:2px;border-radius:8px;border:0;background:none;font:inherit;font-size:12.5px;color:#334155;cursor:pointer;text-align:left;transition:background-color .12s"><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(cat.n)+'</span><span data-rnavn style="font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;white-space:nowrap;background:'+(n===m?'#dcfce7':n?'#dbeafe':'#eef2f6')+';color:'+(n===m?'#15803d':n?'#1d4ed8':'#94a3b8')+'">'+n+'/'+m+'</span></button>';
+}
+function railHTML(perms){return RAIL_GROUPS.map(function(g,gi){
+  return '<div data-rgroup style="margin-top:'+(gi?14:0)+'px"><div style="padding:4px 10px 6px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#94a3b8">'+esc(g.t)+'</div>'+g.c.map(function(c){return railRow(perms,c)}).join('')+'</div>';
+}).join('')}
 function railPaint(navSel,perms){$$(navSel+' [data-rnav]').forEach(function(b){var c=+b.getAttribute('data-rnav'),ks=catKeys(c),n=ks.filter(function(p){return perms[p.k]}).length,m=ks.length,p=$('[data-rnavn]',b);p.textContent=n+'/'+m;p.style.background=n===m?'#dcfce7':n?'#dbeafe':'#eef2f6';p.style.color=n===m?'#15803d':n?'#1d4ed8':'#94a3b8'})}
 function dlgSearch(navSel,bodySel,q){
   q=(q||'').trim().toLowerCase(); var total=0, first=null, only=bodySel==='#rvB'&&rvOnly;
@@ -3955,6 +4054,7 @@ function dlgSearch(navSel,bodySel,q){
     var show=q?n>0:!(only&&!catCount(bodySel==='#rvB'?RV:{perms:RE.perms},c));
     acc.style.display=show?'':'none'; var nav=$(navSel+' [data-rnav="'+c+'"]'); if(nav)nav.style.display=show?'flex':'none';
     if(q&&n){total+=n;if(first==null)first=c;accSet(acc,true)}});
+  $$(navSel+' [data-rgroup]').forEach(function(grp){var any=$$('[data-rnav]',grp).some(function(b){return b.style.display!=='none'});grp.style.display=any?'':'none'});
   $(navSel+' [data-qn]').textContent=q?(total?total+(total===1?' match':' matches'):'No matches'):'';
   if(q&&first!=null)railActive(navSel,first);
 }
@@ -3974,6 +4074,7 @@ function rvApplyOnly(){var on=$('#rvOnly').checked; rvOnly=on; try{localStorage.
   $$('#rvB [data-pon]').forEach(function(el){showEl(el,!(on&&el.getAttribute('data-pon')==='0'))});
   $$('#rvB [data-acc]').forEach(function(acc){var n=catCount(RV,+acc.getAttribute('data-acc'));acc.style.display=(on&&!n)?'none':''});
   $$('#rvNav [data-rnav]').forEach(function(b){var n=catCount(RV,+b.getAttribute('data-rnav'));b.style.display=(on&&!n)?'none':'flex'});
+  $$('#rvNav [data-rgroup]').forEach(function(grp){var any=$$('[data-rnav]',grp).some(function(b){return b.style.display!=='none'});grp.style.display=any?'':'none'});
   if(on)accAll($('#rvB'),true); if($('#rvQ').value)dlgSearch('#rvNav','#rvB',$('#rvQ').value);
   var first=$$('#rvB [data-acc]').filter(function(a){return a.style.display!=='none'})[0]; if(first)railActive('#rvNav',+first.getAttribute('data-acc'))}
 function rChip(icon,text,bg,fg){return '<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:13px;background:'+bg+';color:'+fg+'">'+ico2(icon,fg,14)+text+'</span>'}
@@ -4027,6 +4128,7 @@ function reRenderFrom(){var b=$('#reFrom');if(!b)return;b.innerHTML=reFromOpts()
 function openRoleEditor(mode,x,swapFrom){if(!can('roles'))return;
   var src=mode==='new'?fromById('t-agent'):x;
   RE={mode:mode,id:mode==='edit'?x.id:null,src:mode==='dup'?x:null,from:mode==='edit'?null:src.id,perms:Object.assign({},src.perms)};
+  $$('#reTabs [data-ret]').forEach(function(b){b.style.display=''}); $('#reNo').style.display=''; $('#reYes').removeAttribute('data-redone');
   var name=mode==='edit'?x.name:mode==='dup'?'Copy of '+x.name:'', desc=mode==='new'?'':x.desc;
   $('#reT').textContent=mode==='edit'?'Edit role':mode==='dup'?'Duplicate role':'New role';
   $('#reSub').textContent=mode==='edit'?'Rename it or change what it allows. Changes apply to everyone holding it.':'Name it, then tick what anyone holding it can see and do.';
@@ -4043,11 +4145,58 @@ function openRoleEditor(mode,x,swapFrom){if(!can('roles'))return;
     start='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:#eff6ff;color:#1e3a8a;font-size:13px;margin-bottom:14px">'+ico2('users','#1d4ed8',15)+'<span>'+(hn?'<b>'+hn+(hn===1?' person holds':' people hold')+'</b> this role — they get the new permissions as soon as you save.':'No one holds this role yet.')+'</span></div>';
   }
   var bar='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px"><span style="font-size:11px;font-weight:700;letter-spacing:.7px;color:#64748b;text-transform:uppercase">'+(mode==='edit'?'Permissions':'Or build it yourself')+'</span><span style="display:flex;gap:4px;align-items:center"><button data-rex="1" data-h="background:#eff6ff;" style="'+LNK+'">Expand all</button><button data-rex="0" data-h="background:#eff6ff;" style="'+LNK+'">Collapse all</button></span></div>';
-  $('#reB').innerHTML=top+start+bar+'<p style="margin:-4px 0 10px;font-size:12.5px;color:#64748b;line-height:1.5">Tick <b style="color:#334155">View</b> on an action first — the other actions stay greyed out until somebody can see it at all.</p>'+PERMS.map(function(_,c){return accHTML(c,{perms:RE.perms},true)}).join('');
+  $('#rep1').innerHTML=top+start;
+  $('#reB').innerHTML=bar+'<p style="margin:-4px 0 10px;font-size:12.5px;color:#64748b;line-height:1.5">Tick <b style="color:#334155">View</b> on an action first — the other actions stay greyed out until somebody can see it at all.</p>'+PERMS.map(function(_,c){return accHTML(c,{perms:RE.perms},true)}).join('');
   $('#reNavL').innerHTML=railHTML(RE.perms); railActive('#reNav',0); $('#reQ').value=''; $('#reNav [data-qn]').textContent='';
-  $('#reB').scrollTop=0; reRenderFrom(); rePaint(); reValidate();
+  $('#reB').scrollTop=0; $('#rep1').scrollTop=0; reRenderFrom(); rePaint(); reValidate();
   RE0=JSON.stringify({n:$('#reName').value.trim(),d:($('#reDesc')?$('#reDesc').value.trim():''),p:RE.perms});
+  RE.tab=1; reRenderTabs();
   if(swapFrom)rSwap(swapFrom,'#redlg');else rOpen('#redlg');
+}
+function reRenderTabs(){
+  $$('#reTabs [data-ret]').forEach(function(b){var on=+b.getAttribute('data-ret')===RE.tab;b.style.color=on?'#1d4ed8':'#334155';b.style.background=on?'#e0ebff':'transparent';b.style.borderRadius='8px 8px 0 0';b.style.borderBottomColor=on?'#2563eb':'transparent'});
+  $('#rep1').style.display=RE.tab===1?'':'none';
+  $('#rep2').style.display=RE.tab===2?'flex':'none';
+  $('#reBack').style.display=RE.tab>1?'inline-flex':'none';
+  $('#reYes').textContent=RE.tab===2?(RE.mode==='edit'?'Save':'Create role'):'Next';
+}
+function reGo(n){
+  if(RE.tab===1&&n>1){var nm=$('#reName').value.trim();if(!nm){reNameErr('Give the role a name.');$('#reName').focus();return}}
+  RE.tab=n; reRenderTabs();
+}
+/* shown after a brand-new role is actually saved — a closing summary, not a step you navigate to before saving */
+function reShowCreated(nx){
+  RE.created=nx;
+  $$('#reTabs [data-ret]').forEach(function(b){b.style.display='none'});
+  $('#rep1').style.display='none'; $('#rep2').style.display='none';
+  $('#rep3').style.display=''; reRenderCreated(nx);
+  $('#reBack').style.display='none'; $('#reNo').style.display='none';
+  $('#reYes').textContent='Done'; $('#reYes').setAttribute('data-redone','1');
+}
+function reRenderCreated(x){
+  var tot=Object.keys(x.perms).length;
+  var groupsHTML=RAIL_GROUPS.map(function(g){
+    var rows=g.c.map(function(c){var ks=catKeys(c),n=ks.filter(function(p){return x.perms[p.k]}).length,m=ks.length;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:12.5px;color:#334155"><span>'+esc(PERMS[c].n)+'</span><span style="font-weight:700;color:'+(n===m?'#15803d':n?'#1d4ed8':'#94a3b8')+'">'+n+'/'+m+'</span></div>';
+    }).join('');
+    return '<div style="margin-bottom:12px"><div style="font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#94a3b8;margin-bottom:4px">'+esc(g.t)+'</div>'+rows+'</div>';
+  }).join('');
+  $('#rep3').innerHTML=
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><span style="width:40px;height:40px;border-radius:50%;background:#dcfce7;color:#15803d;display:grid;place-items:center;flex-shrink:0">'+ico2('check','#15803d',20)+'</span><div><div style="font-size:16px;font-weight:700;color:#0f172a">Role created</div><div style="font-size:13px;color:#64748b">Here’s a summary of what you set up.</div></div></div>'
+    +'<div style="border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-bottom:14px"><span style="font-size:11px;font-weight:700;letter-spacing:.7px;color:#64748b;text-transform:uppercase">Role information</span>'
+    +'<div style="font-size:16px;font-weight:700;color:#0f172a;margin-top:8px">'+esc(x.name)+'</div>'
+    +(x.desc?'<div style="font-size:13px;color:#64748b;margin-top:4px;line-height:1.5">'+esc(x.desc)+'</div>':'')
+    +'</div>'
+    +'<div style="border:1px solid #e2e8f0;border-radius:12px;padding:16px"><span style="font-size:11px;font-weight:700;letter-spacing:.7px;color:#64748b;text-transform:uppercase">Permissions</span>'
+    +'<div style="font-size:13px;color:#334155;font-weight:600;margin:8px 0 12px">'+tot+' of '+PERM_TOTAL+' permissions ticked</div>'
+    +groupsHTML+'</div>';
+}
+function finishCreatedRole(){
+  var nx=RE.created;
+  closeRoleEditor();
+  if($('#viewRoles').style.display==='none')showView('roles');
+  flashRole(nx);
+  note('Role “'+nx.name+'” created','Undo',function(){var i=ROLES.indexOf(nx);if(i<0)return;roleHolders(nx).forEach(function(r){r.dataset.role='Agent';renderRow(r)});ROLES.splice(i,1);syncRoleOptions();apply();rolesTouched()});
 }
 function rePaint(){
   var tot=Object.keys(RE.perms).length;
@@ -4062,7 +4211,7 @@ function rePaint(){
 }
 function reValidate(){var ok=!!$('#reName').value.trim(),y=$('#reYes');y.disabled=!ok;y.style.opacity=ok?'1':'.5';y.style.cursor=ok?'pointer':'not-allowed';y.setAttribute('data-tip',ok?'':'Give the role a name first')}
 function reNameErr(msg){var e=$('#reNameErr'),i=$('#reName');e.textContent=msg||'';e.style.display=msg?'':'none';i.style.borderColor=msg?'#ef4444':'#cbd5e1';if(msg)i.focus()}
-$('#reB').addEventListener('input',function(e){
+$('#rep1').addEventListener('input',function(e){
   if(e.target.id==='reName'){reNameErr('');reValidate()}
   else if(e.target.id==='reDesc')$('#reDescN').textContent=e.target.value.length+'/300';
 });
@@ -4080,9 +4229,14 @@ $('#reB').addEventListener('change',function(e){
 $('#reB').addEventListener('click',function(e){
   if(accClick(e))return; var t;
   if((t=e.target.closest('[data-rex]'))){accAll($('#reB'),t.getAttribute('data-rex')==='1');return}
-  if((t=e.target.closest('[data-refrom]'))){var id=t.getAttribute('data-refrom'),fr=fromById(id);RE.from=id;RE.perms=fr?Object.assign({},fr.perms):{};
-    $$('#reB [data-perm]').forEach(function(cb){cb.checked=!!RE.perms[cb.getAttribute('data-perm')]});reRenderFrom();rePaint()}
 });
+$('#rep1').addEventListener('click',function(e){
+  var t=e.target.closest('[data-refrom]'); if(!t)return;
+  var id=t.getAttribute('data-refrom'),fr=fromById(id);RE.from=id;RE.perms=fr?Object.assign({},fr.perms):{};
+  $$('#reB [data-perm]').forEach(function(cb){cb.checked=!!RE.perms[cb.getAttribute('data-perm')]});reRenderFrom();rePaint();
+});
+$('#redlg').addEventListener('click',function(e){var t=e.target.closest('[data-ret]');if(t)reGo(+t.getAttribute('data-ret'))});
+$('#reBack').addEventListener('click',function(){reGo(RE.tab-1)});
 function saveRole(){
   var name=$('#reName').value.trim(), desc=$('#reDesc').value.trim();
   if(!name){reNameErr('Give the role a name.');return}
@@ -4096,14 +4250,11 @@ function saveRole(){
     syncRoleOptions(); apply(); rolesTouched(); closeRoleEditor(); toast('Role saved'); flashRole(x); return;
   }
   var nx={id:'r'+Date.now().toString(36),name:name,desc:desc,builtin:false,perms:perms}; ROLES.push(nx);
-  syncRoleOptions(); rolesTouched(); closeRoleEditor();
-  if($('#viewRoles').style.display==='none')showView('roles');
-  flashRole(nx);
-  note('Role “'+name+'” created','Undo',function(){var i=ROLES.indexOf(nx);if(i<0)return;roleHolders(nx).forEach(function(r){r.dataset.role='Agent';renderRow(r)});ROLES.splice(i,1);syncRoleOptions();apply();rolesTouched()});
+  syncRoleOptions(); rolesTouched(); reShowCreated(nx);
 }
 function flashRole(x){var tr=$('tr[data-rrow="'+x.id+'"]');if(!tr)return;tr.style.transition='background-color .7s';tr.style.background='#eff6ff';setTimeout(function(){tr.style.background=''},1500)}
-$('#reYes').addEventListener('click',saveRole); $('#reX').addEventListener('click',attemptCloseRoleEditor); $('#reNo').addEventListener('click',attemptCloseRoleEditor);
-$('#reB').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='reName'){e.preventDefault();if(!$('#reYes').disabled)saveRole()}});
+$('#reYes').addEventListener('click',function(){if($('#reYes').getAttribute('data-redone')==='1'){finishCreatedRole();return}if(RE.tab<2){reGo(RE.tab+1);return}saveRole()}); $('#reX').addEventListener('click',attemptCloseRoleEditor); $('#reNo').addEventListener('click',attemptCloseRoleEditor);
+$('#rep1').addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='reName'){e.preventDefault();if(!$('#reYes').disabled)reGo(2)}});
 function confirmDeleteRole(x){if(!can('roles'))return;
   var hs=roleHolders(x), n=hs.length, to=x.id===DEFAULT_ROLE?roleById('agent'):defaultRole(), wasDef=DEFAULT_ROLE;
   showConfirm('Delete role “'+x.name+'”?',n?'<b>'+n+(n===1?' person holds':' people hold')+'</b> this role. They will be moved to <b>'+esc(to.name)+'</b> and keep their extension, group and numbers. You can undo this for a few seconds.':'No one holds this role. You can undo this for a few seconds after deleting.','Delete role',function(){
@@ -4199,7 +4350,7 @@ function renderSignIn(){
 }
 function signOut(){
   try{localStorage.setItem('me','')}catch(e){}
-  closeMenu(); closeDrawer(); closeK(); $$('[role="dialog"]').forEach(function(m){m.style.display='none'}); mStack.length=0; dOv.style.opacity=0; dOv.style.display='none';
+  closeMenu(); closeDrawer(); closeK(); $$('[role="dialog"]').forEach(function(m){m.style.display='none'}); mStack.length=0; dOv.style.opacity=0; dOv.style.display='none'; if(appHeader){appHeader.style.position='';appHeader.style.zIndex=''}
   renderSignIn(); var s=$('#signin'); s.style.display='flex'; s.style.opacity='0'; void s.offsetHeight; s.style.transition='opacity .2s'; s.style.opacity='1';
   setTimeout(function(){var f=$('#siList button');if(f)f.focus()},50);
 }
