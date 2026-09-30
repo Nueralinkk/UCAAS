@@ -4452,7 +4452,7 @@ var REQS=[]; try{REQS=JSON.parse(localStorage.getItem('reqs')||'[]')}catch(e){RE
 function saveReqs(){try{localStorage.setItem('reqs',JSON.stringify(REQS))}catch(e){}}
 function teamLevel(){var m=me(),x=m&&roleByName(m.dataset.role);return !!(x&&x.perms['5.x.0.1'])}   /* "Call reports: Team" marks a supervisor-level role */
 function canReqFor(r,type){var m=me();if(!m||!r||r.dataset.removed==='1'||r.dataset.role==='Account owner')return false;if(type==='role'||type==='cid')return r===m||teamLevel();return r!==m&&teamLevel()}
-function reqNeed(q){return {role:'roles',cid:'numbers',suspend:'people',remove:'people',gdelete:'people'}[q.type]}
+function reqNeed(q){return {role:'roles',cid:'numbers',suspend:'people',remove:'people',gdelete:'people',block:'numbers',unblock:'numbers'}[q.type]}
 function canApprove(q){return can(reqNeed(q))}
 function pendingReqs(){return REQS.filter(function(q){return q.status==='pending'})}
 function hasPending(type,id){return pendingReqs().some(function(q){return q.type===type&&q.target===id})}
