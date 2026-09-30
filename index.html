@@ -181,7 +181,7 @@ html[data-theme="dark"] [data-pg][title="Page 1"],html[data-theme="dark"] [data-
 <div style="box-sizing: border-box; display: flex; align-items: flex-start;">
   <!-- ============ SIDEBAR (unchanged look) ============ -->
   <aside style="box-sizing: border-box; width: 88px; flex-shrink: 0; background: #fff; border-right: 1px solid #e5e9f0; padding: 20px 10px; display: flex; flex-direction: column; gap: 7px; position: sticky; top: 78px; height: calc(100vh - 78px);">
-    <a href="#" data-h="background:#f1f5f9;" style="box-sizing: border-box; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 0; border-radius: 10px; color: #334155; font-size: 11px; transition: background-color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 20px; height: 20px;"><rect x="5.2" y="3" width="16.6" height="18" rx="3.6"/><path d="M2.8 8h2.4M2.8 12h2.4M2.8 16h2.4"/><path d="M10.6 8.2l1.5-.3 1.3 2.7-1 1a5.4 5.4 0 0 0 2.5 2.5l1-1 2.7 1.3-.3 1.5a1.8 1.8 0 0 1-1.8 1.4A8.4 8.4 0 0 1 9.3 10a1.8 1.8 0 0 1 1.3-1.8z"/></svg>Contacts</a>
+    <a href="#" data-side="contacts" data-h="background:#f1f5f9;" style="box-sizing: border-box; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 0; border-radius: 10px; color: #334155; font-size: 11px; transition: background-color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 20px; height: 20px;"><rect x="5.2" y="3" width="16.6" height="18" rx="3.6"/><path d="M2.8 8h2.4M2.8 12h2.4M2.8 16h2.4"/><path d="M10.6 8.2l1.5-.3 1.3 2.7-1 1a5.4 5.4 0 0 0 2.5 2.5l1-1 2.7 1.3-.3 1.5a1.8 1.8 0 0 1-1.8 1.4A8.4 8.4 0 0 1 9.3 10a1.8 1.8 0 0 1 1.3-1.8z"/></svg>Contacts</a>
     <a href="#" data-side="people" data-h="background:#f1f5f9;background:#d5e4ff;" style="box-sizing: border-box; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 0; border-radius: 10px; font-size: 11px; transition: background-color .12s; background: #e0ebff; color: #1d4ed8;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 20px; height: 20px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6.5 6.5 0 0 1 11 0"/></svg>People</a>
     <a href="#" data-side="groups" data-h="background:#f1f5f9;" style="box-sizing: border-box; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 0; border-radius: 10px; color: #334155; font-size: 11px; transition: background-color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 20px; height: 20px;"><circle cx="9" cy="6.6" r="3.6"/><path d="M2.4 20.2v-1.6c0-2 1.6-3.6 3.6-3.6h6c2 0 3.6 1.6 3.6 3.6v1.6z"/><path d="M14.4 3.1a3.6 3.6 0 0 1 0 7.1 5.2 5.2 0 0 0 0-7.1z" fill="currentColor"/><path d="M17.2 14.9c2.3.3 4 1.8 4 3.7v1.6h-3.6c.1-1.7-.1-3.3-.4-5.3z" fill="currentColor"/></svg>Groups</a>
     <a href="#" data-side="roles" data-h="background:#f1f5f9;" style="box-sizing: border-box; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 0; border-radius: 10px; color: #334155; font-size: 11px; transition: background-color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 20px; height: 20px;"><circle cx="9" cy="7" r="3.5"/><path d="M3 20a6 6 0 0 1 9-5.2"/><circle cx="18" cy="17" r="2"/><path d="M18 13v1.5M18 19.5V21M14 17h1.5M20.5 17H22"/></svg>Roles</a>
@@ -261,7 +261,7 @@ html[data-theme="dark"] [data-pg][title="Page 1"],html[data-theme="dark"] [data-
           </thead>
           <tbody id="tbody" style="box-sizing: border-box;">
             <!-- Umar -->
-            <tr data-row data-id="umar" data-name="Umar Ansari" data-email="umar05@yopmail.com" data-role="Group admin" data-status="Active" data-group data-loc="MCM" data-city="Mumbai, India" data-num="9088" data-num2 data-presence="Offline" data-removed="0" data-fav="0" data-self="0" data-av="0" data-h="background:#f8fafc;" style="box-sizing: border-box; transition: background-color .1s; position: relative; z-index: 1;">
+            <tr data-row data-id="umar" data-name="Umar Ansari" data-email="umar05@yopmail.com" data-role="Group admin" data-status="Active" data-group data-loc="MCM" data-city="Mumbai, India" data-num="9088" data-num2 data-presence="Offline" data-removed="0" data-fav="1" data-self="0" data-av="0" data-h="background:#f8fafc;" style="box-sizing: border-box; transition: background-color .1s; position: relative; z-index: 1;">
               <td style="box-sizing: border-box; white-space: nowrap; padding: 10px 12px; height: 72px; border-bottom: 1px solid #eef1f5; vertical-align: middle; width: 44px; padding-left: 16px;" width="44" height="72" valign="middle"><input type="checkbox" data-chk style="box-sizing: border-box; font: inherit; color: inherit; width: 16px; height: 16px; margin: 0; accent-color: #2563eb; cursor: pointer;"></td>
               <td style="box-sizing: border-box; white-space: nowrap; padding: 10px 12px; height: 72px; border-bottom: 1px solid #eef1f5; vertical-align: middle;" height="72" valign="middle"><button data-person title="Open profile" data-h="background:#eef2f6;" style="box-sizing: border-box; font: inherit; color: inherit; cursor: pointer; background: none; border: 0; text-align: left; display: flex; align-items: center; gap: 12px; padding: 4px 8px; margin: -4px -8px; border-radius: 8px; width: 100%;"><span data-f="initials" style="box-sizing: border-box; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; flex-shrink: 0; background: #fdf6d8; color: #a16207;">UA</span><span style="box-sizing: border-box; display: flex; flex-direction: column; min-width: 0;"><span style="box-sizing: border-box; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;"><span data-f="name" style="box-sizing: border-box;">Umar Ansari</span></span><span data-f="email" style="box-sizing: border-box; color: #64748b; font-size: 12px; margin-top: 1px; font-weight: 400;">umar05@yopmail.com</span></span></button></td>
               <td style="box-sizing: border-box; white-space: nowrap; padding: 10px 12px; height: 72px; border-bottom: 1px solid #eef1f5; vertical-align: middle;" height="72" valign="middle"><button data-open title="View profile" data-h="background:#e8eef7;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; text-align: left; display: flex; flex-direction: column; align-items: flex-start; padding: 4px 8px; margin: -4px -8px; border-radius: 6px; color: #1e293b; transition: background-color .1s;"><span data-f="role" style="box-sizing: border-box;">Admin</span><span data-f="roleSub" style="box-sizing: border-box; color: #64748b; font-size: 12px; margin-top: 1px; font-weight: 400;">no groups yet</span></button></td>
@@ -531,7 +531,7 @@ html[data-theme="dark"] [data-pg][title="Page 1"],html[data-theme="dark"] [data-
       <h1 style="box-sizing: border-box; margin: 0; font-size: 24px; font-weight: 700; color: #0f172a; letter-spacing: -.4px;">Blocked Numbers</h1>
       <p style="box-sizing: border-box; margin: 0; color: #475569; margin-top: 6px; font-size: 14px;">Everyone you have stopped hearing from, and one place to block someone new.</p>
     </div>
-    <div style="box-sizing: border-box; display: flex; gap: 10px; flex-wrap: wrap;"><button id="btnBkExport" data-need="export" data-h="background:#f8fafc;border-color:#cbd5e1;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; font-weight: 500; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>Export</button><button id="btnBkNew" data-need="numbers" data-h="background:#1d4ed8;border-color:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/></svg>Block a number</button></div>
+    <div style="box-sizing: border-box; display: flex; gap: 10px; flex-wrap: wrap;"><button id="btnBkExport" data-need="export" data-h="background:#f8fafc;border-color:#cbd5e1;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; font-weight: 500; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>Export</button><button id="btnBkNew" data-h="background:#1d4ed8;border-color:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/></svg><span id="btnBkNewL" style="box-sizing: border-box;">Block a number</span></button></div>
   </div>
   <div style="box-sizing: border-box; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 0; margin-top: 22px; justify-content: space-between;">
     <label data-h="border-color:#cbd5e1;" data-fo="border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; width: 300px; max-width: 100%; height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 11px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #94a3b8; transition: border-color .12s,box-shadow .12s;">
@@ -560,7 +560,7 @@ html[data-theme="dark"] [data-pg][title="Page 1"],html[data-theme="dark"] [data-
               <div style="box-sizing: border-box; width: 52px; height: 52px; border-radius: 50%; background: #eef2f6; color: #94a3b8; display: grid; place-items: center; margin: 0 auto 12px;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 24px; height: 24px;"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></svg></div>
               <h2 id="bkEmptyT" style="box-sizing: border-box; margin: 0; font-size: 16px; color: #0f172a;">Nobody is blocked</h2>
               <p id="bkEmptyP" style="box-sizing: border-box; margin: 0; color: #64748b; margin-top: 4px;">Numbers you block will be listed here.</p>
-              <button id="bkEmptyBtn" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35); margin-top: 14px;" data-need="numbers" data-h="background:#1d4ed8;border-color:#1d4ed8;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/></svg>Block a number</button>
+              <button id="bkEmptyBtn" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35); margin-top: 14px;" data-h="background:#1d4ed8;border-color:#1d4ed8;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/></svg><span id="bkEmptyBtnL" style="box-sizing: border-box;">Block a number</span></button>
               <button id="bkEmptyClear" data-h="background:#eff6ff;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; margin-top: 14px; display: none; border-color: #2563eb; color: #2563eb; background: #fff; font-weight: 600;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M6 6l12 12M18 6L6 18"/></svg>Clear filters</button>
             </div>
           </td></tr>
@@ -637,6 +637,95 @@ html[data-theme="dark"] [data-pg][title="Page 1"],html[data-theme="dark"] [data-
         <button data-fvpg title="Page 1" data-h="background:#e2e8f0;background:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; text-align: center; background: #2563eb; color: #fff; font-weight: 700;">1</button>
         <button data-fvpg title="Next page" disabled data-h="background:#e2e8f0;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; background: #f1f5f9; display: grid; place-items: center; color: #475569; font-size: 12px; text-align: center;">›</button>
         <button data-fvpg title="Last page" disabled data-h="background:#e2e8f0;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; background: #f1f5f9; display: grid; place-items: center; color: #475569; font-size: 12px; text-align: center;">»</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="viewContacts" style="box-sizing: border-box; display: none;">
+  <div style="box-sizing: border-box; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+    <div style="box-sizing: border-box;">
+      <h1 style="box-sizing: border-box; margin: 0; font-size: 24px; font-weight: 700; color: #0f172a; letter-spacing: -.4px;">Contacts</h1>
+      <p style="box-sizing: border-box; margin: 0; color: #475569; margin-top: 6px; font-size: 14px;">People outside the organisation — who they work for, and how to reach them.</p>
+    </div>
+    <div style="box-sizing: border-box; display: flex; gap: 10px; flex-wrap: wrap;"><button id="btnAddContact" data-need="people" data-h="background:#1d4ed8;border-color:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 11.6-4M19 8v6M16 11h6"/></svg>Add Person</button><button id="btnNewCGroup" data-need="people" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; font-weight: 500; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 5v14M5 12h14"/></svg>New Group</button></div>
+  </div>
+  <section data-scrollcard="1" style="box-sizing: border-box; background: #fff; border: 1px solid #e8ecf3; border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.04); display: flex; flex-direction: column; margin-top: 14px; min-height: 0;">
+    <div style="box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px 12px;">
+      <div style="box-sizing: border-box; display: inline-flex; background: #f1f5f9; border-radius: 9px; padding: 3px;">
+        <button id="cxTabContacts" data-cxtab="contacts" data-h="color:#0f172a;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; text-align: left; display: flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; color: #64748b; font-weight: 500; font-size: 13px; transition: background-color .12s,color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px;"><rect x="5.2" y="3" width="16.6" height="18" rx="3.6"/><path d="M2.8 8h2.4M2.8 12h2.4M2.8 16h2.4"/><path d="M10.6 8.2l1.5-.3 1.3 2.7-1 1a5.4 5.4 0 0 0 2.5 2.5l1-1 2.7 1.3-.3 1.5a1.8 1.8 0 0 1-1.8 1.4A8.4 8.4 0 0 1 9.3 10a1.8 1.8 0 0 1 1.3-1.8z"/></svg>All contacts<span id="cxCntContacts" style="box-sizing: border-box; font-size: 12px; font-weight: 700; background: #e2e8f0; color: #475569; border-radius: 10px; padding: 1px 7px;">0</span></button>
+        <button id="cxTabGroups" data-cxtab="groups" data-h="color:#0f172a;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; text-align: left; display: flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; color: #64748b; font-weight: 500; font-size: 13px; transition: background-color .12s,color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px;"><circle cx="9" cy="6.6" r="3.6"/><path d="M2.4 20.2v-1.6c0-2 1.6-3.6 3.6-3.6h6c2 0 3.6 1.6 3.6 3.6v1.6z"/><path d="M14.4 3.1a3.6 3.6 0 0 1 0 7.1 5.2 5.2 0 0 0 0-7.1z" fill="currentColor"/><path d="M17.2 14.9c2.3.3 4 1.8 4 3.7v1.6h-3.6c.1-1.7-.1-3.3-.4-5.3z" fill="currentColor"/></svg>Groups<span id="cxCntGroups" style="box-sizing: border-box; font-size: 12px; font-weight: 700; background: #e2e8f0; color: #475569; border-radius: 10px; padding: 1px 7px;">0</span></button>
+      </div>
+      <div style="box-sizing: border-box; display: flex; align-items: center; gap: 8px;">
+        <button id="cxGroupChip" style="box-sizing: border-box; text-align: left; display: none; align-items: center; gap: 6px; height: 34px; padding: 0 8px 0 12px; border-radius: 9px; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;"><span id="cxGroupChipL" style="box-sizing: border-box;"></span><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px;"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        <label style="box-sizing: border-box; max-width: 100%; height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 11px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #94a3b8; transition: border-color .12s,box-shadow .12s; width: 280px;" data-h="border-color:#cbd5e1;" data-fo="border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe;">
+          <svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 15px; height: 15px;"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="cxsearch" placeholder="Search by name or number" autocomplete="off" style="box-sizing: border-box; font: inherit; border: 0; outline: 0; flex: 1; min-width: 0; width: 100%; font-size: 13px; background: transparent; color: #0f172a;">
+          <button id="cxsClear" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; text-align: left; width: 20px; height: 20px; border-radius: 50%; place-items: center; color: #64748b; background: #eef2f6; display: none;" title="Clear search" data-h="background:#dbe3ec;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 11px; height: 11px;"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </label>
+      </div>
+    </div>
+    <div id="cxContactsWrap" style="box-sizing: border-box; overflow-x: auto; overflow-y: auto; flex: 1; min-height: 0;">
+      <table style="box-sizing: border-box; width: 100%; border-collapse: separate; border-spacing: 0; min-width: 920px;" width="100%">
+        <thead style="box-sizing: border-box;"><tr style="box-sizing: border-box;">
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Created date</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Name</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Email</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Phone</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Company</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Group</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Tag</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Updated by</th>
+          <th style="box-sizing: border-box; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; text-align: center; background: #fff; border-top: 0; width: 90px;" width="90" height="48" align="center">Action</th>
+        </tr></thead>
+        <tbody id="cxbody" style="box-sizing: border-box;">
+          <tr id="cxEmpty" style="box-sizing: border-box; display: none;"><td colspan="9" style="box-sizing: border-box; white-space: nowrap; padding: 10px 12px; height: 72px; border-bottom: 1px solid #eef1f5; vertical-align: middle;" height="72" valign="middle">
+            <div style="box-sizing: border-box; padding: 56px 16px; text-align: center;">
+              <div style="box-sizing: border-box; width: 52px; height: 52px; border-radius: 50%; background: #eef2f6; color: #94a3b8; display: grid; place-items: center; margin: 0 auto 12px;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 24px; height: 24px;"><rect x="5.2" y="3" width="16.6" height="18" rx="3.6"/><path d="M2.8 8h2.4M2.8 12h2.4M2.8 16h2.4"/><path d="M10.6 8.2l1.5-.3 1.3 2.7-1 1a5.4 5.4 0 0 0 2.5 2.5l1-1 2.7 1.3-.3 1.5a1.8 1.8 0 0 1-1.8 1.4A8.4 8.4 0 0 1 9.3 10a1.8 1.8 0 0 1 1.3-1.8z"/></svg></div>
+              <h2 id="cxEmptyT" style="box-sizing: border-box; margin: 0; font-size: 16px; color: #0f172a;">No contacts yet</h2>
+              <p id="cxEmptyP" style="box-sizing: border-box; margin: 0; color: #64748b; margin-top: 4px;">People outside the organisation show up here once you add them.</p>
+              <button id="cxEmptyBtn" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35); margin-top: 14px;" data-h="background:#1d4ed8;border-color:#1d4ed8;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 11.6-4M19 8v6M16 11h6"/></svg>Add Person</button>
+              <button id="cxEmptyClear" data-h="background:#eff6ff;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; margin-top: 14px; display: none; border-color: #2563eb; color: #2563eb; background: #fff; font-weight: 600;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M6 6l12 12M18 6L6 18"/></svg>Clear filters</button>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="cxGroupsWrap" style="box-sizing: border-box; overflow-x: auto; overflow-y: auto; flex: 1; min-height: 0; display: none;">
+      <table style="box-sizing: border-box; width: 100%; border-collapse: separate; border-spacing: 0; min-width: 760px;" width="100%">
+        <thead style="box-sizing: border-box;"><tr style="box-sizing: border-box;">
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Date</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Group name</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Type</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Contact count</th>
+          <th style="box-sizing: border-box; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #fff; border-top: 0;" height="48" align="left">Created by</th>
+          <th style="box-sizing: border-box; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: #64748b; text-transform: uppercase; padding: 0 14px; height: 48px; border-bottom: 1px solid #eef1f5; white-space: nowrap; position: sticky; top: 0; z-index: 2; text-align: center; background: #fff; border-top: 0; width: 90px;" width="90" height="48" align="center">Action</th>
+        </tr></thead>
+        <tbody id="cgbody" style="box-sizing: border-box;">
+          <tr id="cgEmpty" style="box-sizing: border-box; display: none;"><td colspan="6" style="box-sizing: border-box; white-space: nowrap; padding: 10px 12px; height: 72px; border-bottom: 1px solid #eef1f5; vertical-align: middle;" height="72" valign="middle">
+            <div style="box-sizing: border-box; padding: 56px 16px; text-align: center;">
+              <div style="box-sizing: border-box; width: 52px; height: 52px; border-radius: 50%; background: #eef2f6; color: #94a3b8; display: grid; place-items: center; margin: 0 auto 12px;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 24px; height: 24px;"><circle cx="9" cy="6.6" r="3.6"/><path d="M2.4 20.2v-1.6c0-2 1.6-3.6 3.6-3.6h6c2 0 3.6 1.6 3.6 3.6v1.6z"/><path d="M14.4 3.1a3.6 3.6 0 0 1 0 7.1 5.2 5.2 0 0 0 0-7.1z" fill="currentColor"/><path d="M17.2 14.9c2.3.3 4 1.8 4 3.7v1.6h-3.6c.1-1.7-.1-3.3-.4-5.3z" fill="currentColor"/></svg></div>
+              <h2 id="cgEmptyT" style="box-sizing: border-box; margin: 0; font-size: 16px; color: #0f172a;">No groups yet</h2>
+              <p id="cgEmptyP" style="box-sizing: border-box; margin: 0; color: #64748b; margin-top: 4px;">Save a list of contacts or leads to reuse later.</p>
+              <button id="cgEmptyBtn" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35); margin-top: 14px;" data-h="background:#1d4ed8;border-color:#1d4ed8;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 5v14M5 12h14"/></svg>New Group</button>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section style="box-sizing: border-box; background: #fff; border: 1px solid #e8ecf3; box-shadow: 0 1px 2px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.04); display: flex; flex-direction: column; margin-top: 12px; min-height: 0; border-radius: 14px;">
+    <div style="box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #475569; font-size: 13px; flex-wrap: wrap;">
+      <button data-dd="cxperpage" data-h="background:#f8fafc;border-color:#94a3b8;" style="box-sizing: border-box; font: inherit; color: inherit; cursor: pointer; text-align: left; height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px 0 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; background: #fff;"><span data-lbl style="box-sizing: border-box;">25</span><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 12px; height: 12px; color: #64748b;"><path d="M6 9l6 6 6-6"/></svg></button>
+      <span style="box-sizing: border-box;">per page</span>
+      <span id="cxPgText" style="box-sizing: border-box; margin-left: 6px; color: #64748b;">0 contacts</span>
+      <button id="cxRefresh" title="Refresh" data-h="background:#eef2f6;color:#0f172a;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; padding: 0; text-align: left; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #64748b; margin-left: 10px;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 15px; height: 15px;"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4"/></svg></button>
+      <div style="box-sizing: border-box; margin-left: auto; display: flex; align-items: center; gap: 6px;">
+        <button data-cxpg title="First page" disabled data-h="background:#e2e8f0;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; background: #f1f5f9; display: grid; place-items: center; color: #475569; font-size: 12px; text-align: center;">«</button>
+        <button data-cxpg title="Previous page" disabled data-h="background:#e2e8f0;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; background: #f1f5f9; display: grid; place-items: center; color: #475569; font-size: 12px; text-align: center;">‹</button>
+        <button data-cxpg title="Page 1" data-h="background:#e2e8f0;background:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; text-align: center; background: #2563eb; color: #fff; font-weight: 700;">1</button>
+        <button data-cxpg title="Next page" disabled data-h="background:#e2e8f0;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; background: #f1f5f9; display: grid; place-items: center; color: #475569; font-size: 12px; text-align: center;">›</button>
+        <button data-cxpg title="Last page" disabled data-h="background:#e2e8f0;" style="box-sizing: border-box; font: inherit; cursor: pointer; border: 0; padding: 0; width: 30px; height: 30px; border-radius: 8px; background: #f1f5f9; display: grid; place-items: center; color: #475569; font-size: 12px; text-align: center;">»</button>
       </div>
     </div>
   </section>
@@ -909,7 +998,94 @@ html[data-theme="dark"] [data-pg][title="Page 1"],html[data-theme="dark"] [data-
     </div>
     <div style="box-sizing: border-box; display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 18px; border-top: 1px solid #eef1f5; align-items: center;">
       <button id="bkNo" data-h="background:#f1f5f9;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; border-color: transparent; background: transparent; font-weight: 500; color: #334155;">Cancel</button>
-      <button id="bkYes" data-h="background:#1d4ed8;border-color:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/></svg>Block number</button>
+      <button id="bkYes" data-h="background:#1d4ed8;border-color:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;"><path d="M12 3l8 3v6c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V6z"/></svg><span id="bkYesL" style="box-sizing: border-box;">Block number</span></button>
+    </div>
+  </div>
+</div>
+<div id="acdlg" style="box-sizing: border-box; position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100;" role="dialog" aria-modal="true">
+  <div style="box-sizing: border-box; background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,.3); overflow: hidden; width: 640px; max-width: 100%; max-height: calc(100vh - 32px); display: flex; flex-direction: column;">
+    <div style="box-sizing: border-box; display: flex; align-items: flex-start; gap: 14px; padding: 20px 22px 14px; border-bottom: 1px solid #eef1f5;">
+      <span style="box-sizing: border-box; width: 42px; height: 42px; border-radius: 50%; background: #eef2f7; display: grid; place-items: center; color: #475569; flex-shrink: 0;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 20px; height: 20px;"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 11.6-4M19 8v6M16 11h6"/></svg></span>
+      <div style="box-sizing: border-box; flex: 1; min-width: 0;"><h2 style="box-sizing: border-box; margin: 0; font-size: 18px; color: #0f172a;">Add a person</h2><p style="box-sizing: border-box; margin: 0; margin-top: 3px; color: #64748b; font-size: 13.5px; line-height: 1.45;">Someone outside your organisation. A name and a number is enough to start.</p></div>
+      <button id="acX" data-tip="Close" aria-label="Close" data-h="background:#f1f5f9;color:#0f172a;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; padding: 0; text-align: left; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: #64748b;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 18px; height: 18px;"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div id="acB" style="box-sizing: border-box; padding: 18px 22px; overflow-y: auto; flex: 1; min-height: 0;">
+      <div style="box-sizing: border-box; display: flex; gap: 10px; margin-bottom: 18px;">
+        <label data-ackind="contact" data-h="border-color:#93b4f5;" style="box-sizing: border-box; flex: 1; border: 1px solid #2563eb; border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #f3f7ff;"><div style="box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 14px;">Contact</div><div style="box-sizing: border-box; color: #64748b; font-size: 12.5px; margin-top: 2px;">Lives in the directory only</div></label>
+        <label data-ackind="lead" data-h="border-color:#93b4f5;" style="box-sizing: border-box; flex: 1; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #fff;"><div style="box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 14px;">Lead</div><div style="box-sizing: border-box; color: #64748b; font-size: 12.5px; margin-top: 2px;">Can be dialled by a campaign</div></label>
+      </div>
+      <div style="box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px;">
+        <div style="box-sizing: border-box;"><label for="acFirst" style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block;">First Name *</label><input id="acFirst" placeholder="Enter first name" autocomplete="off" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; font: inherit; color: inherit; height: 44px; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s;"><div data-ge="acfirst" style="box-sizing: border-box; display: none; color: #dc2626; font-size: 12.5px; margin-top: 5px;"></div></div>
+        <div style="box-sizing: border-box;"><label for="acLast" style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block;">Last Name</label><input id="acLast" placeholder="Enter last name" autocomplete="off" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; font: inherit; color: inherit; height: 44px; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s;"></div>
+        <div style="box-sizing: border-box;"><label for="acEmail" style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block;">Email</label><input id="acEmail" placeholder="Enter email" autocomplete="off" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; font: inherit; color: inherit; height: 44px; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s;"><div data-ge="acemail" style="box-sizing: border-box; display: none; color: #dc2626; font-size: 12.5px; margin-top: 5px;"></div></div>
+        <div style="box-sizing: border-box;"><label for="acPhone" style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block;">Phone Number *</label><input id="acPhone" placeholder="+1 415 555 1212" autocomplete="off" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; font: inherit; color: inherit; height: 44px; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s;"><div data-ge="acphone" style="box-sizing: border-box; display: none; color: #dc2626; font-size: 12.5px; margin-top: 5px;"></div></div>
+        <div style="box-sizing: border-box;"><label for="acCompany" style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block;">Company</label><input id="acCompany" placeholder="Enter company" autocomplete="off" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; font: inherit; color: inherit; height: 44px; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s;"></div>
+        <div style="box-sizing: border-box;"><label for="acGroup" style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block;">Select Group</label><select id="acGroup" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; font: inherit; color: inherit; height: 44px; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; background: #fff; outline: 0; width: 100%;"><option value>No group</option></select></div>
+      </div>
+    </div>
+    <div style="box-sizing: border-box; display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 18px; border-top: 1px solid #eef1f5; align-items: center;">
+      <button id="acNo" data-h="background:#f1f5f9;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; border-color: transparent; background: transparent; font-weight: 500; color: #334155;">Cancel</button>
+      <button id="acYes" data-h="background:#1d4ed8;border-color:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);">Add contact</button>
+    </div>
+  </div>
+</div>
+<div id="cgdlg" style="box-sizing: border-box; position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100;" role="dialog" aria-modal="true">
+  <div style="box-sizing: border-box; background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,.3); overflow: hidden; width: 760px; max-width: 100%; max-height: calc(100vh - 32px); display: flex; flex-direction: column;">
+    <div style="box-sizing: border-box; display: flex; align-items: flex-start; gap: 14px; padding: 20px 22px 14px; border-bottom: 1px solid #eef1f5;">
+      <div style="box-sizing: border-box; flex: 1; min-width: 0;"><h2 id="cgTitle" style="box-sizing: border-box; margin: 0; font-size: 18px; color: #0f172a;">New contact group</h2></div>
+      <button id="cgX" data-tip="Close" aria-label="Close" data-h="background:#f1f5f9;color:#0f172a;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; padding: 0; text-align: left; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: #64748b;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 18px; height: 18px;"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div id="cgB" style="box-sizing: border-box; padding: 18px 22px; overflow-y: auto; flex: 1; min-height: 0;">
+      <div id="cgKindRow" style="box-sizing: border-box;">
+        <div style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; display: block; margin-bottom: 8px;">What is this list for?</div>
+        <div style="box-sizing: border-box; display: flex; gap: 10px; margin-bottom: 18px;">
+          <label data-cgkind="lead" data-h="border-color:#93b4f5;" style="box-sizing: border-box; flex: 1; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #fff;"><div style="box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 14px;">Lead list</div><div style="box-sizing: border-box; color: #64748b; font-size: 12.5px; margin-top: 2px;">People a campaign can dial</div></label>
+          <label data-cgkind="contact" data-h="border-color:#93b4f5;" style="box-sizing: border-box; flex: 1; border: 1px solid #2563eb; border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #f3f7ff;"><div style="box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 14px;">Contact group</div><div style="box-sizing: border-box; color: #64748b; font-size: 12.5px; margin-top: 2px;">People you keep in the directory</div></label>
+        </div>
+      </div>
+      <div id="cgKindLocked" style="box-sizing: border-box; display: none; margin-bottom: 16px; padding: 10px 14px; border-radius: 10px; background: #eff6ff; color: #1e3a8a; font-size: 13px;"></div>
+      <label for="cgName" style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block;">Contact group name</label>
+      <input id="cgName" placeholder="e.g. Suppliers" autocomplete="off" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;" style="box-sizing: border-box; font: inherit; color: inherit; height: 44px; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s;">
+      <div data-ge="cgname" style="box-sizing: border-box; display: none; color: #dc2626; font-size: 12.5px; margin-top: 5px;"></div>
+      <div style="box-sizing: border-box; font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px; display: block; margin: 18px 0 8px;">Who goes in it?</div>
+      <div style="box-sizing: border-box; display: flex; gap: 10px; margin-bottom: 18px;">
+        <label data-cgmode="type" data-h="border-color:#93b4f5;" style="box-sizing: border-box; flex: 1; border: 1px solid #2563eb; border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #f3f7ff;"><div style="box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 14px;">Type them in</div><div style="box-sizing: border-box; color: #64748b; font-size: 12.5px; margin-top: 2px;">Names and numbers</div></label>
+        <label data-cgmode="file" data-h="border-color:#93b4f5;" style="box-sizing: border-box; flex: 1; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #fff;"><div style="box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 14px;">Upload a file</div><div style="box-sizing: border-box; color: #64748b; font-size: 12.5px; margin-top: 2px;">CSV or Excel</div></label>
+        <label data-cgmode="pick" data-h="border-color:#93b4f5;" style="box-sizing: border-box; flex: 1; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; cursor: pointer; background: #fff;"><div style="box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 14px;">Pick existing</div><div style="box-sizing: border-box; color: #64748b; font-size: 12.5px; margin-top: 2px;">Already saved</div></label>
+      </div>
+      <div id="cgTypeWrap" style="box-sizing: border-box;">
+        <div id="cgTypeRows" style="box-sizing: border-box;">
+          <div data-cgrow style="box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 10px;">
+            <div style="box-sizing: border-box;"><label style="box-sizing: border-box; font-weight: 600; color: #1e293b; display: block; font-size: 13px; margin-bottom: 5px;" data-cglbl>Name</label><input data-cgname placeholder="John Doe" autocomplete="off" style="box-sizing: border-box; font: inherit; color: inherit; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s; height: 42px;" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;"></div>
+            <div style="box-sizing: border-box;"><label style="box-sizing: border-box; font-weight: 600; color: #1e293b; display: block; font-size: 13px; margin-bottom: 5px;" data-cglbl>Phone number</label><input data-cgphone placeholder="+91 98765 43210" autocomplete="off" style="box-sizing: border-box; font: inherit; color: inherit; border: 1px solid #cbd5e1; border-radius: 11px; padding: 0 12px; font-size: 15px; outline: 0; background: #fff; width: 100%; transition: border-color .12s,box-shadow .12s; height: 42px;" data-fo="border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe;"></div>
+            <button type="button" data-cgrm data-tip="Remove this row" aria-label="Remove this row" data-h="background:#f1f5f9;" style="box-sizing: border-box; font: inherit; cursor: pointer; padding: 0; text-align: left; width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: #475569; border: 1px solid #e2e8f0; background: #fff; flex-shrink: 0;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 16px; height: 16px;"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+          </div>
+        </div>
+        <button type="button" id="cgAddRow" style="box-sizing: border-box; text-align: left; border: 0; background: none; color: #2563eb; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 6px 0; display: inline-flex; align-items: center; gap: 6px;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px;"><path d="M12 5v14M5 12h14"/></svg>Add another</button>
+        <div style="box-sizing: border-box; color: #94a3b8; font-size: 12px; margin-top: 10px; line-height: 1.5;">Include the country code, e.g. +91. Paste a column from a spreadsheet to fill a row per line. A number with no name is saved under the number.</div>
+      </div>
+      <div id="cgFileWrap" style="box-sizing: border-box; display: none; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 26px 16px; text-align: center; color: #64748b; background: #fafbfd;">
+        <div style="box-sizing: border-box; font-weight: 600; color: #0f172a; margin-bottom: 4px;">Upload a CSV or Excel file</div>
+        <div style="box-sizing: border-box; font-size: 12.5px; margin-bottom: 14px;">Not available in this preview — use “Type them in” instead.</div>
+        <button type="button" id="cgFileBtn" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; font-weight: 500; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; border-color: #2563eb; color: #2563eb; display: inline-flex;">Choose a file</button>
+      </div>
+      <div id="cgPickWrap" style="box-sizing: border-box; display: none;">
+        <div style="box-sizing: border-box; display: inline-flex; background: #f1f5f9; border-radius: 9px; padding: 3px; margin-bottom: 12px;">
+          <button type="button" data-cgpicktab="contact" data-h="color:#0f172a;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; text-align: left; display: flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; color: #64748b; font-weight: 500; font-size: 13px; transition: background-color .12s,color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px;"><rect x="5.2" y="3" width="16.6" height="18" rx="3.6"/><path d="M2.8 8h2.4M2.8 12h2.4M2.8 16h2.4"/><path d="M10.6 8.2l1.5-.3 1.3 2.7-1 1a5.4 5.4 0 0 0 2.5 2.5l1-1 2.7 1.3-.3 1.5a1.8 1.8 0 0 1-1.8 1.4A8.4 8.4 0 0 1 9.3 10a1.8 1.8 0 0 1 1.3-1.8z"/></svg>Contacts<span id="cgPickCntContact" style="box-sizing: border-box; font-size: 12px; font-weight: 700; background: #e2e8f0; color: #475569; border-radius: 10px; padding: 1px 7px;">0</span></button>
+          <button type="button" data-cgpicktab="lead" data-h="color:#0f172a;" style="box-sizing: border-box; font: inherit; cursor: pointer; background: none; border: 0; text-align: left; display: flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; color: #64748b; font-weight: 500; font-size: 13px; transition: background-color .12s,color .12s;"><svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px;"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>Leads<span id="cgPickCntLead" style="box-sizing: border-box; font-size: 12px; font-weight: 700; background: #e2e8f0; color: #475569; border-radius: 10px; padding: 1px 7px;">0</span></button>
+        </div>
+        <label style="box-sizing: border-box; max-width: 100%; height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 11px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #94a3b8; transition: border-color .12s,box-shadow .12s; width: 100%; margin-bottom: 10px;" data-h="border-color:#cbd5e1;" data-fo="border-color:#60a5fa;box-shadow:0 0 0 3px #dbeafe;">
+          <svg viewBox="0 0 24 24" style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 15px; height: 15px;"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="cgPickSearch" placeholder="Search by name or number" autocomplete="off" style="box-sizing: border-box; font: inherit; border: 0; outline: 0; flex: 1; min-width: 0; width: 100%; font-size: 13px; background: transparent; color: #0f172a;">
+        </label>
+        <label style="box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 8px 4px; cursor: pointer; font-weight: 600; font-size: 13.5px; color: #334155;"><input type="checkbox" id="cgPickAll" style="box-sizing: border-box; font: inherit; color: inherit; accent-color: #2563eb; width: 16px; height: 16px;">Select All</label>
+        <div id="cgPickList" style="box-sizing: border-box; max-height: 260px; overflow-y: auto;"></div>
+      </div>
+    </div>
+    <div style="box-sizing: border-box; display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 18px; border-top: 1px solid #eef1f5; align-items: center;">
+      <span id="cgFooterN" style="box-sizing: border-box; font-size: 13px; color: #64748b; font-weight: 500; margin-right: auto;"></span>
+      <button id="cgNo" data-h="background:#f1f5f9;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; border-color: transparent; background: transparent; font-weight: 500; color: #334155;">Cancel</button>
+      <button id="cgYes" data-h="background:#1d4ed8;border-color:#1d4ed8;" style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);">Save</button>
     </div>
   </div>
 </div>
@@ -1685,6 +1861,8 @@ tbody.addEventListener('click',function(e){
   user   = everyone else        -> Change role, Assign caller ID, Suspend, Remove person (danger block)
   removed = row in Removed tab  -> View profile, Restore */
 var IC_={
+  groups:'<circle cx="9" cy="6.6" r="3.6"/><path d="M2.4 20.2v-1.6c0-2 1.6-3.6 3.6-3.6h6c2 0 3.6 1.6 3.6 3.6v1.6z"/><path d="M14.4 3.1a3.6 3.6 0 0 1 0 7.1 5.2 5.2 0 0 0 0-7.1z" fill="currentColor"/><path d="M17.2 14.9c2.3.3 4 1.8 4 3.7v1.6h-3.6c.1-1.7-.1-3.3-.4-5.3z" fill="currentColor"/>',
+  grid:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>',
   star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
   phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
   msg:'<path d="M4 5h16v11H9l-5 4z"/>',
@@ -2476,7 +2654,7 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('keydown',function(e){
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(['#modal','#gmodal','#sdlg','#cdlg','#idlg','#kdlg','#rvdlg','#redlg','#radlg','#rqdlg','#ldlg','#signin'].some(function(id){return $(id).style.display==='flex'}))return;$('#gsearch').focus();$('#gsearch').select();openK()}
-  if(e.key==='Escape'){if($('#cdlg').style.display==='flex'){hideConfirm();return}if($('#rqdlg').style.display==='flex'){closeReqs();return}if($('#ldlg').style.display==='flex'){closeLoc();return}if($('#bkdlg').style.display==='flex'){attemptCloseBlock();return}if($('#radlg').style.display==='flex'){closeAssign();return}if($('#redlg').style.display==='flex'){attemptCloseRoleEditor();return}if($('#rvdlg').style.display==='flex'){closeRoleView();return}if($('#kdlg').style.display==='flex'){closeKeys();return}if($('#adlg').style.display==='flex'){closeActivity();return}if($('#roledlg').style.display==='flex'){closeRoleDialog();return}if($('#ciddlg').style.display==='flex'){closeCidDialog();return}if($('#faxdlg').style.display==='flex'){closeFax();return}if($('#expdlg').style.display==='flex'){closeExport();return}if($('#idlg').style.display==='flex'){closeImp();return}if($('#sdlg').style.display==='flex'){closeSD();return}if($('#cdlg').style.display==='flex'){hideConfirm();return}closeMenu();closeDrawer();attemptCloseModal();attemptCloseG()}
+  if(e.key==='Escape'){if($('#cdlg').style.display==='flex'){hideConfirm();return}if($('#rqdlg').style.display==='flex'){closeReqs();return}if($('#ldlg').style.display==='flex'){closeLoc();return}if($('#bkdlg').style.display==='flex'){attemptCloseBlock();return}if($('#acdlg').style.display==='flex'){attemptCloseAC();return}if($('#cgdlg').style.display==='flex'){attemptCloseCG();return}if($('#radlg').style.display==='flex'){closeAssign();return}if($('#redlg').style.display==='flex'){attemptCloseRoleEditor();return}if($('#rvdlg').style.display==='flex'){closeRoleView();return}if($('#kdlg').style.display==='flex'){closeKeys();return}if($('#adlg').style.display==='flex'){closeActivity();return}if($('#roledlg').style.display==='flex'){closeRoleDialog();return}if($('#ciddlg').style.display==='flex'){closeCidDialog();return}if($('#faxdlg').style.display==='flex'){closeFax();return}if($('#expdlg').style.display==='flex'){closeExport();return}if($('#idlg').style.display==='flex'){closeImp();return}if($('#sdlg').style.display==='flex'){closeSD();return}if($('#cdlg').style.display==='flex'){hideConfirm();return}closeMenu();closeDrawer();attemptCloseModal();attemptCloseG()}
 });
 
 
@@ -2506,23 +2684,23 @@ function applyHash(h){
     var m;
     if((m=/^#person\/(.+)$/.exec(h))){var r=personById(m[1]);if(r){openPerson(r);return}}
     if((m=/^#group\/(.+)$/.exec(h))){var g=groups.filter(function(x){return x.id===m[1]})[0];if(g){openDetail(g);return}}
-    showView(h==='#groups'?'groups':h==='#roles'?'roles':h==='#locations'?'locations':h==='#blocked'?'blocked':h==='#favourites'?'favourites':'people');
+    showView(h==='#groups'?'groups':h==='#roles'?'roles':h==='#locations'?'locations':h==='#blocked'?'blocked':h==='#favourites'?'favourites':h==='#contacts'?'contacts':'people');
   }finally{navLock=false}
 }
 window.addEventListener('popstate',function(){backTo=null;applyHash(location.hash)});
-var curView='', VIEW_IDS={people:'#viewPeople',groups:'#viewGroups',roles:'#viewRoles',locations:'#viewLocs',blocked:'#viewBlocked',favourites:'#viewFavourites',gdetail:'#viewGDetail'};
+var curView='', VIEW_IDS={people:'#viewPeople',groups:'#viewGroups',roles:'#viewRoles',locations:'#viewLocs',blocked:'#viewBlocked',favourites:'#viewFavourites',contacts:'#viewContacts',gdetail:'#viewGDetail'};
 var backTo=null, keepBack=false;
 function paintBack(){var el=$('#backBar');el.style.display=backTo?'inline-flex':'none';if(backTo)$('#backLbl').textContent='Back to '+backTo.label}
 function goWithBack(v,label,from){backTo={label:label,view:from};keepBack=true;showView(v);keepBack=false;paintBack()}
 $('#backBar').addEventListener('click',function(e){e.preventDefault();var t=backTo;backTo=null;showView(t?t.view:'people')});
 function showView(v){
-  if(v==='people'){pushNav('#people');apply()} if(v==='groups')pushNav('#groups'); if(v==='roles')pushNav('#roles'); if(v==='locations')pushNav('#locations'); if(v==='blocked')pushNav('#blocked'); if(v==='favourites')pushNav('#favourites');
+  if(v==='people'){pushNav('#people');apply()} if(v==='groups')pushNav('#groups'); if(v==='roles')pushNav('#roles'); if(v==='locations')pushNav('#locations'); if(v==='blocked')pushNav('#blocked'); if(v==='favourites')pushNav('#favourites'); if(v==='contacts')pushNav('#contacts');
   var changed=curView!==v; curView=v;
   Object.keys(VIEW_IDS).forEach(function(k){var el=$(VIEW_IDS[k]),on=k===v;el.style.display=on?'':'none';
     if(on&&changed){el.style.transition='none';el.style.opacity='0';void el.offsetHeight;el.style.transition='opacity .18s ease';el.style.opacity='1'}});
   var side=v==='gdetail'?(dMode==='person'?'people':'groups'):v;
   $$('a[data-side]').forEach(function(a){styleSide(a,a.dataset.side===side)});
-  closeMenu(); window.scrollTo(0,0); if(v==='groups')renderGroups(); if(v==='roles')renderRoles(); if(v==='locations')renderLocs(); if(v==='blocked')renderBlocked(); if(v==='favourites')renderFavourites(); if(v==='gdetail')renderDetail();
+  closeMenu(); window.scrollTo(0,0); if(v==='groups')renderGroups(); if(v==='roles')renderRoles(); if(v==='locations')renderLocs(); if(v==='blocked')renderBlocked(); if(v==='favourites')renderFavourites(); if(v==='contacts'){renderContacts();renderCGroups();paintCxCounts()} if(v==='gdetail')renderDetail();
   setTimeout(fitScrollCards,0);
   if(!navLock&&!keepBack&&changed)backTo=null; if(v!=='gdetail')paintBack(); else $('#backBar').style.display='none';
 }
@@ -4274,12 +4452,15 @@ var REQS=[]; try{REQS=JSON.parse(localStorage.getItem('reqs')||'[]')}catch(e){RE
 function saveReqs(){try{localStorage.setItem('reqs',JSON.stringify(REQS))}catch(e){}}
 function teamLevel(){var m=me(),x=m&&roleByName(m.dataset.role);return !!(x&&x.perms['5.x.0.1'])}   /* "Call reports: Team" marks a supervisor-level role */
 function canReqFor(r,type){var m=me();if(!m||!r||r.dataset.removed==='1'||r.dataset.role==='Account owner')return false;if(type==='role'||type==='cid')return r===m||teamLevel();return r!==m&&teamLevel()}
-function reqNeed(q){return {role:'roles',cid:'numbers',suspend:'people',remove:'people',gdelete:'people'}[q.type]}
+function reqNeed(q){return {role:'roles',cid:'numbers',suspend:'people',remove:'people',gdelete:'people',block:'numbers',unblock:'numbers'}[q.type]}
 function canApprove(q){return can(reqNeed(q))}
 function pendingReqs(){return REQS.filter(function(q){return q.status==='pending'})}
 function hasPending(type,id){return pendingReqs().some(function(q){return q.type===type&&q.target===id})}
-function reqTarget(q){return q.type==='gdelete'?groups.filter(function(g){return g.id===q.target})[0]:personById(q.target)}
-function reqText(q){var t=reqTarget(q),n=t?(q.type==='gdelete'?t.name:t.dataset.name):'(gone)';
+function reqTarget(q){if(q.type==='block')return null;if(q.type==='unblock')return BLOCKS.filter(function(b){return b.id===q.target})[0];return q.type==='gdelete'?groups.filter(function(g){return g.id===q.target})[0]:personById(q.target)}
+function reqText(q){
+  if(q.type==='block')return 'block <b>'+bkWhoText(q.blockData)+'</b>';
+  if(q.type==='unblock'){var ut=reqTarget(q);return 'unblock <b>'+(ut?bkWhoText(ut):'(already gone)')+'</b>'}
+  var t=reqTarget(q),n=t?(q.type==='gdelete'?t.name:t.dataset.name):'(gone)';
   if(q.type==='role')return 'change <b>'+esc(n)+'</b>’s role to <b>'+esc(q.value)+'</b>';
   if(q.type==='cid')return 'give <b>'+esc(n)+'</b> the caller ID <b>'+esc(fmtNum(q.value))+'</b>'+(q.fresh?' (new number)':'');
   if(q.type==='suspend')return (q.un?'reactivate':'suspend')+' <b>'+esc(n)+'</b>';
@@ -4297,6 +4478,8 @@ function reqConfirm(type,t){
   showConfirm('Ask an admin?',body,'Send request',function(){sendReq(isG?{type:'gdelete',target:t.id}:{type:type,target:t.dataset.id,un:un})},type!=='suspend'||!un);
 }
 function applyReq(q){
+  if(q.type==='block'){var rec=Object.assign({},q.blockData,{id:'bk'+Date.now().toString(36),by:q.by,ts:Date.now(),stopped:0});BLOCKS.unshift(rec);renderBlocked();return true}
+  if(q.type==='unblock'){var b=reqTarget(q);if(!b){note('That block no longer exists',null,null,'danger');return false}var bi=BLOCKS.indexOf(b);if(bi>-1)BLOCKS.splice(bi,1);renderBlocked();return true}
   var t=reqTarget(q); if(!t){note('That '+(q.type==='gdelete'?'group':'person')+' no longer exists',null,null,'danger');return false}
   if(q.type==='role'){var x=roleByName(q.value);if(!x){note('The role “'+q.value+'” no longer exists',null,null,'danger');return false}
     var old=t.dataset.role;t.dataset.role=q.value;renderRow(t);apply();rolesTouched();logAct(t,'Role changed from '+old+' to '+q.value+' (requested by '+reqByName(q)+')')}
@@ -4422,7 +4605,11 @@ $('[data-menu="lpeople"]').addEventListener('click',function(e){e.stopPropagatio
   if(e.target.closest('[data-lpshow]')){closeMenu();filters.location=l.name;updateChip('location');goWithBack('people','Locations','locations')}});
 
 /* ---------- Blocked numbers ---------- */
-var BLOCKS=[], bkq='', BK=null, bkOwn=false;
+var BLOCKS=[
+  {id:'bk1',who:'number',numbers:['+14155550199'],prefix:'',stops:'all',gets:'block',scope:'mine',reason:'Spam or robocall',label:'Car warranty robocall',note:'',by:'anu',ts:Date.now()-9*86400e3,stopped:7},
+  {id:'bk2',who:'prefix',numbers:[],prefix:'+91 11',stops:'callsfax',gets:'voicemail',scope:'lines',reason:'Telemarketing',label:'Delhi telemarketers',note:'',by:'umar',ts:Date.now()-3*86400e3,stopped:23},
+  {id:'bk3',who:'hidden',numbers:[],prefix:'',stops:'texts',gets:'spam',scope:'company',reason:'Harassment or abuse',label:'',note:'Repeated after being asked to stop',by:'anu',ts:Date.now()-30*86400e3,stopped:2}
+], bkq='', BK=null, bkOwn=false;
 var BK_STOP_T={all:'Calls, faxes and texts',callsfax:'Calls and faxes',texts:'Texts'};
 var BK_GETS_T={block:'Block everything',voicemail:'Send to voicemail',spam:'Mark as spam'};
 var BK_SCOPE_T={mine:'My numbers',lines:'Lines I run',company:'Every number the company owns'};
@@ -4436,20 +4623,26 @@ function bkSubText(b){
   if((b.who==='number'||b.who==='several')&&b.numbers.length>1)return esc(b.numbers.slice(1).map(fmtNum).join(', '));
   return '';
 }
+function bkIcon(who){return {number:'phone',several:'phone',prefix:'grid',hidden:'eyeOff'}[who]||'phone'}
+function bkPrimary(b){
+  if(b.who==='hidden')return '<span style="font-weight:600;color:#0f172a">Callers who hide their number</span>';
+  if(b.who==='prefix')return '<span style="font-weight:600;color:#0f172a">Every number starting with </span><button data-copy="'+esc(b.prefix)+'" title="Click to copy" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#0f172a;cursor:pointer;font-size:13px;letter-spacing:.2px">'+esc(b.prefix)+'</button>';
+  return '<button data-copy="'+esc(b.numbers[0])+'" title="Click to copy" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#0f172a;cursor:pointer;font-size:13px;letter-spacing:.2px">'+esc(fmtNum(b.numbers[0]))+'</button>'+(b.numbers.length>1?' <span style="color:#94a3b8;font-weight:500">+'+(b.numbers.length-1)+'</span>':'');
+}
 function renderBlocked(){
   var q=bkq.trim().toLowerCase();
-  var list=BLOCKS.filter(function(b){return !q||[bkWhoText(b),b.label,b.note,b.reason,b.by].join(' ').toLowerCase().indexOf(q)>-1});
+  var list=BLOCKS.filter(function(b){return !q||[bkWhoText(b),b.label,b.note,b.reason].join(' ').toLowerCase().indexOf(q)>-1});
   $$('tr[data-bkrow]',$('#bkbody')).forEach(function(t){t.remove()});
   var rows=list.map(function(b){
-    return '<tr data-bkrow="'+b.id+'">'
-      +'<td><div style="font-weight:600;color:#0f172a">'+bkWhoText(b)+'</div>'+(bkSubText(b)?'<div style="font-size:12px;color:#64748b;margin-top:2px">'+bkSubText(b)+'</div>':'')+'</td>'
-      +'<td>'+BK_STOP_T[b.stops]+'</td>'
-      +'<td>'+BK_GETS_T[b.gets]+'</td>'
-      +'<td>'+BK_SCOPE_T[b.scope]+'</td>'
-      +'<td>'+(b.reason?esc(b.reason):'<span style="color:#94a3b8">Not given</span>')+'</td>'
-      +'<td>'+esc(b.by)+'</td>'
-      +'<td>'+b.stopped+'</td>'
-      +'<td>'+rBtn('data-bkact="del"','Unblock this number','trash','red')+'</td>'
+    return '<tr data-bkrow="'+b.id+'" style="position:relative;z-index:1;transition:background-color .1s">'
+      +'<td style="'+TDS+'"><div style="display:flex;align-items:center;gap:10px">'+kTile(bkIcon(b.who))+'<div>'+bkPrimary(b)+(bkSubText(b)?'<div style="font-size:12px;color:#64748b;margin-top:2px">'+bkSubText(b)+'</div>':'')+'</div></div></td>'
+      +'<td style="'+TDS+'">'+BK_STOP_T[b.stops]+'</td>'
+      +'<td style="'+TDS+'">'+BK_GETS_T[b.gets]+'</td>'
+      +'<td style="'+TDS+'">'+BK_SCOPE_T[b.scope]+'</td>'
+      +'<td style="'+TDS+'">'+(b.reason?esc(b.reason):'<span style="color:#94a3b8">Not given</span>')+'</td>'
+      +'<td style="'+TDS+'">'+byCell(b.by)+'</td>'
+      +'<td style="'+TDS+'">'+b.stopped+'</td>'
+      +'<td style="'+TDS+'text-align:center">'+rBtn('data-bkact="del"','Unblock this number','trash','red')+'</td>'
       +'</tr>';
   }).join('');
   $('#bkEmpty').insertAdjacentHTML('beforebegin',rows);
@@ -4457,18 +4650,24 @@ function renderBlocked(){
   $('#bkEmpty').style.display=list.length?'none':'';
   $('#bkEmptyT').textContent=none?'Nobody is blocked':'No blocks match your search';
   $('#bkEmptyP').textContent=none?'Numbers you block will be listed here.':'Try a different search.';
-  $('#bkEmptyBtn').style.display=(none&&can('numbers'))?'inline-flex':'none';
+  $('#bkEmptyBtn').style.display=none?'inline-flex':'none';
   $('#bkEmptyClear').style.display=none?'none':'inline-flex';
   $('#bksClear').style.display=bkq?'':'none';
   $('#bkCount').textContent=BLOCKS.length+(BLOCKS.length===1?' blocked':' blocked');
   $('#bkStoppedCount').textContent=BLOCKS.reduce(function(s,b){return s+b.stopped},0)+' calls and texts stopped';
   $('#bkPgText').textContent=list.length?'1–'+list.length+' of '+list.length+(list.length===1?' block':' blocks'):'0 blocks';
+  var lbl=can('numbers')?'Block a number':'Request to block a number';
+  $('#btnBkNewL').textContent=lbl; $('#bkEmptyBtnL').textContent=lbl;
 }
 $('#bkbody').addEventListener('click',function(e){
   var tr=e.target.closest('tr[data-bkrow]'); if(!tr)return; var id=tr.getAttribute('data-bkrow'), b=BLOCKS.filter(function(x){return x.id===id})[0]; if(!b)return;
   if(e.target.closest('[data-bkact="del"]'))confirmUnblock(b);
 });
 function confirmUnblock(b){
+  if(!can('numbers')){
+    showConfirm('Ask an admin to unblock '+bkWhoText(b)+'?','Nothing changes until they approve.','Send request',function(){sendReq({type:'unblock',target:b.id})},true);
+    return;
+  }
   showConfirm('Unblock '+bkWhoText(b)+'?','They’ll be able to reach you again on the next call or text.','Unblock',function(){
     var i=BLOCKS.indexOf(b); if(i<0)return; BLOCKS.splice(i,1); renderBlocked();
     note('Unblocked','Undo',function(){BLOCKS.splice(Math.min(i,BLOCKS.length),0,b);renderBlocked()});
@@ -4490,10 +4689,10 @@ function bkPfxErr(msg){var e=$('[data-ge="bkprefix"]');e.textContent=msg||'';e.s
 $('#bkNum').addEventListener('input',function(){bkErr('')});
 $('#bkPrefix').addEventListener('input',function(){bkPfxErr('')});
 function openBlock(){
-  if(!can('numbers'))return;
   BK={};
   $('#bkWho').value='number'; $('#bkNum').value=''; $('#bkPrefix').value=''; $('#bkStop').value='all'; $('#bkGets').value='block'; $('#bkScope').value='mine'; $('#bkReason').value=''; $('#bkLabel').value=''; $('#bkNote').value='';
   bkErr(''); bkPfxErr(''); paintBkWho(); $('#bkB').scrollTop=0;
+  $('#bkYesL').textContent=can('numbers')?'Block number':'Send request';
   bkOwn=grabOv(); $('#bkdlg').style.display='flex'; closeMenu(); mOpen($('#bkdlg'));
   setTimeout(function(){$('#bkWho').focus({preventScroll:true})},30);
 }
@@ -4515,9 +4714,15 @@ function saveBlock(){
     prefix=$('#bkPrefix').value.trim();
     if(!prefix){bkPfxErr('Add a prefix, e.g. +1 415.');$('#bkPrefix').focus();return}
   }
-  var rec={id:'bk'+Date.now().toString(36),who:who,numbers:nums,prefix:prefix,stops:$('#bkStop').value,gets:$('#bkGets').value,scope:$('#bkScope').value,reason:$('#bkReason').value,label:$('#bkLabel').value.trim(),note:$('#bkNote').value.trim(),by:(me()?me().dataset.name:'You'),ts:Date.now(),stopped:0};
+  var what=(who==='hidden'?'Hidden callers':who==='prefix'?'Prefix '+prefix:nums.length>1?nums.length+' numbers':'Number');
+  if(!can('numbers')){
+    var draft={who:who,numbers:nums,prefix:prefix,stops:$('#bkStop').value,gets:$('#bkGets').value,scope:$('#bkScope').value,reason:$('#bkReason').value,label:$('#bkLabel').value.trim(),note:$('#bkNote').value.trim()};
+    closeBlock(); sendReq({type:'block',blockData:draft});
+    return;
+  }
+  var rec={id:'bk'+Date.now().toString(36),who:who,numbers:nums,prefix:prefix,stops:$('#bkStop').value,gets:$('#bkGets').value,scope:$('#bkScope').value,reason:$('#bkReason').value,label:$('#bkLabel').value.trim(),note:$('#bkNote').value.trim(),by:(me()?me().dataset.id:''),ts:Date.now(),stopped:0};
   BLOCKS.unshift(rec); closeBlock(); renderBlocked();
-  toast((who==='hidden'?'Hidden callers':who==='prefix'?'Prefix '+prefix:nums.length>1?nums.length+' numbers':'Number')+' blocked');
+  toast(what+' blocked');
 }
 $('#btnBkNew').addEventListener('click',openBlock); $('#bkEmptyBtn').addEventListener('click',openBlock);
 $('#bkX').addEventListener('click',attemptCloseBlock); $('#bkNo').addEventListener('click',attemptCloseBlock);
@@ -4571,6 +4776,279 @@ $('#fvsClear').addEventListener('click',function(){fvq='';$('#fvsearch').value='
 $('#fvEmptyClear').addEventListener('click',function(){$('#fvsClear').click()});
 $('#fvEmptyGo').addEventListener('click',function(){showView('people')});
 $('#fvRefresh').addEventListener('click',function(){var i=$('#fvRefresh svg');i.style.transition='transform .6s';i.style.transform='rotate(360deg)';setTimeout(function(){i.style.transition='none';i.style.transform='none';renderFavourites()},600)});
+
+/* ---------- Contacts (external, outside the organisation) ---------- */
+var CONTACTS=[
+  {id:'cx1',first:'Marcus',last:'Webb',email:'marcus.webb@brightleaf.co',phone:'+14155552031',company:'Brightleaf Supplies',kind:'contact',group:'cg1',by:'anu',ts:Date.now()-18*86400e3,av:0},
+  {id:'cx2',first:'Elena',last:'Ruiz',email:'elena.ruiz@northgate.com',phone:'+442071234567',company:'Northgate Logistics',kind:'contact',group:'cg1',by:'umar',ts:Date.now()-11*86400e3,av:1},
+  {id:'cx3',first:'Tomás',last:'Alvarez',email:'',phone:'+13105557890',company:'',kind:'lead',group:'',by:'anu',ts:Date.now()-5*86400e3,av:2},
+  {id:'cx4',first:'Priyanka',last:'Rao',email:'priyanka.rao@fintrack.io',phone:'+919845098450',company:'FinTrack Analytics',kind:'lead',group:'cg2',by:'anu',ts:Date.now()-2*86400e3,av:3}
+], CGROUPS=[
+  {id:'cg1',name:'Suppliers',kind:'contact',members:['cx1','cx2'],by:'anu',ts:Date.now()-18*86400e3},
+  {id:'cg2',name:'Q4 outreach',kind:'lead',members:['cx4'],by:'anu',ts:Date.now()-2*86400e3}
+], cxTab='contacts', cxq='';
+var CX_MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function cxDate(ts){var d=new Date(ts);return CX_MN[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()}
+function cxName(c){return (c.first+' '+(c.last||'')).trim()}
+function cxAvatar(c,size){var av=AVS[(+c.av)%AVS.length];return '<span style="width:'+(size||32)+'px;height:'+(size||32)+'px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:'+Math.round((size||32)*.4)+'px;flex-shrink:0;background:'+av[0]+';color:'+av[1]+'">'+esc(ini(cxName(c)))+'</span>'}
+function cxTagChip(kind){return '<span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:700;background:'+(kind==='lead'?'#ede9fe':'#dbeafe')+';color:'+(kind==='lead'?'#6d28d9':'#1d4ed8')+'">'+(kind==='lead'?'Lead':'Contact')+'</span>'}
+function byCell(id,size){
+  var r=personById(id);
+  if(!r)return '<span style="color:#94a3b8">—</span>';
+  return '<button data-openperson="'+esc(id)+'" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:8px;color:#0f172a;font-weight:600;text-align:left">'+avP(r,size||24)+'<span>'+esc(r.dataset.name)+'</span></button>';
+}
+document.addEventListener('click',function(e){var t=e.target.closest('[data-openperson]');if(t){var r=personById(t.getAttribute('data-openperson'));if(r)openDrawer(r)}});
+function paintCxCounts(){$('#cxCntContacts').textContent=CONTACTS.length;$('#cxCntGroups').textContent=CGROUPS.length}
+function paintCxTabs(){
+  $$('[data-cxtab]').forEach(function(b){var on=b.getAttribute('data-cxtab')===cxTab;b.style.background=on?'#fff':'';b.style.color=on?'#0f172a':'';b.style.boxShadow=on?'0 1px 2px rgba(15,23,42,.08)':''});
+  $('#cxContactsWrap').style.display=cxTab==='contacts'?'':'none';
+  $('#cxGroupsWrap').style.display=cxTab==='groups'?'':'none';
+}
+$$('[data-cxtab]').forEach(function(b){b.addEventListener('click',function(){cxTab=b.getAttribute('data-cxtab');paintCxTabs();(cxTab==='contacts'?renderContacts:renderCGroups)();setTimeout(fitScrollCards,0)})});
+var cxGroupF='';
+function paintCxGroupChip(){
+  var g=cxGroupF?CGROUPS.filter(function(x){return x.id===cxGroupF})[0]:null;
+  $('#cxGroupChip').style.display=g?'inline-flex':'none';
+  if(g)$('#cxGroupChipL').textContent='Group: '+g.name;
+}
+function renderContacts(){
+  var q=cxq.trim().toLowerCase();
+  var list=CONTACTS.filter(function(c){return (!cxGroupF||c.group===cxGroupF)&&(!q||(cxName(c)+' '+c.email+' '+c.phone+' '+c.company).toLowerCase().indexOf(q)>-1)});
+  $$('tr[data-cxrow]',$('#cxbody')).forEach(function(t){t.remove()});
+  var rows=list.map(function(c){
+    var g=c.group?CGROUPS.filter(function(x){return x.id===c.group})[0]:null;
+    return '<tr data-cxrow="'+c.id+'" style="position:relative;z-index:1;transition:background-color .1s">'
+      +'<td style="'+TDS+'">'+cxDate(c.ts)+'</td>'
+      +'<td style="'+TDS+'"><div style="display:flex;align-items:center;gap:10px">'+cxAvatar(c)+'<span style="font-weight:600;color:#0f172a">'+esc(cxName(c))+'</span></div></td>'
+      +'<td style="'+TDS+'">'+(c.email?esc(c.email):'<span style="color:#94a3b8">—</span>')+'</td>'
+      +'<td style="'+TDS+'">'+(c.phone?'<button data-copy="'+esc(c.phone)+'" title="Click to copy" style="border:0;background:none;padding:0;font:inherit;color:#0f172a;cursor:pointer;font-size:13px;letter-spacing:.2px">'+esc(fmtNum(c.phone))+'</button>':'<span style="color:#94a3b8">—</span>')+'</td>'
+      +'<td style="'+TDS+'">'+(c.company?esc(c.company):'<span style="color:#94a3b8">—</span>')+'</td>'
+      +'<td style="'+TDS+'">'+(g?'<button data-cxgroup="'+g.id+'" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;color:#2563eb;font-weight:600;cursor:pointer">'+esc(g.name)+'</button>':'<span style="color:#94a3b8">—</span>')+'</td>'
+      +'<td style="'+TDS+'">'+cxTagChip(c.kind)+'</td>'
+      +'<td style="'+TDS+'">'+byCell(c.by)+'</td>'
+      +'<td style="'+TDS+'text-align:center">'+rBtn('data-cxact="del"','Remove contact','trash','red')+'</td>'
+      +'</tr>';
+  }).join('');
+  $('#cxEmpty').insertAdjacentHTML('beforebegin',rows);
+  paintCxGroupChip();
+  var none=!CONTACTS.length;
+  var filtered=!!(cxGroupF||cxq);
+  $('#cxEmpty').style.display=list.length?'none':'';
+  $('#cxEmptyT').textContent=none?'No contacts yet':'No contacts match'+(cxGroupF?' this group':' your search');
+  $('#cxEmptyP').textContent=none?'People outside the organisation show up here once you add them.':('Try a different search'+(cxGroupF?', or clear the group filter.':'.'));
+  $('#cxEmptyBtn').style.display=(!list.length&&!filtered)?'inline-flex':'none';
+  $('#cxEmptyClear').style.display=(!list.length&&filtered)?'inline-flex':'none';
+  $('#cxsClear').style.display=cxq?'':'none';
+  $('#cxPgText').textContent=list.length?'1–'+list.length+' of '+list.length+(list.length===1?' contact':' contacts'):'0 contacts';
+  paintCxCounts();
+}
+function renderCGroups(){
+  var rows=CGROUPS.map(function(g){
+    return '<tr data-cgrow2="'+g.id+'" style="position:relative;z-index:1;transition:background-color .1s">'
+      +'<td style="'+TDS+'">'+cxDate(g.ts)+'</td>'
+      +'<td style="'+TDS+'"><div style="display:flex;align-items:center;gap:10px">'+kTile('groups')+'<button data-cgact="edit" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#0f172a;cursor:pointer">'+esc(g.name)+'</button></div></td>'
+      +'<td style="'+TDS+'">'+cxTagChip(g.kind==='lead'?'lead':'')+'</td>'
+      +'<td style="'+TDS+'">'+(g.members.length?'<button data-cgact="members" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;color:#2563eb;font-weight:600;cursor:pointer">'+g.members.length+'</button>':'<span style="color:#94a3b8">0</span>')+'</td>'
+      +'<td style="'+TDS+'">'+byCell(g.by)+'</td>'
+      +'<td style="'+TDS+'text-align:center"><div style="display:inline-flex;gap:8px;align-items:center">'+rBtn('data-cgact="edit"','Edit group','pencil','blue')+rBtn('data-cgact="del"','Delete group','trash','red')+'</div></td>'
+      +'</tr>';
+  }).join('');
+  $$('tr[data-cgrow2]',$('#cgbody')).forEach(function(t){t.remove()});
+  $('#cgEmpty').insertAdjacentHTML('beforebegin',rows);
+  $('#cgEmpty').style.display=CGROUPS.length?'none':'';
+  if(cxTab==='groups')$('#cxPgText').textContent=CGROUPS.length?'1–'+CGROUPS.length+' of '+CGROUPS.length+(CGROUPS.length===1?' group':' groups'):'0 groups';
+  paintCxCounts();
+}
+$('#cxsearch').addEventListener('input',function(e){cxq=e.target.value;renderContacts()});
+$('#cxsClear').addEventListener('click',function(){cxq='';$('#cxsearch').value='';renderContacts();$('#cxsearch').focus()});
+$('#cxEmptyClear').addEventListener('click',function(){cxGroupF='';cxq='';$('#cxsearch').value='';renderContacts()});
+$('#cxGroupChip').addEventListener('click',function(){cxGroupF='';renderContacts()});
+function flashCGroup(id){var tr=$('tr[data-cgrow2="'+id+'"]');if(!tr)return;tr.style.transition='background-color .7s';tr.style.background='#eff6ff';setTimeout(function(){tr.style.background=''},1500)}
+$('#cxRefresh').addEventListener('click',function(){var i=$('#cxRefresh svg');i.style.transition='transform .6s';i.style.transform='rotate(360deg)';setTimeout(function(){i.style.transition='none';i.style.transform='none';(cxTab==='contacts'?renderContacts:renderCGroups)()},600)});
+$('#cxbody').addEventListener('click',function(e){
+  var gt=e.target.closest('[data-cxgroup]');
+  if(gt){cxTab='groups';paintCxTabs();renderCGroups();setTimeout(fitScrollCards,0);setTimeout(function(){flashCGroup(gt.getAttribute('data-cxgroup'))},60);return}
+  var tr=e.target.closest('tr[data-cxrow]'); if(!tr)return; var id=tr.getAttribute('data-cxrow'), c=CONTACTS.filter(function(x){return x.id===id})[0]; if(!c)return;
+  if(e.target.closest('[data-cxact="del"]')){
+    showConfirm('Remove '+esc(cxName(c))+'?','This removes them from the directory and any group.','Remove',function(){
+      var i=CONTACTS.indexOf(c); if(i<0)return; CONTACTS.splice(i,1);
+      CGROUPS.forEach(function(g){var gi=g.members.indexOf(c.id);if(gi>-1)g.members.splice(gi,1)});
+      renderContacts();
+      note('Removed','Undo',function(){CONTACTS.splice(Math.min(i,CONTACTS.length),0,c);if(c.group){var g=CGROUPS.filter(function(x){return x.id===c.group})[0];if(g&&g.members.indexOf(c.id)<0)g.members.push(c.id)}renderContacts()});
+    },true);
+  }
+});
+$('#cgbody').addEventListener('click',function(e){
+  var tr=e.target.closest('tr[data-cgrow2]'); if(!tr)return; var id=tr.getAttribute('data-cgrow2'), g=CGROUPS.filter(function(x){return x.id===id})[0]; if(!g)return;
+  if(e.target.closest('[data-cgact="edit"]')){openCGroup(g);return}
+  if(e.target.closest('[data-cgact="members"]')){cxGroupF=g.id;cxq='';$('#cxsearch').value='';cxTab='contacts';paintCxTabs();renderContacts();setTimeout(fitScrollCards,0);return}
+  if(e.target.closest('[data-cgact="del"]')){
+    showConfirm('Delete “'+esc(g.name)+'”?','Contacts already in it stay in the directory, just no longer grouped.','Delete',function(){
+      var i=CGROUPS.indexOf(g); if(i<0)return; CGROUPS.splice(i,1);
+      CONTACTS.forEach(function(c){if(c.group===g.id)c.group=''});
+      renderCGroups();
+      note('“'+g.name+'” deleted','Undo',function(){CGROUPS.splice(Math.min(i,CGROUPS.length),0,g);CONTACTS.forEach(function(c){if(g.members.indexOf(c.id)>-1)c.group=g.id});renderCGroups()});
+    },true);
+  }
+});
+
+/* ----- Add a person ----- */
+var AC=null, acOwn=false;
+function paintAcKind(k){$$('[data-ackind]').forEach(function(l){var on=l.getAttribute('data-ackind')===k;l.style.borderColor=on?'#2563eb':'#cbd5e1';l.style.background=on?'#f3f7ff':'#fff'});AC.kind=k}
+$$('[data-ackind]').forEach(function(l){l.addEventListener('click',function(){paintAcKind(l.getAttribute('data-ackind'))})});
+function acErr(sel,geKey,msg){var e=$('[data-ge="'+geKey+'"]');if(e){e.textContent=msg||'';e.style.display=msg?'block':'none'}var i=$(sel);if(i)i.style.borderColor=msg?'#ef4444':'#cbd5e1'}
+function openAddContact(){
+  if(!can('people'))return;
+  AC={kind:'contact'};
+  $('#acFirst').value='';$('#acLast').value='';$('#acEmail').value='';$('#acPhone').value='';$('#acCompany').value='';
+  $('#acGroup').innerHTML='<option value="">No group</option>'+CGROUPS.map(function(g){return '<option value="'+g.id+'">'+esc(g.name)+'</option>'}).join('');
+  paintAcKind('contact');
+  acErr('#acFirst','acfirst',''); acErr('#acPhone','acphone',''); acErr('#acEmail','acemail','');
+  $('#acB').scrollTop=0;
+  acOwn=grabOv(); $('#acdlg').style.display='flex'; closeMenu(); mOpen($('#acdlg'));
+  setTimeout(function(){$('#acFirst').focus({preventScroll:true})},30);
+}
+function acDirty(){return !!($('#acFirst').value.trim()||$('#acLast').value.trim()||$('#acEmail').value.trim()||$('#acPhone').value.trim()||$('#acCompany').value.trim())}
+function attemptCloseAC(){if($('#acdlg').style.display==='flex'&&acDirty()){showConfirm('Discard this contact?','You’ve entered details that haven’t been saved yet. Keep editing, or discard them and close.','Discard',closeAC,true,'Keep editing');return}closeAC()}
+function closeAC(){if($('#acdlg').style.display!=='flex')return;$('#acdlg').style.display='none';dropOv(acOwn);AC=null;mReturnFocus()}
+function saveContact(){
+  var first=$('#acFirst').value.trim(), phone=$('#acPhone').value.trim(), email=$('#acEmail').value.trim(), ok=true;
+  acErr('#acFirst','acfirst',''); acErr('#acPhone','acphone',''); acErr('#acEmail','acemail','');
+  if(!first){acErr('#acFirst','acfirst','First name is required');ok=false}
+  if(!phone){acErr('#acPhone','acphone','Phone number is required');ok=false}
+  else if(!/^\+?\d{6,14}$/.test(phone.replace(/[\s()-]/g,''))){acErr('#acPhone','acphone','Enter a valid phone number');ok=false}
+  if(email&&!EMAIL_RE.test(email)){acErr('#acEmail','acemail','Enter a valid email address');ok=false}
+  if(!ok)return;
+  var rec={id:'cx'+Date.now().toString(36),first:first,last:$('#acLast').value.trim(),email:email,phone:phone,company:$('#acCompany').value.trim(),kind:AC.kind,group:$('#acGroup').value,by:(me()?me().dataset.id:''),ts:Date.now(),av:CONTACTS.length};
+  CONTACTS.push(rec);
+  var g=CGROUPS.filter(function(x){return x.id===rec.group})[0]; if(g)g.members.push(rec.id);
+  closeAC(); if(cxTab==='contacts')renderContacts(); else paintCxCounts();
+  toast(esc(cxName(rec))+' added to contacts');
+}
+$('#btnAddContact').addEventListener('click',openAddContact); $('#cxEmptyBtn').addEventListener('click',openAddContact);
+$('#acX').addEventListener('click',attemptCloseAC); $('#acNo').addEventListener('click',attemptCloseAC);
+$('#acYes').addEventListener('click',saveContact);
+$('#acdlg').addEventListener('mousedown',function(e){if(e.target===$('#acdlg'))attemptCloseAC()});
+
+/* ----- New / update contact group ----- */
+var CG=null, cgOwn=false, cgPickTab='contact', cgPickQ='';
+function paintCgKind(k){$$('[data-cgkind]').forEach(function(l){var on=l.getAttribute('data-cgkind')===k;l.style.borderColor=on?'#2563eb':'#cbd5e1';l.style.background=on?'#f3f7ff':'#fff'});CG.kind=k}
+function paintCgMode(m){
+  $$('[data-cgmode]').forEach(function(l){var on=l.getAttribute('data-cgmode')===m;l.style.borderColor=on?'#2563eb':'#cbd5e1';l.style.background=on?'#f3f7ff':'#fff'});
+  CG.who=m;
+  $('#cgTypeWrap').style.display=m==='type'?'':'none';
+  $('#cgFileWrap').style.display=m==='file'?'':'none';
+  $('#cgPickWrap').style.display=m==='pick'?'':'none';
+  if(m==='pick')renderCgPick();
+  paintCgFooter();
+}
+$$('[data-cgkind]').forEach(function(l){l.addEventListener('click',function(){paintCgKind(l.getAttribute('data-cgkind'))})});
+$$('[data-cgmode]').forEach(function(l){l.addEventListener('click',function(){paintCgMode(l.getAttribute('data-cgmode'))})});
+function paintCgPickTabs(){$$('[data-cgpicktab]').forEach(function(b){var on=b.getAttribute('data-cgpicktab')===cgPickTab;b.style.background=on?'#fff':'';b.style.color=on?'#0f172a':'';b.style.boxShadow=on?'0 1px 2px rgba(15,23,42,.08)':''})}
+$$('[data-cgpicktab]').forEach(function(b){b.addEventListener('click',function(){cgPickTab=b.getAttribute('data-cgpicktab');paintCgPickTabs();renderCgPick()})});
+function renderCgPick(){
+  $('#cgPickCntContact').textContent=CONTACTS.filter(function(c){return c.kind==='contact'}).length;
+  $('#cgPickCntLead').textContent=CONTACTS.filter(function(c){return c.kind==='lead'}).length;
+  var q=cgPickQ.trim().toLowerCase();
+  var shown=CONTACTS.filter(function(c){return c.kind===cgPickTab&&(!q||(cxName(c)+' '+c.phone).toLowerCase().indexOf(q)>-1)});
+  $('#cgPickList').innerHTML=shown.length?shown.map(function(c){var on=!!CG.picked[c.id];
+    return '<label data-h="background:#f8fafc;" style="display:flex;align-items:center;gap:12px;padding:9px 6px;border-radius:10px;cursor:pointer;background:'+(on?'#eff6ff':'transparent')+'"><input type="checkbox" data-cgpick="'+c.id+'"'+(on?' checked':'')+' style="accent-color:#2563eb;width:16px;height:16px;margin:0;flex-shrink:0">'+cxAvatar(c,32)+'<span style="flex:1;min-width:0"><span style="display:block;font-weight:600;color:#0f172a">'+esc(cxName(c))+'</span><span style="display:block;font-size:12px;color:#64748b">'+esc(fmtNum(c.phone))+'</span></span></label>';
+  }).join(''):'<div style="text-align:center;color:#64748b;padding:20px 0;font-size:13px">No '+(cgPickTab==='lead'?'leads':'contacts')+' match.</div>';
+  $('#cgPickAll').checked=!!(shown.length&&shown.every(function(c){return CG.picked[c.id]}));
+}
+$('#cgPickSearch').addEventListener('input',function(e){cgPickQ=e.target.value;renderCgPick()});
+$('#cgPickList').addEventListener('change',function(e){var t=e.target.closest('[data-cgpick]');if(!t)return;var id=t.getAttribute('data-cgpick');if(t.checked)CG.picked[id]=1;else delete CG.picked[id];var lab=t.closest('label');if(lab)lab.style.background=t.checked?'#eff6ff':'transparent';$('#cgPickAll').checked=false;paintCgFooter()});
+$('#cgPickAll').addEventListener('change',function(e){
+  var q=cgPickQ.trim().toLowerCase();
+  var shown=CONTACTS.filter(function(c){return c.kind===cgPickTab&&(!q||(cxName(c)+' '+c.phone).toLowerCase().indexOf(q)>-1)});
+  shown.forEach(function(c){if(e.target.checked)CG.picked[c.id]=1;else delete CG.picked[c.id]});
+  renderCgPick(); paintCgFooter();
+});
+$('#cgAddRow').addEventListener('click',function(){
+  var tpl=$('#cgTypeRows [data-cgrow]'), row=tpl.cloneNode(true);
+  $$('[data-cglbl]',row).forEach(function(l){l.style.display='none'});
+  $('[data-cgname]',row).value=''; $('[data-cgphone]',row).value='';
+  $('#cgTypeRows').appendChild(row); paintCgFooter();
+});
+$('#cgTypeRows').addEventListener('click',function(e){
+  var rm=e.target.closest('[data-cgrm]'); if(!rm)return;
+  var rowsNow=$$('[data-cgrow]',$('#cgTypeRows')); if(rowsNow.length<=1)return;
+  rm.closest('[data-cgrow]').remove(); paintCgFooter();
+});
+$('#cgTypeRows').addEventListener('input',paintCgFooter);
+function paintCgFooter(){
+  var n=0;
+  if(CG.who==='type')n=$$('[data-cgrow]',$('#cgTypeRows')).filter(function(r){return $('[data-cgname]',r).value.trim()||$('[data-cgphone]',r).value.trim()}).length;
+  else if(CG.who==='pick')n=Object.keys(CG.picked).length;
+  $('#cgFooterN').textContent=n+(n===1?' person to add':' people to add');
+}
+$('#cgFileBtn').addEventListener('click',function(){toast('File upload isn’t available in this preview — try “Type them in” instead.')});
+function cgErr(msg){var e=$('[data-ge="cgname"]');if(e){e.textContent=msg||'';e.style.display=msg?'block':'none'}$('#cgName').style.borderColor=msg?'#ef4444':'#cbd5e1'}
+function openCGroup(editing){
+  if(!can('people'))return;
+  CG={editing:editing||null,kind:editing?editing.kind:'contact',who:'type',picked:{}};
+  if(editing)(editing.members||[]).forEach(function(id){CG.picked[id]=1});
+  $('#cgTitle').textContent=editing?'Update contact group':'New contact group';
+  $('#cgKindRow').style.display=editing?'none':'';
+  $('#cgKindLocked').style.display=editing?'':'none';
+  if(editing)$('#cgKindLocked').textContent=(editing.kind==='lead'?'Lead list':'Contact group')+' — a saved list keeps its kind; changing it would strand everyone already in it.';
+  $('#cgName').value=editing?editing.name:'';
+  paintCgKind(CG.kind);
+  var rowsNow=$$('[data-cgrow]',$('#cgTypeRows')); rowsNow.slice(1).forEach(function(r){r.remove()});
+  $('[data-cgname]',rowsNow[0]).value=''; $('[data-cgphone]',rowsNow[0]).value='';
+  $$('[data-cglbl]',rowsNow[0]).forEach(function(l){l.style.display=''});
+  paintCgMode(editing?'pick':'type');
+  cgPickTab='contact'; cgPickQ=''; $('#cgPickSearch').value=''; paintCgPickTabs();
+  cgErr(''); $('#cgB').scrollTop=0;
+  cgOwn=grabOv(); $('#cgdlg').style.display='flex'; closeMenu(); mOpen($('#cgdlg'));
+  setTimeout(function(){$('#cgName').focus({preventScroll:true})},30);
+}
+function cgDirty(){
+  if(CG.editing)return $('#cgName').value.trim()!==CG.editing.name||Object.keys(CG.picked).sort().join()!==(CG.editing.members||[]).slice().sort().join();
+  return !!$('#cgName').value.trim()||$$('[data-cgrow]',$('#cgTypeRows')).some(function(r){return $('[data-cgname]',r).value.trim()||$('[data-cgphone]',r).value.trim()})||Object.keys(CG.picked).length>0;
+}
+function attemptCloseCG(){if($('#cgdlg').style.display==='flex'&&cgDirty()){showConfirm('Discard this group?','You’ve made changes that haven’t been saved yet. Keep editing, or discard them and close.','Discard',closeCG,true,'Keep editing');return}closeCG()}
+function closeCG(){if($('#cgdlg').style.display!=='flex')return;$('#cgdlg').style.display='none';dropOv(cgOwn);CG=null;mReturnFocus()}
+function saveCGroup(){
+  var name=$('#cgName').value.trim();
+  cgErr('');
+  if(!name){cgErr('Give the group a name.');$('#cgName').focus();return}
+  if(CGROUPS.some(function(g){return g!==CG.editing&&g.name.toLowerCase()===name.toLowerCase()})){cgErr('A group called “'+esc(name)+'” already exists.');$('#cgName').focus();return}
+  var newIds=[];
+  if(CG.who==='type'){
+    var rowsNow=$$('[data-cgrow]',$('#cgTypeRows'));
+    for(var i=0;i<rowsNow.length;i++){
+      var nm=$('[data-cgname]',rowsNow[i]).value.trim(), ph=$('[data-cgphone]',rowsNow[i]).value.trim();
+      if(!nm&&!ph)continue;
+      if(!ph){toast('Row '+(i+1)+' needs a phone number');return}
+      if(!/^\+?\d{6,14}$/.test(ph.replace(/[\s()-]/g,''))){toast('Row '+(i+1)+' has an invalid number');return}
+      var parts=(nm||ph).split(' ');
+      CONTACTS.push({id:'cx'+Date.now().toString(36)+i,first:parts[0]||ph,last:parts.slice(1).join(' '),email:'',phone:ph,company:'',kind:CG.kind,group:'',by:(me()?me().dataset.id:''),ts:Date.now(),av:CONTACTS.length+i});
+      newIds.push(CONTACTS[CONTACTS.length-1].id);
+    }
+  } else if(CG.who==='pick'){
+    newIds=Object.keys(CG.picked);
+  }
+  if(CG.editing){
+    var g=CG.editing; g.name=name;
+    g.members.forEach(function(id){if(newIds.indexOf(id)<0){var c=CONTACTS.filter(function(x){return x.id===id})[0];if(c&&c.group===g.id)c.group=''}});
+    g.members=newIds;
+    newIds.forEach(function(id){var c=CONTACTS.filter(function(x){return x.id===id})[0];if(c)c.group=g.id});
+    closeCG(); renderCGroups(); if(cxTab==='contacts')renderContacts();
+    toast('“'+esc(g.name)+'” updated');
+  } else {
+    var ng={id:'cg'+Date.now().toString(36),name:name,kind:CG.kind,members:newIds,by:(me()?me().dataset.id:''),ts:Date.now()};
+    CGROUPS.push(ng);
+    newIds.forEach(function(id){var c=CONTACTS.filter(function(x){return x.id===id})[0];if(c)c.group=ng.id});
+    closeCG(); renderCGroups(); if(cxTab==='contacts')renderContacts();
+    toast('“'+esc(ng.name)+'” created');
+  }
+}
+$('#btnNewCGroup').addEventListener('click',function(){openCGroup(null)}); $('#cgEmptyBtn').addEventListener('click',function(){openCGroup(null)});
+$('#cgX').addEventListener('click',attemptCloseCG); $('#cgNo').addEventListener('click',attemptCloseCG);
+$('#cgYes').addEventListener('click',saveCGroup);
+$('#cgdlg').addEventListener('mousedown',function(e){if(e.target===$('#cgdlg'))attemptCloseCG()});
+paintCxTabs();
 
 /* ----- dialog: 1 Details → 2 Review ----- */
 var LD=null;
@@ -4676,8 +5154,9 @@ syncLocOptions();
     {id:'sana',name:'Sana Khan',email:'sana.khan@acme.com',role:'Agent',status:'Invited',group:'Support',num:'2003',num2:'',phone:'',presence:'Offline',login:'',invited:String(now-2*3600e3),av:'4'},
     {id:'dev',name:'Dev Patel',email:'dev.patel@acme.com',role:'Agent',status:'Active',group:'Support',num:'2004',num2:'+12139953032',phone:'+919812345674',presence:'Available',login:String(now-40*60e3),av:'0',loc:'London Branch',city:'London, United Kingdom'}
   ];
+  var FAV_SEED={priya:1,rahul:1};
   seed.forEach(function(p){
-    addRow({id:p.id,dids:p.num2||'',name:p.name,email:p.email,role:p.role,status:p.status,group:p.group,loc:p.loc||'MCM',city:p.city||'Mumbai, India',num:p.num,num2:p.num2,phone:p.phone,presence:p.presence,login:p.login,invited:p.invited||'',removed:'0',fav:'0',self:'0',av:p.av});
+    addRow({id:p.id,dids:p.num2||'',name:p.name,email:p.email,role:p.role,status:p.status,group:p.group,loc:p.loc||'MCM',city:p.city||'Mumbai, India',num:p.num,num2:p.num2,phone:p.phone,presence:p.presence,login:p.login,invited:p.invited||'',removed:'0',fav:FAV_SEED[p.id]?'1':'0',self:'0',av:p.av});
   });
   var u=personById('umar'); if(u){u.dataset.group='Sales';renderRow(u)}
   syncGroupOptions();
