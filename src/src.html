@@ -68,8 +68,11 @@ h1{font-size:24px;font-weight:700;color:#0f172a;letter-spacing:-.4px}
 .btn svg{width:17px;height:17px}
 
 /* toolbar */
-.tool{display:flex;align-items:center;gap:10px;padding:0 16px 14px;flex-wrap:wrap}
-.chip{height:40px;display:inline-flex;align-items:center;gap:5px;padding:0 12px 0 14px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;font-size:13px;transition:background-color .12s,border-color .12s}
+.tool{display:flex;align-items:center;gap:10px;padding:0 16px 14px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.tool::-webkit-scrollbar{height:6px}
+.tool::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.tool>*{flex-shrink:0}
+.chip{height:40px;display:inline-flex;align-items:center;gap:5px;padding:0 12px 0 14px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;font-size:13px;transition:background-color .12s,border-color .12s;white-space:nowrap;flex-shrink:0}
 .chip:hover{background:#f8fafc;border-color:#cbd5e1}
 .chip b{color:#0f172a;font-weight:600}
 .chip svg{width:14px;height:14px;color:#94a3b8}
@@ -390,7 +393,12 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
           <button class="tab" data-tab="people" style="background:#fff;color:#0f172a;box-shadow:0 1px 2px rgba(15,23,42,.08)"><i data-ic="users"></i>People<span class="cnt" id="cntP">2</span></button>
           <button class="tab" data-tab="removed"><i data-ic="trash"></i>Removed<span class="cnt" id="cntR">0</span></button>
         </div>
-        <div class="showing">Showing <b id="sRange">1 – 2</b> of <b id="sTotal">2</b><span class="gdot"></span><span class="gnum" id="sAvail">0</span> available on this page</div>
+        <label class="fsearch" style="margin-left:auto;width:260px;max-width:40vw">
+          <i data-ic="search"></i>
+          <input id="psearch" placeholder="Search people" autocomplete="off">
+          <button class="xbtn" id="psClear" style="display:none" title="Clear search"><i data-ic="x"></i></button>
+        </label>
+        <div class="showing" style="margin-left:0">Showing <b id="sRange">1 – 2</b> of <b id="sTotal">2</b><span class="gdot"></span><span class="gnum" id="sAvail">0</span> available on this page</div>
       </div>
 
       <div class="tool">
@@ -399,12 +407,8 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
         <button class="chip" data-dd="presence"><span>Presence:</span><b data-lbl>Any</b><i data-ic="chev"></i></button>
         <button class="chip" data-dd="status"><span>Status:</span><b data-lbl>Any</b><i data-ic="chev"></i></button>
       <button class="chip" data-dd="role"><span>Role:</span><b data-lbl>Any</b><i data-ic="chev"></i></button>
+        <button class="chip" id="btnSort"><i data-ic="sort"></i>Sort:<b data-lbl style="margin-left:4px">Name A–Z</b><i data-ic="chev"></i></button>
         <button class="chip" id="btnViews"><i data-ic="star"></i>Views<i data-ic="chev"></i></button>
-        <label class="fsearch" style="width:auto;flex:1 1 200px;max-width:340px;min-width:180px">
-          <i data-ic="search"></i>
-          <input id="psearch" placeholder="Search people" autocomplete="off">
-          <button class="xbtn" id="psClear" style="display:none" title="Clear search"><i data-ic="x"></i></button>
-        </label>
         <button class="chip" data-dd="cols" title="Show or hide columns"><i data-ic="list"></i>Columns<i data-ic="chev"></i></button>
       <button class="link" id="clearAll" style="display:none">Clear filters</button>
       </div>
@@ -439,7 +443,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
           </thead>
           <tbody id="tbody">
             <!-- Umar -->
-            <tr class="row" data-row data-id="umar" data-name="Umar Ansari" data-email="umar05@yopmail.com" data-role="Group admin" data-status="Active" data-group="" data-loc="MCM" data-city="Mumbai, India" data-num="9088" data-num2="" data-presence="Offline" data-removed="0" data-fav="1" data-self="0" data-av="0">
+            <tr class="row" data-row data-id="umar" data-name="Umar Ansari" data-email="umar05@yopmail.com" data-role="Group admin" data-department="Customer Support" data-status="Active" data-group="" data-loc="MCM" data-city="Mumbai, India" data-num="9088" data-num2="" data-presence="Offline" data-removed="0" data-fav="1" data-self="0" data-av="0">
               <td class="cchk"><input type="checkbox" class="cb" data-chk></td>
               <td><button class="person" data-person title="Open profile"><span class="av" data-f="initials">UA</span><span class="txt"><span class="nm"><span data-f="name">Umar Ansari</span></span><span class="sub" data-f="email">umar05@yopmail.com</span></span></button></td>
               <td><button class="cell" data-open title="View profile"><span data-f="role">Admin</span><span class="sub" data-f="roleSub">no groups yet</span></button></td>
@@ -455,7 +459,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
               <td><button class="more" data-more title="Actions"><i data-ic="dots"></i></button></td>
             </tr>
             <!-- Anu (you) -->
-            <tr class="row" data-row data-id="anu" data-dids="+12139953029" data-name="Anu Nadar" data-email="anunadar2045@gmail.com" data-role="Account owner" data-status="Active" data-group="New department" data-loc="MCM" data-city="Mumbai, India" data-num="1000" data-num2="+12139953029" data-phone="+919768705528" data-presence="Offline" data-removed="0" data-fav="0" data-self="1" data-av="1">
+            <tr class="row" data-row data-id="anu" data-dids="+12139953029" data-name="Anu Nadar" data-email="anunadar2045@gmail.com" data-role="Account owner" data-department="Operations" data-status="Active" data-group="New department" data-loc="MCM" data-city="Mumbai, India" data-num="1000" data-num2="+12139953029" data-phone="+919768705528" data-presence="Offline" data-removed="0" data-fav="0" data-self="1" data-av="1">
               <td class="cchk"><input type="checkbox" class="cb" data-chk></td>
               <td><button class="person" data-person title="Open profile"><span class="av" data-f="initials" style="background:#f3e8e8;color:#1e293b">AN</span><span class="txt"><span class="nm"><span data-f="name">Anu Nadar</span></span><span class="sub" data-f="email">anunadar2045@gmail.com</span></span></button></td>
               <td><button class="cell" data-open title="View profile"><span data-f="role">Account owner</span></button></td>
@@ -839,15 +843,27 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
 </div>
 
 <div id="viewContacts" style="display:none">
-  <div class="phead">
-    <div>
-      <h1>Contacts</h1>
-      <p class="sub1">People outside the organisation — who they work for, and how to reach them.</p>
+  <div id="cxNormalHead">
+    <div class="phead">
+      <div>
+        <h1>Contacts</h1>
+        <p class="sub1">People outside the organisation — who they work for, and how to reach them.</p>
+      </div>
+      <div class="acts"><button class="btn pri" id="btnAddContact" data-need="people"><i data-ic="userplus"></i>Add Person</button><button class="btn" id="btnNewCGroup" data-need="people"><i data-ic="plus"></i>New Group</button></div>
     </div>
-    <div class="acts"><button class="btn pri" id="btnAddContact" data-need="people"><i data-ic="userplus"></i>Add Person</button><button class="btn" id="btnNewCGroup" data-need="people"><i data-ic="plus"></i>New Group</button></div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px">
-    <div class="tabs">
+  <div id="cxGroupHead" class="phead" style="display:none;align-items:center">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="ibtn" id="cxGroupBack" title="Back to all contacts" aria-label="Back to all contacts" style="width:32px;height:32px;border-radius:8px;flex-shrink:0"><span style="display:flex;transform:rotate(180deg)"><i data-ic="chevr" data-s="16"></i></span></button>
+      <div>
+        <h1 id="cxGroupHeadName" style="font-size:17px;line-height:1.2">Group</h1>
+        <p class="sub1" style="margin-top:2px;font-size:12.5px">Contacts in this group. Anything added here is a contact.</p>
+      </div>
+    </div>
+    <div id="cxGroupHeadToolSlot" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"></div>
+  </div>
+  <div id="cxToolbarRow" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px">
+    <div class="tabs" id="cxTabsRow">
       <button class="tab" id="cxTabContacts" data-cxtab="contacts"><i data-ic="contacts"></i>All contacts<span class="cnt" id="cxCntContacts">0</span></button>
       <button class="tab" id="cxTabGroups" data-cxtab="groups"><i data-ic="groups"></i>Groups<span class="cnt" id="cxCntGroups">0</span></button>
     </div>
@@ -857,7 +873,7 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
         <input id="cxsearch" placeholder="Search by name or number" autocomplete="off">
         <button class="xbtn" id="cxsClear" style="display:none" title="Clear search"><i data-ic="x"></i></button>
       </label>
-      <button class="chip" data-dd="cxgroupf"><span>Group:</span><b data-lbl>All</b><i data-ic="chev"></i></button>
+      <button class="chip" data-dd="cxgroupf" id="cxGroupFChip"><span>Group:</span><b data-lbl>All</b><i data-ic="chev"></i></button>
       <button class="chip" data-dd="cxtagf"><span>Tag:</span><b data-lbl>Any</b><i data-ic="chev"></i></button>
       <button class="link" id="cxClearFilters" style="display:none">Clear filters</button>
       <input type="file" id="cxFile" accept=".csv" style="display:none">
@@ -977,17 +993,18 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
 <div class="menu" data-menu="cols" style="min-width:236px;padding:8px"></div>
 <div class="menu" data-menu="bulkgrp" style="min-width:230px"></div>
 <div class="menu" data-menu="views" style="min-width:260px"></div>
+<div class="menu" data-menu="sort" style="min-width:210px;padding:6px"></div>
 
 <div class="menu" data-menu="perpage" style="min-width:110px" data-options="25|50|100"></div>
 <div class="menu" data-menu="setpresence" style="min-width:150px" data-options="Available|Busy|Do not disturb|Offline"></div>
-<div class="menu" data-menu="rowmenu" style="min-width:236px"></div>
+<div class="menu" data-menu="rowmenu" style="min-width:190px;padding:4px;max-height:260px;overflow-y:auto"></div>
 
 <div class="menu" data-menu="fvshow" style="min-width:170px" data-options="All|Colleague|External"></div>
 <div class="menu" data-menu="cxgroupf" style="min-width:200px"></div>
 <div class="menu" data-menu="cxtagf" style="min-width:180px" data-options="Any|Standard|VIP|DNC|Blocked"></div>
 <div class="menu" data-menu="cxtag" style="min-width:190px"></div>
 <div class="menu" data-menu="cxgroupset" style="min-width:200px;max-height:260px;overflow-y:auto"></div>
-<div class="menu" data-menu="cxrow" style="min-width:230px"></div>
+<div class="menu" data-menu="cxrow" style="min-width:190px;padding:4px;max-height:260px;overflow-y:auto"></div>
 
 <div class="menu" data-menu="groupsmenu" style="min-width:230px"></div>
 <div class="menu" data-menu="gmgrfilter" style="min-width:180px" data-options="All|Has manager|No manager"></div>
@@ -1607,6 +1624,41 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
   </div>
 </aside>
 
+<!-- ============ BLOCKED NUMBER DETAIL DRAWER ============ -->
+<aside class="drawer" id="bkDrawer" style="width:300px;top:88px;bottom:auto;right:16px;max-height:calc(100vh - 110px);border-radius:16px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.18),0 2px 8px rgba(15,23,42,.08)">
+  <div class="dh" style="padding:14px 16px;gap:10px">
+    <span id="bkdIcon" style="width:30px;height:30px;border-radius:9px;background:#eef2f7;display:grid;place-items:center;flex-shrink:0"></span>
+    <div class="txt" style="flex:1;min-width:0">
+      <span class="nm" style="font-size:13.5px" id="bkdTitle">Blocked number</span>
+      <span class="sub" style="font-size:11.5px" id="bkdSub"></span>
+    </div>
+    <button class="ibtn" id="bkdClose" title="Close" style="width:30px;height:30px;border-radius:8px"><i data-ic="x" data-s="15"></i></button>
+  </div>
+  <div class="dbody" style="padding:12px 16px;font-size:12.5px">
+    <div class="dl" style="padding:7px 0"><span>Stops</span><span id="bkdStops"></span></div>
+    <div class="dl" style="padding:7px 0"><span>Caller gets</span><span id="bkdGets"></span></div>
+    <div class="dl" style="padding:7px 0"><span>Applies to</span><span id="bkdScope"></span></div>
+    <div class="dl" style="padding:7px 0"><span>Reason</span><span id="bkdReason"></span></div>
+    <div class="dl" style="padding:7px 0"><span>Blocked by</span><span id="bkdBy"></span></div>
+    <div class="dl" style="padding:7px 0"><span>Blocked</span><span id="bkdWhen"></span></div>
+    <div class="dl" style="padding:7px 0"><span>Stopped</span><span id="bkdStopped"></span></div>
+    <div class="dsec" style="margin-top:12px">
+      <h2 style="font-size:10.5px">Label</h2>
+      <div style="display:flex;gap:6px">
+        <input id="bkdLabel" placeholder="e.g. Car warranty robocall" autocomplete="off" style="flex:1;min-width:0;box-sizing:border-box;height:30px;border:1px solid #cbd5e1;border-radius:7px;padding:0 8px;font:inherit;font-size:12.5px;background:#fff;color:#0f172a">
+        <button id="bkdLabelSave" class="btn sec" style="height:30px;padding:0 10px;font-size:12px">Save</button>
+      </div>
+    </div>
+    <div class="dsec" id="bkdNoteWrap" style="display:none;margin-top:12px">
+      <h2 style="font-size:10.5px">Note</h2>
+      <p id="bkdNote" style="color:#475569;font-size:12.5px;margin:0"></p>
+    </div>
+  </div>
+  <div class="dfoot" style="padding:12px 16px">
+    <button class="btn sec" id="bkdUnblock" style="color:#15803d;height:34px;font-size:12.5px"><i data-ic="undo" data-s="15"></i><span id="bkdUnblockL">Unblock</span></button>
+  </div>
+</aside>
+
 <!-- ============ INVITE MODAL ============ -->
 <div class="modal" id="modal" role="dialog" aria-modal="true">
   <div class="wcard" role="dialog" aria-label="Invite people">
@@ -1747,7 +1799,7 @@ var AVS=[['#fdf6d8','#a16207'],['#f3e8e8','#1e293b'],['#dbeafe','#1d4ed8'],['#dc
 function badge(el,kind,text){el.style.background=BADGE[kind][0];el.style.color=BADGE[kind][1];if(text!=null)el.textContent=text}
 var PD={Available:'#10b981',Busy:'#ef4444','Do not disturb':'#ef4444',Offline:'#94a3b8'};
 var PC={Available:{d:'#10b981',t:'#047857',ring:'#d1fae5'},Busy:{d:'#ef4444',t:'#b91c1c',ring:'#fee2e2'},'Do not disturb':{d:'#ef4444',t:'#b91c1c',ring:'#fee2e2'},Offline:{d:'#94a3b8',t:'#1e293b',ring:'transparent'}};
-function presRing(p){return '0 0 0 2px #fff,0 0 0 3px '+((PC[p]||PC.Offline).d)}
+function presRing(p){return '0 0 0 1.5px #fff,0 0 0 3px '+((PC[p]||PC.Offline).d)}
 var PEFF_ME={Available:'Calls ring your phone','Busy':'Callers reach voicemail','Do not disturb':'Callers reach voicemail, no alerts',Offline:'Callers reach voicemail'};
 var PEFF={Available:'Calls ring their phone.',Busy:'Calls go to voicemail.','Do not disturb':'Calls go to voicemail and don’t alert them.',Offline:'Calls go to voicemail.'};
 $$('[data-menu="setpresence"] [data-opt]').forEach(function(o){var v=o.dataset.opt;o.lastElementChild.innerHTML='<span style="display:block">'+v+'</span><span style="display:block;font-size:11.5px;color:#94a3b8;margin-top:1px">'+PEFF_ME[v]+'</span>'});
@@ -1809,7 +1861,7 @@ function openMenu(btn,menu,alignRight){
   menu.style.left=left+'px'; menu.style.top=top+'px'; openM={btn:btn,menu:menu};
 }
 document.addEventListener('click',function(e){if(openM&&!openM.menu.contains(e.target)&&!openM.btn.contains(e.target))closeMenu()});
-addEventListener('scroll',closeMenu,true); addEventListener('resize',closeMenu);
+addEventListener('scroll',function(e){if(openM&&e.target.nodeType===1&&openM.menu.contains(e.target))return;closeMenu()},true); addEventListener('resize',closeMenu);
 
 /* ---------- state + filtering ---------- */
 var DEF={group:'All',location:'All',presence:'Any',status:'Any',role:'Any'};
@@ -1821,7 +1873,8 @@ function paintChip(chip,on,menu,val){
   $$('[data-opt]',$('[data-menu="'+menu+'"]')).forEach(function(o){$('[data-ck]',o).style.visibility=o.dataset.opt===val?'visible':'hidden'});
 }
 function updateChip(k){
-  var chip=$('[data-dd="'+k+'"]'), on=filters[k]!==DEF[k];
+  var chip=$('[data-dd="'+k+'"]'); if(!chip)return;
+  var on=filters[k]!==DEF[k];
   $('[data-lbl]',chip).textContent=filters[k]; $('[data-lbl]',chip).style.color=(k==='presence'&&PC[filters[k]])?PC[filters[k]].t:'#0f172a';
   paintChip(chip,on,k,filters[k]);
 }
@@ -1932,12 +1985,19 @@ function pagerSlice(list,page,per){
 function darkenPagerArrows(btns){
   [btns[0],btns[1],btns[3],btns[4]].forEach(function(b){if(b){b.style.opacity='1';b.style.color='#334155'}});
 }
+/* dark mode forces a background on every plain text <input> via !important; the current-page box must
+   win that fight so it always reads as the blue "you are here" pill, in any theme */
+function pinPagerCur(cur){
+  cur.style.setProperty('background','#2563eb','important');
+  cur.style.setProperty('color','#fff','important');
+}
 function paintPagerBtns(attr,page,totalPages){
   var btns=$$('[data-'+attr+']'); if(btns.length<5)return;
   var first=btns[0],prev=btns[1],cur=btns[2],next=btns[3],last=btns[4];
   first.disabled=prev.disabled=page<=1; next.disabled=last.disabled=page>=totalPages;
   if(document.activeElement!==cur)cur.value=page;
   cur.title=totalPages>1?'Page '+page+' of '+totalPages+' — type a page number and press Enter':'Page '+page;
+  pinPagerCur(cur);
   darkenPagerArrows(btns);
 }
 function wirePagerBtns(attr,getPage,setPage,getTotalPages,rerender){
@@ -1990,11 +2050,41 @@ $$('[data-tab]').forEach(function(t){t.addEventListener('click',function(){
 })});
 
 /* sorting */
-$$('[data-sort]').forEach(function(b){b.addEventListener('click',function(){
-  var k=b.dataset.sort; if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}
-  rows().sort(function(a,c){return sortDir*(a.dataset[k]||'').localeCompare(c.dataset[k]||'')}).forEach(function(r){tbody.insertBefore(r,emptyRow)});
+function sortPeopleBy(k,dir){
+  sortKey=k; sortDir=dir;
+  rows().sort(function(a,c){
+    if(k==='login')return sortDir*((+a.dataset.login||0)-(+c.dataset.login||0));
+    return sortDir*(a.dataset[k]||'').localeCompare(c.dataset[k]||'');
+  }).forEach(function(r){tbody.insertBefore(r,emptyRow)});
   $$('[data-sort]').forEach(function(x){var a=x.lastElementChild;a.textContent=x.dataset.sort===sortKey?(sortDir>0?'↑':'↓'):'⇅';a.style.color=x.dataset.sort===sortKey?'#2563eb':'#94a3b8'});
+  paintSortChip();
+}
+$$('[data-sort]').forEach(function(b){b.addEventListener('click',function(){
+  var k=b.dataset.sort, dir=(sortKey===k)?sortDir*-1:1;
+  sortPeopleBy(k,dir);
 })});
+var SORT_OPTS=[
+  {k:'name',dir:1,label:'Name A–Z'},{k:'name',dir:-1,label:'Name Z–A'},
+  {k:'presence',dir:1,label:'Presence'},{k:'department',dir:1,label:'Department'},
+  {k:'loc',dir:1,label:'Location'},{k:'login',dir:-1,label:'Recently active'}
+];
+function paintSortChip(){
+  var lbl=$('#btnSort [data-lbl]'); if(!lbl)return;
+  var hit=SORT_OPTS.filter(function(o){return o.k===sortKey&&o.dir===sortDir})[0];
+  lbl.textContent=hit?hit.label:'Custom';
+}
+function renderSortMenu(){
+  var m=$('[data-menu="sort"]');
+  m.innerHTML=SORT_OPTS.map(function(o,i){
+    var on=sortKey===o.k&&sortDir===o.dir;
+    return '<button data-sortopt="'+i+'" data-h="background:#f1f5f9;" style="'+M_OPT+(on?'color:#2563eb;font-weight:600':'color:#1e293b')+'">'+(on?ico('tick','#2563eb'):'<span style="width:16px;display:inline-block"></span>')+'<span>'+o.label+'</span></button>';
+  }).join('');
+}
+$('#btnSort').addEventListener('click',function(){renderSortMenu();openMenu(this,$('[data-menu="sort"]'))});
+$('[data-menu="sort"]').addEventListener('click',function(e){
+  var o=e.target.closest('[data-sortopt]'); if(!o)return;
+  var opt=SORT_OPTS[+o.getAttribute('data-sortopt')]; closeMenu(); sortPeopleBy(opt.k,opt.dir);
+});
 
 /* ---------- selection + bulk ---------- */
 function selected(){return rows().filter(function(r){return visible(r)&&$('[data-chk]',r).checked})}
@@ -2079,7 +2169,7 @@ $('#duty').addEventListener('click',function(){
 var COL_KEYS=['numbers','queues','skills','login','invited'], COL_LABEL={numbers:'Numbers',queues:'Queues',skills:'Skills',login:'Last login',invited:'Invited'};
 var colOn=(function(){var d={numbers:true,queues:false,skills:false,login:false,invited:false};try{var v=JSON.parse(localStorage.getItem('colOn'));if(v&&typeof v==='object')return Object.assign(d,v)}catch(e){}return d})();
 function saveColOn(){try{localStorage.setItem('colOn',JSON.stringify(colOn))}catch(e){}}
-var COL_ORDER=(function(){try{var v=JSON.parse(localStorage.getItem('colOrder'));if(Array.isArray(v)&&v.length===5&&COL_KEYS.every(function(k){return v.indexOf(k)>-1}))return v}catch(e){}return COL_KEYS.slice()})();
+var COL_ORDER=(function(){try{var v=JSON.parse(localStorage.getItem('colOrder'));if(Array.isArray(v)&&v.length===COL_KEYS.length&&COL_KEYS.every(function(k){return v.indexOf(k)>-1}))return v}catch(e){}return COL_KEYS.slice()})();
 function saveColOrder(){try{localStorage.setItem('colOrder',JSON.stringify(COL_ORDER))}catch(e){}}
 /* every row that has the 5 tagged cells, plus the detached row template new people are cloned from —
   otherwise a freshly invited or imported person would come back in whatever order existed at page load */
@@ -2123,10 +2213,16 @@ var colDrag=null;
 })();
 function loginText(v,none){if(!v)return none||'Never';var m=Math.round((Date.now()-(+v))/60000);if(m<1)return 'Just now';if(m<60)return m+' min ago';var h=Math.round(m/60);if(h<24)return h+' h ago';var d=Math.round(h/24);return d<30?d+(d===1?' day ago':' days ago'):new Date(+v).toLocaleDateString()}
 function paintLogin(r){var e=$('[data-f="login"]',r);if(e)e.textContent=loginText(r.dataset.login);var iv=$('[data-f="invited"]',r);if(iv)iv.textContent=loginText(r.dataset.invited,'—')}
+function paintLocCell(r){
+  var e=$('[data-f="loc"]',r); if(!e)return;
+  var l=locByName(r.dataset.loc);
+  e.innerHTML=l?'<button data-ploc="'+l.id+'" title="Open this location" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-size:inherit;color:#2563eb;font-weight:500;cursor:pointer">'+esc(l.name)+'</button>':esc(r.dataset.loc||'—');
+}
 function renderRow(r){
   var d=r.dataset; paintLogin(r); var ck=$('[data-chk]',r); if(ck)ck.closest('td').style.display=canSelect()?'':'none';
   function set(f,t){var e=$('[data-f="'+f+'"]',r);if(e)e.textContent=t}
-  set('name',d.name);set('email',d.email);set('initials',ini(d.name));set('role',d.role);set('loc',d.loc);set('city',d.city);
+  set('name',d.name);set('email',d.email);set('initials',ini(d.name));set('role',d.role);set('city',d.city);
+  paintLocCell(r);
   paintGroupCell(r);
   var rs=$('[data-f="roleSub"]',r); if(rs){rs.textContent=d.group?'':'no groups yet';rs.style.display=d.group?'none':''}
   var nb=$$('button',$('[data-numwrap]',r)), n=nb[0]; n.textContent=d.num||'—'; n.dataset.copy=d.num||'';
@@ -2143,7 +2239,11 @@ function openDrawer(r){
   ctx=r; var d=r.dataset, av=AVS[(+d.av)%AVS.length];
   var a=$('#dAv'); a.textContent=ini(d.name); a.style.background=av[0]; a.style.color=av[1]; a.style.boxShadow=presRing(d.presence);
   $('#dName').textContent=d.name; $('#dEmail').textContent=d.email; $('#dRole').textContent=d.role;
-  $('#dStatus').textContent=d.status; $('#dGroup').textContent=groupsOf(r).join(', ')||'None'; $('#dLoc').textContent=d.loc+' · '+d.city;
+  $('#dStatus').textContent=d.status;
+  var glist=groupsOf(r);
+  $('#dGroup').innerHTML=glist.length?glist.map(function(n){return '<button data-goto="'+esc(n)+'" style="border:0;background:none;padding:0;font:inherit;font-size:inherit;font-weight:600;color:#2563eb;cursor:pointer;display:block;text-align:right;width:100%">'+esc(n)+'</button>'}).join(''):'None';
+  var dloc=locByName(d.loc);
+  $('#dLoc').innerHTML=(dloc?'<button data-ploc="'+dloc.id+'" style="border:0;background:none;padding:0;font:inherit;font-size:inherit;font-weight:600;color:#2563eb;cursor:pointer">'+esc(dloc.name)+'</button>':esc(d.loc))+' · '+esc(d.city);
   $('#dNum').textContent=[d.num,d.num2].filter(Boolean).join(' / ')||'None'; $('#dPres').textContent=d.presence;
   $('#dRemL').textContent=d.removed==='1'?'Restore':'Remove';
   $('#dRem').style.color=d.removed==='1'?'#15803d':'#dc2626'; showEl($('#dRem'),can('people'));
@@ -2224,7 +2324,7 @@ function fmtUS(n){var m=n.match(/^\+1(\d{3})(\d{3})(\d{4})$/);return m?'+1 '+m[1
 /* a sticky-positioned <header> can composite above a fixed backdrop despite its lower z-index (a
    sticky-vs-fixed stacking quirk) — de-elevated here while the backdrop owns the screen, restored on drop */
 function grabOv(){var own=dOv.style.display!=='block'; dOv.style.display='block'; dOv.style.opacity=1; dOv.style.zIndex=99; closeMenu(); if(own&&appHeader){appHeader.style.position='static';appHeader.style.zIndex='1'} return own}
-function dropOv(own){var other=modal.style.display==='flex'; dOv.style.zIndex=other?94:''; if(own&&!other&&drawer.style.display!=='flex'){dOv.style.opacity=0;dOv.style.display='none';if(appHeader){appHeader.style.position='';appHeader.style.zIndex=''}}}
+function dropOv(own){var other=modal.style.display==='flex'; dOv.style.zIndex=other?94:''; if(own&&!other&&drawer.style.display!=='flex'&&$('#bkDrawer').style.display!=='flex'){dOv.style.opacity=0;dOv.style.display='none';if(appHeader){appHeader.style.position='';appHeader.style.zIndex=''}}}
 
 var CD=null, cidOwn=false;
 function cidOwner(n){return rows().filter(function(r){return r.dataset.num2===n})[0]}
@@ -2432,15 +2532,21 @@ function menuKind(r){return r.dataset.removed==='1'?'removed':(r.dataset.role===
 var M_OPT='box-sizing:border-box;font:inherit;cursor:pointer;background:none;border:0;text-align:left;display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:7px;font-size:13.5px;white-space:nowrap;';
 var M_HEAD='padding:8px 10px 6px;font-size:11px;font-weight:700;letter-spacing:.7px;color:#64748b;text-transform:uppercase;';
 var M_SEP='<div style="height:1px;background:#eef1f5;margin:5px 2px"></div>';
+/* compact variants for the row "···" actions menus specifically — those lists run long,
+   so they get a tighter row height/font instead of the roomier filter-dropdown sizing */
+var M_OPT_SM='box-sizing:border-box;font:inherit;cursor:pointer;background:none;border:0;text-align:left;display:flex;align-items:center;gap:8px;width:100%;padding:5px 8px;border-radius:6px;font-size:12.5px;white-space:nowrap;';
+var M_HEAD_SM='padding:6px 8px 3px;font-size:10px;font-weight:700;letter-spacing:.6px;color:#64748b;text-transform:uppercase;';
+var M_SEP_SM='<div style="height:1px;background:#eef1f5;margin:3px 2px"></div>';
+function icoSm(k,color){return ico2(k,color||'#64748b',14)}
 function buildRowMenu(r){
-  var h='<div style="'+M_HEAD+'">'+esc(r.dataset.name)+'</div>';
+  var h='<div style="'+M_HEAD_SM+'">'+esc(r.dataset.name)+'</div>';
   MENUS[menuKind(r)].forEach(function(sec){
     var items=sec.filter(function(k){var a=ACT[k];return (!a.when||a.when(r))&&(!a.need||a.need(r))});
     if(!items.length)return;
-    h+=M_SEP;
+    h+=M_SEP_SM;
     items.forEach(function(k){
       var a=ACT[k], red=a.danger, ic=a.iconFn?a.iconFn(r):a.icon, favOn=k==='fav'&&r.dataset.fav==='1';
-      h+='<button data-act="'+k+'" data-h="background:'+(red?'#fef2f2':'#f1f5f9')+';" style="'+M_OPT+'color:'+(red?'#dc2626':favOn?'#b45309':'#1e293b')+'">'+ico(ic,red?'#dc2626':favOn?'#b45309':'#64748b')+'<span>'+esc(a.label(r))+'</span></button>';
+      h+='<button data-act="'+k+'" data-h="background:'+(red?'#fef2f2':'#f1f5f9')+';" style="'+M_OPT_SM+'color:'+(red?'#dc2626':favOn?'#b45309':'#1e293b')+'">'+icoSm(ic,red?'#dc2626':favOn?'#b45309':'#64748b')+'<span>'+esc(a.label(r))+'</span></button>';
     });
   });
   return h;
@@ -3025,12 +3131,12 @@ function showView(v){
     if(on&&changed){el.style.transition='none';el.style.opacity='0';void el.offsetHeight;el.style.transition='opacity .18s ease';el.style.opacity='1'}});
   var side=v==='gdetail'?(dMode==='person'?'people':'groups'):v;
   $$('a[data-side]').forEach(function(a){styleSide(a,a.dataset.side===side)});
-  closeMenu(); window.scrollTo(0,0); if(v==='groups')renderGroups(); if(v==='roles')renderRoles(); if(v==='locations')renderLocs(); if(v==='blocked')renderBlocked(); if(v==='favourites')renderFavourites(); if(v==='contacts'){renderContacts();renderCGroups();paintCxCounts()} if(v==='gdetail')renderDetail();
+  closeMenu(); window.scrollTo(0,0); if(v==='groups')renderGroups(); if(v==='roles')renderRoles(); if(v==='locations')renderLocs(); if(v==='blocked')renderBlocked(); if(v==='favourites')renderFavourites(); if(v==='contacts'){paintCxGroupBanner();renderContacts();renderCGroups();paintCxCounts()} if(v==='gdetail')renderDetail();
   setTimeout(fitScrollCards,0);
   if(!navLock&&!keepBack&&changed)backTo=null; if(v!=='gdetail')paintBack(); else $('#backBar').style.display='none';
 }
 $$('aside a[href="#"]').forEach(function(a){a.addEventListener('click',function(e){
-  e.preventDefault(); if(a.dataset.side){showView(a.dataset.side)}else{toast(a.textContent.trim()+' isn’t part of this preview')}
+  e.preventDefault(); if(a.dataset.side){if(a.dataset.side==='contacts')cxGroupDrill=null;showView(a.dataset.side)}else{toast(a.textContent.trim()+' isn’t part of this preview')}
 })});
 
 /* ---------- Groups: data ---------- */
@@ -3091,7 +3197,7 @@ function gCardHTML(g){
     +'<div style="display:flex;align-items:center;gap:12px">'+(canSelect()?'<input type="checkbox" data-gchk'+(on?' checked':'')+' style="accent-color:#2563eb;width:16px;height:16px;margin:0;cursor:pointer;flex-shrink:0">':'')+avHTML(gInitials(g.name),av,40)
     +'<div style="flex:1;min-width:0"><button data-gopen data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-weight:700;font-size:15px;color:#0f172a;cursor:pointer;text-align:left;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.name)+'</button><div style="color:#64748b;font-size:12.5px;display:flex;align-items:center;gap:5px;margin-top:1px">'+ico2('grid','#94a3b8',12)+'Ext '+esc(g.ext)+'</div></div>'
     +(ready?'<span style="font-size:11px;font-weight:700;color:#15803d;background:#dcfce7;border-radius:999px;padding:3px 9px;flex-shrink:0">Ready</span>':'<span style="font-size:11px;font-weight:700;color:#b45309;background:#fef3c7;border-radius:999px;padding:3px 9px;flex-shrink:0">Needs setup</span>')+'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 12px"><div><div style="'+LBL+'">Manager</div><div style="color:'+(m?'#0f172a':'#64748b')+';font-size:13.5px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(m?esc(m):'—')+'</div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 12px"><div><div style="'+LBL+'">Manager</div><div style="color:'+(m?'#0f172a':'#64748b')+';font-size:13.5px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(m?'<button data-openperson="'+esc(g.manager)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:inherit;color:#2563eb;cursor:pointer">'+esc(m)+'</button>':'—')+'</div></div>'
     +'<div><div style="'+LBL+'">People</div><div style="margin-top:3px"><button data-gpeople data-tip="Show the people in this group" data-h="background:#dbeafe;" style="border:0;background:#eff6ff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:700;border-radius:8px;padding:2px 10px;cursor:pointer">'+n+'</button></div></div></div>'
     +'<div>'+gAvailHTML(g)+'</div>'
     +'<div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #eef1f5;padding-top:12px">'+ibtn('data-gopen',can('people')?'Open / edit group':'Open group','pencil','border-color:#bfdbfe;background:#eff6ff;','#2563eb')+(can('people')?ibtn('data-gdel','Delete group','trash','border-color:#fecaca;background:#fef2f2;','#dc2626'):'')+'</div></div>';
@@ -3134,7 +3240,10 @@ function renderGroups(){
     var r=gTpl.cloneNode(true), av=AVS[(g.ci+4)%AVS.length], n=gMembers(g).length, m=gMgrName(g);
     r.removeAttribute('id'); r.setAttribute('data-grow',g.id);
     var a=$('[data-gav]',r); a.textContent=gInitials(g.name); a.style.background=av[0]; a.style.color=av[1];
-    $('[data-gname]',r).textContent=g.name; $('[data-gmgr]',r).textContent=m||'—'; if(!m)$('[data-gmgr]',r).style.color='#64748b';
+    $('[data-gname]',r).textContent=g.name;
+    var gmgrEl=$('[data-gmgr]',r);
+    if(m){gmgrEl.innerHTML='<button data-openperson="'+esc(g.manager)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:inherit;color:#2563eb;cursor:pointer">'+esc(m)+'</button>';gmgrEl.style.color=''}
+    else{gmgrEl.textContent='—';gmgrEl.style.color='#64748b'}
     $('[data-gcnt]',r).textContent=n; $('[data-gav2]',r).innerHTML=gPeopleStack(g,n); $('[data-gext]',r).textContent=g.ext; $('[data-gcopy]',r).setAttribute('data-copy',g.ext);
     $('[data-gavail]',r).innerHTML=gAvailHTML(g);
     $('[data-gchk]',r).checked=!!gSel[g.id]; $('[data-gchk]',r).closest('td').style.display=canSelect()?'':'none';
@@ -3858,7 +3967,8 @@ function renderQV(r){
   var d=r.dataset;
   var head='<div style="display:flex;align-items:center;gap:12px">'+avP(r,44)+'<div style="min-width:0;flex:1"><div style="font-weight:700;color:#0f172a;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.name)+'</div><div style="font-size:11px;font-weight:700;letter-spacing:.4px;color:#2563eb;margin-top:1px">'+personTag(d.role)+'</div></div></div>';
   var pres='<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 10px;border-radius:10px;background:#f8fafc"><span style="width:8px;height:8px;border-radius:50%;background:'+PD[d.presence]+';flex-shrink:0"></span><span style="font-weight:600;color:'+PC[d.presence].t+'">'+esc(d.presence)+'</span><span style="color:#94a3b8;font-size:12px;margin-left:auto;white-space:nowrap">'+esc(PEFF[d.presence])+'</span></div>';
-  var rows=qvField('Email',esc(d.email))+qvField('Phone',esc(d.phone||'')||'—')+qvField('Extension',esc(d.num||'')||'—')+qvField('Direct numbers',(r.dataset.dids||'').split(',').filter(Boolean).map(fmtNum).join(', ')||'—')+qvField('Group',groupsOf(r).join(', ')||'—');
+  var glistQ=groupsOf(r), groupHTML=glistQ.length?glistQ.map(function(n){return '<button data-goto="'+esc(n)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#2563eb;cursor:pointer">'+esc(n)+'</button>'}).join(', '):'—';
+  var rows=qvField('Email',esc(d.email))+qvField('Phone',esc(d.phone||'')||'—')+qvField('Extension',esc(d.num||'')||'—')+qvField('Direct numbers',(r.dataset.dids||'').split(',').filter(Boolean).map(fmtNum).join(', ')||'—')+qvField('Group',groupHTML);
   return head+pres+'<div style="margin-top:2px">'+rows+'</div>'+(d.removed==='1'?'<div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:#fef2f2;color:#b91c1c;font-size:12.5px;font-weight:600">Removed from the directory</div>':'');
 }
 function placeQV(el){
@@ -4006,6 +4116,7 @@ function savePerson(){
 
 IC_.refresh='<path d="M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4"/>';
 IC_.mail='<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>';
+IC_.tick='<path d="M5 12.5l4.5 4.5L19 7.5"/>';
 IC_.grid='<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>';
 function renderDgList(){
   var box=$('#dgList'), ql=$('#dgSearch').value.trim().toLowerCase(), people=dMode==='person'; box.innerHTML=''; dgSel=-1;
@@ -4047,9 +4158,10 @@ function liveBar(mem){
     +'<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#64748b">'+leg(a,'#10b981','available')+leg(b2,'#ef4444','busy / DND')+leg(c,'#94a3b8','offline')+'</div></div>';
 }
 function callPathHTML(g,mem){
-  var order=g.strategy==='order'&&g.order&&g.order.length?g.order.map(function(id){var r=personById(id);return r?r.dataset.name.split(' ')[0]:null}).filter(Boolean):null;
+  var order=g.strategy==='order'&&g.order&&g.order.length?g.order.map(function(id){var r=personById(id);return r?'<button data-pp="'+esc(id)+'" style="border:0;background:none;padding:0;font:inherit;font-size:inherit;color:#2563eb;cursor:pointer">'+esc(r.dataset.name.split(' ')[0])+'</button>':null}).filter(Boolean):null;
   var how=g.strategy==='all'?'Everyone\u2019s phone rings at once':g.strategy==='round'?'One person at a time, taking turns':'One at a time, in this order: '+(order&&order.length?order.join(' \u2192 '):'set in Ring strategy');
-  var then=g.noAns==='voicemail'?'goes to voicemail':g.noAns==='group'?'rings '+(backupName(g.backup)||'a backup group'):g.noAns==='forward'?'is forwarded to '+(g.extra||'a number'):'is hung up';
+  var backupGroup=g.noAns==='group'&&g.backup&&groups.filter(function(x){return x.id===g.backup})[0];
+  var then=g.noAns==='voicemail'?'goes to voicemail':g.noAns==='group'?'rings '+(backupGroup?'<button data-goto="'+esc(backupGroup.name)+'" style="border:0;background:none;padding:0;font:inherit;font-size:inherit;color:#2563eb;cursor:pointer">'+esc(backupGroup.name)+'</button>':'a backup group'):g.noAns==='forward'?'is forwarded to '+(g.extra||'a number'):'is hung up';
   var hours=hoursSummary(g.hours||defHours());
   function step(n,ic,t,sub){return '<div style="display:flex;gap:12px;align-items:flex-start;padding:8px 0'+(n>1?';border-top:1px solid #f1f5f9':'')+'"><span style="width:26px;height:26px;border-radius:50%;background:#eef2f7;color:#475569;display:grid;place-items:center;flex-shrink:0">'+ico2(ic,'#475569',13)+'</span><span style="min-width:0"><span style="display:block;font-size:13.5px;color:#0f172a;font-weight:600">'+t+'</span>'+(sub?'<span style="display:block;font-size:12.5px;color:#64748b;margin-top:1px">'+sub+'</span>':'')+'</span></div>'}
   if(!mem.length)return '<div style="font-size:13.5px;color:#64748b">No members yet \u2014 calls to Ext '+esc(g.ext)+' go straight to '+then.replace(/^goes to |^is |^rings /,'')+'.</div>';
@@ -4092,7 +4204,7 @@ function renderDetail(){
   var mbody, mact='';
   if(mgr){
     var md=mgr.dataset, isMem=mem.indexOf(mgr)>-1;
-    mbody='<div style="display:flex;align-items:center;gap:12px">'+avHTML(ini(md.name),AVS[(+md.av)%AVS.length],40)+'<div style="flex:1;min-width:0"><div style="font-weight:700;color:#0f172a">'+esc(md.name)+'</div><div style="'+D_SUB+'">'+esc(md.email)+' · <button data-prole="'+esc(md.role)+'" data-tip="See what this role allows" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-size:12.5px;color:#2563eb;cursor:pointer">'+esc(md.role)+'</button></div></div></div>'
+    mbody='<div style="display:flex;align-items:center;gap:12px">'+avHTML(ini(md.name),AVS[(+md.av)%AVS.length],40)+'<div style="flex:1;min-width:0"><button data-pp="'+esc(mgr.dataset.id)+'" data-tip="Open profile" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-weight:700;color:#0f172a;cursor:pointer">'+esc(md.name)+'</button><div style="'+D_SUB+'">'+esc(md.email)+' · <button data-prole="'+esc(md.role)+'" data-tip="See what this role allows" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-size:12.5px;color:#2563eb;cursor:pointer">'+esc(md.role)+'</button></div></div></div>'
       +'<div style="margin-top:12px;font-size:12.5px;color:#64748b">'+(isMem?'Also listed under Members below.':'Not a member of this group. <button data-addmgr data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:600;color:#2563eb;cursor:pointer">Add as member</button>')+'</div>';
     mact=ibtn('data-mgrpick','Change manager','swap')+ibtn('data-mgrrm','Remove manager','x');
   }else{
@@ -4789,11 +4901,12 @@ function reqText(q){
   if(q.type==='block')return 'block <b>'+bkWhoText(q.blockData)+'</b>';
   if(q.type==='unblock'){var ut=reqTarget(q);return 'unblock <b>'+(ut?bkWhoText(ut):'(already gone)')+'</b>'}
   var t=reqTarget(q),n=t?(q.type==='gdelete'?t.name:t.dataset.name):'(gone)';
-  if(q.type==='role')return 'change <b>'+esc(n)+'</b>’s role to <b>'+esc(q.value)+'</b>';
-  if(q.type==='cid')return 'give <b>'+esc(n)+'</b> the caller ID <b>'+esc(fmtNum(q.value))+'</b>'+(q.fresh?' (new number)':'');
-  if(q.type==='suspend')return (q.un?'reactivate':'suspend')+' <b>'+esc(n)+'</b>';
-  if(q.type==='remove')return 'remove <b>'+esc(n)+'</b> from the directory';
-  return 'delete the group <b>'+esc(n)+'</b>'}
+  var nb=!t?esc(n):(q.type==='gdelete'?'<button data-goto="'+esc(n)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:inherit;color:#2563eb;cursor:pointer">'+esc(n)+'</button>':'<button data-openperson="'+esc(t.dataset.id)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:inherit;color:#2563eb;cursor:pointer">'+esc(n)+'</button>');
+  if(q.type==='role')return 'change <b>'+nb+'</b>’s role to <b>'+esc(q.value)+'</b>';
+  if(q.type==='cid')return 'give <b>'+nb+'</b> the caller ID <b>'+esc(fmtNum(q.value))+'</b>'+(q.fresh?' (new number)':'');
+  if(q.type==='suspend')return (q.un?'reactivate':'suspend')+' <b>'+nb+'</b>';
+  if(q.type==='remove')return 'remove <b>'+nb+'</b> from the directory';
+  return 'delete the group <b>'+nb+'</b>'}
 function addReq(o){o.id='q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);o.by=me().dataset.id;o.at=Date.now();o.status='pending';REQS.unshift(o);saveReqs();reqTouched();return o}
 function withdrawReq(id){var i=REQS.map(function(q){return q.id}).indexOf(id);if(i<0)return;REQS.splice(i,1);saveReqs();reqTouched()}
 function sendReq(o){var q=addReq(o);note('Request sent — an admin will review it','Undo',function(){withdrawReq(q.id)})}
@@ -4825,8 +4938,10 @@ function paintReqBadge(){
   d.textContent=n; d.style.display=n?'inline-flex':'none'; d.title=n+' request'+(n===1?'':'s')+' waiting';
 }
 function statusChip(st){var c={pending:['#fef3c7','#b45309','Waiting'],approved:['#dcfce7','#15803d','Approved'],declined:['#fee2e2','#b91c1c','Declined']}[st];return '<span style="font-size:11px;font-weight:700;letter-spacing:.3px;border-radius:6px;padding:2px 7px;background:'+c[0]+';color:'+c[1]+'">'+c[2]+'</span>'}
-function reqRow(q,acts){var by=personById(q.by);
-  return '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid #f1f5f9">'+(by?avP(by,36):'')+'<div style="flex:1;min-width:0"><div style="font-size:13.5px;color:#1e293b;line-height:1.45"><b>'+esc(by?by.dataset.name:'Someone')+'</b> asked to '+reqText(q)+(q.note?' — “'+esc(q.note)+'”':'')+'</div><div style="display:flex;align-items:center;gap:8px;margin-top:5px;font-size:12px;color:#64748b">'+relTime(q.at)+(q.status!=='pending'?' · '+statusChip(q.status)+(q.byAdmin?' by '+esc((personById(q.byAdmin)||{dataset:{name:'an admin'}}).dataset.name):''):'')+'</div></div>'+(acts||'')+'</div>'}
+function reqRow(q,acts){var by=personById(q.by), admin=q.byAdmin?personById(q.byAdmin):null;
+  var byName=by?'<button data-openperson="'+esc(by.dataset.id)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:inherit;color:#0f172a;cursor:pointer">'+esc(by.dataset.name)+'</button>':'Someone';
+  var adminName=q.byAdmin?(admin?'<button data-openperson="'+esc(admin.dataset.id)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:inherit;color:#2563eb;cursor:pointer">'+esc(admin.dataset.name)+'</button>':'an admin'):'';
+  return '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid #f1f5f9">'+(by?avP(by,36):'')+'<div style="flex:1;min-width:0"><div style="font-size:13.5px;color:#1e293b;line-height:1.45"><b>'+byName+'</b> asked to '+reqText(q)+(q.note?' — “'+esc(q.note)+'”':'')+'</div><div style="display:flex;align-items:center;gap:8px;margin-top:5px;font-size:12px;color:#64748b">'+relTime(q.at)+(q.status!=='pending'?' · '+statusChip(q.status)+(q.byAdmin?' by '+adminName:''):'')+'</div></div>'+(acts||'')+'</div>'}
 function renderReqs(){
   var m=me(), mine=REQS.filter(function(q){return q.by===m.dataset.id}), pend=pendingReqs();
   var forMe=pend.filter(function(q){return canApprove(q)&&q.by!==m.dataset.id}), other=pend.filter(function(q){return !canApprove(q)&&q.by!==m.dataset.id}), done=REQS.filter(function(q){return q.status!=='pending'}).slice(0,6);
@@ -4974,7 +5089,7 @@ function bkMatchContact(b){
 function bkLeadCell(b){
   var mc=bkMatchContact(b);
   if(mc){
-    return '<div style="display:flex;align-items:center;gap:10px">'+cxAvatar(mc)+'<div><div style="font-weight:600;color:#0f172a">'+esc(cxName(mc))+'</div><div style="font-size:12px;color:#64748b;margin-top:2px">'+esc(fmtNum(b.numbers[0]))+(b.numbers.length>1?' <span style="color:#94a3b8">+'+(b.numbers.length-1)+'</span>':'')+'</div></div></div>';
+    return '<div style="display:flex;align-items:center;gap:10px">'+cxAvatar(mc)+'<div><button data-cxopen="'+esc(mc.id)+'" data-tip="Open contact" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#2563eb;cursor:pointer">'+esc(cxName(mc))+'</button><div style="font-size:12px;color:#64748b;margin-top:2px">'+esc(fmtNum(b.numbers[0]))+(b.numbers.length>1?' <span style="color:#94a3b8">+'+(b.numbers.length-1)+'</span>':'')+'</div></div></div>';
   }
   return '<div style="display:flex;align-items:center;gap:10px">'+kTile(bkIcon(b.who))+'<div>'+bkPrimary(b)+(bkSubText(b)?'<div style="font-size:12px;color:#64748b;margin-top:2px">'+bkSubText(b)+'</div>':'')+'</div></div>';
 }
@@ -5026,9 +5141,47 @@ function renderBlocked(){
 $('#bkbody').addEventListener('click',function(e){
   var chk=e.target.closest('[data-bkchk]');
   if(chk){var id=chk.getAttribute('data-bkchk');if(chk.checked)bkSel[id]=1;else delete bkSel[id];bkSyncSel();return}
+  var cxo=e.target.closest('[data-cxopen]'); if(cxo){var oc=CONTACTS.filter(function(x){return x.id===cxo.getAttribute('data-cxopen')})[0];if(oc)openContactView(oc);return}
   var tr=e.target.closest('tr[data-bkrow]'); if(!tr)return; var id2=tr.getAttribute('data-bkrow'), b=BLOCKS.filter(function(x){return x.id===id2})[0]; if(!b)return;
-  if(e.target.closest('[data-bkact="del"]'))confirmUnblock(b);
+  if(e.target.closest('[data-bkact="del"]')){confirmUnblock(b);return}
+  if(e.target.closest('[data-copy]'))return;
+  openBkDrawer(b);
 });
+
+/* ---------- blocked number detail drawer ---------- */
+var bkDrawer=$('#bkDrawer'), bkCtx=null;
+function renderBkDrawer(b){
+  $('#bkdIcon').innerHTML=ico2(bkIcon(b.who),'#475569',15);
+  $('#bkdTitle').textContent=bkWhoText(b).replace(/<[^>]+>/g,'');
+  $('#bkdSub').textContent='Blocked '+relTime(b.ts);
+  $('#bkdStops').textContent=BK_STOP_T[b.stops];
+  $('#bkdGets').innerHTML=bkChip(BK_GETS_META[b.gets]);
+  $('#bkdScope').innerHTML=bkChip(BK_SCOPE_META[b.scope]);
+  $('#bkdReason').textContent=b.reason||'Not given';
+  $('#bkdBy').innerHTML=byCell(b.by,18);
+  $('#bkdWhen').textContent=new Date(b.ts).toLocaleDateString();
+  $('#bkdStopped').textContent=b.stopped+(b.stopped===1?' call or text':' calls and texts');
+  $('#bkdLabel').value=b.label||'';
+  var nw=$('#bkdNoteWrap'); nw.style.display=b.note?'':'none'; $('#bkdNote').textContent=b.note||'';
+  $('#bkdUnblockL').textContent=can('numbers')?'Unblock':'Request to unblock';
+}
+function openBkDrawer(b){
+  bkCtx=b; renderBkDrawer(b);
+  dOv.style.display='block'; bkDrawer.style.display='flex'; closeMenu(); if(appHeader){appHeader.style.position='static';appHeader.style.zIndex='1'}
+  requestAnimationFrame(function(){dOv.style.opacity=1;bkDrawer.style.transform='translateX(0)'});
+}
+function closeBkDrawer(){
+  if(bkDrawer.style.display!=='flex')return; dOv.style.opacity=0; bkDrawer.style.transform='translateX(100%)';
+  setTimeout(function(){
+    bkDrawer.style.display='none';
+    if(modal.style.display!=='flex'&&drawer.style.display!=='flex'){dOv.style.display='none';if(appHeader){appHeader.style.position='';appHeader.style.zIndex=''}}
+  },220);
+}
+dOv.addEventListener('click',closeBkDrawer); $('#bkdClose').addEventListener('click',closeBkDrawer);
+$('#bkdLabelSave').addEventListener('click',function(){
+  if(!bkCtx)return; bkCtx.label=$('#bkdLabel').value.trim(); renderBlocked(); note('Label saved');
+});
+$('#bkdUnblock').addEventListener('click',function(){if(bkCtx)confirmUnblock(bkCtx)});
 $('#bkChkAll').addEventListener('change',function(e){
   $$('tr[data-bkrow]',$('#bkbody')).forEach(function(t){var id=t.getAttribute('data-bkrow');if(e.target.checked)bkSel[id]=1;else delete bkSel[id]});
   renderBlocked();
@@ -5063,7 +5216,7 @@ function confirmUnblock(b){
     return;
   }
   showConfirm('Unblock '+bkWhoText(b)+'?','They’ll be able to reach you again on the next call or text.','Unblock',function(){
-    var i=BLOCKS.indexOf(b); if(i<0)return; BLOCKS.splice(i,1); delete bkSel[b.id]; renderBlocked();
+    var i=BLOCKS.indexOf(b); if(i<0)return; BLOCKS.splice(i,1); delete bkSel[b.id]; renderBlocked(); closeBkDrawer();
     note('Unblocked','Undo',function(){BLOCKS.splice(Math.min(i,BLOCKS.length),0,b);renderBlocked()});
   },true);
 }
@@ -5172,7 +5325,7 @@ function renderFavourites(){
         +'<td class="cchk" style="'+TDS+'"><input type="checkbox" class="cb" data-fvchk="'+it.id+'"'+(fvSel[it.id]?' checked':'')+'></td>'
         +'<td style="'+TDS+'"><button data-fvopen style="border:0;background:none;font:inherit;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;padding:4px 8px;margin:-4px -8px;border-radius:8px" title="Open profile">'+avP(r,32)+'<span style="font-weight:700;color:#0f172a">'+esc(d.name)+'</span></button></td>'
         +'<td style="'+TDS+'"><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:700;background:#dbeafe;color:#1d4ed8">Colleague</span></td>'
-        +'<td style="'+TDS+'">'+(groupsOf(r).length?esc(groupsOf(r).join(', ')):'<span style="color:#94a3b8">—</span>')+'</td>'
+        +'<td style="'+TDS+'">'+(groupsOf(r).length?groupsOf(r).map(function(n){return '<button data-goto="'+esc(n)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:500;color:#2563eb;cursor:pointer">'+esc(n)+'</button>'}).join(', '):'<span style="color:#94a3b8">—</span>')+'</td>'
         +'<td style="'+TDS+'">'+esc(d.role)+'</td>'
         +'<td style="'+TDS+'">'+(d.num?'<div><span style="font-weight:600;color:#0f172a">'+esc(d.num)+'</span><div style="font-size:11.5px;color:#94a3b8">Extension</div></div>':'<span style="color:#94a3b8">—</span>')+'</td>'
         +'<td style="'+TDS+'">'+(d.email?esc(d.email):'<span style="color:#94a3b8">—</span>')+'</td>'
@@ -5186,7 +5339,7 @@ function renderFavourites(){
       +'<td class="cchk" style="'+TDS+'"><input type="checkbox" class="cb" data-fvchk="'+it.id+'"'+(fvSel[it.id]?' checked':'')+'></td>'
       +'<td style="'+TDS+'"><div style="display:flex;align-items:center;gap:10px">'+cxAvatar(c)+'<span style="font-weight:700;color:#0f172a">'+esc(cxName(c))+'</span></div></td>'
       +'<td style="'+TDS+'"><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:11.5px;font-weight:700;background:#ede9fe;color:#6d28d9">External</span></td>'
-      +'<td style="'+TDS+'">'+(c.company?esc(c.company):(g?esc(g.name):'<span style="color:#94a3b8">—</span>'))+'</td>'
+      +'<td style="'+TDS+'">'+(c.company?esc(c.company):(g?'<button data-cgopen="'+esc(g.id)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:500;color:#2563eb;cursor:pointer">'+esc(g.name)+'</button>':'<span style="color:#94a3b8">—</span>'))+'</td>'
       +'<td style="'+TDS+'"><span style="color:#94a3b8">—</span></td>'
       +'<td style="'+TDS+'">'+(c.phone?'<div><span style="font-weight:600;color:#0f172a">'+esc(fmtNum(c.phone))+'</span><div style="font-size:11.5px;color:#94a3b8">Mobile</div></div>':'<span style="color:#94a3b8">—</span>')+'</td>'
       +'<td style="'+TDS+'">'+(c.email?esc(c.email):'<span style="color:#94a3b8">—</span>')+'</td>'
@@ -5346,11 +5499,19 @@ function buildCxTagMenu(c){
     return '<button data-cxtagset="'+k+'" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b"><span class="ck" style="width:14px;color:#2563eb;font-weight:700;visibility:'+(on?'visible':'hidden')+';font-size:13px;flex-shrink:0">✓</span><span>'+m.menuLabel+'</span></button>';
   }).join('');
 }
-function cxGroupBtn(c){
-  var g=c.group?CGROUPS.filter(function(x){return x.id===c.group})[0]:null, label=g?g.name:'No group';
-  return '<button data-cxgroupbtn="'+c.id+'" data-tip="Assign to a group" aria-label="Group for '+esc(cxName(c))+'" style="max-width:160px;height:28px;display:inline-flex;align-items:center;gap:5px;padding:0 7px 0 10px;border-radius:7px;border:1px solid '+(g?'#bfdbfe':'#e2e8f0')+';background:'+(g?'#eff6ff':'#f8fafc')+';color:'+(g?'#1d4ed8':'#64748b')+';font:inherit;font-size:12.5px;font-weight:600;cursor:pointer">'
-    +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(label)+'</span>'
-    +'<svg viewBox="0 0 24 24" style="width:11px;height:11px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M6 9l6 6 6-6"/></svg></button>';
+/* one pill, two click zones: the label opens the group's member list, the caret reassigns it —
+   keeps "which group" and "change group" as a single visual entity instead of two columns */
+function cxGroupBtn(c,g){
+  g=g!==undefined?g:(c.group?CGROUPS.filter(function(x){return x.id===c.group})[0]:null);
+  var border=g?'#bfdbfe':'#e2e8f0', bg=g?'#eff6ff':'#f8fafc', fg=g?'#1d4ed8':'#64748b';
+  var label=g?'<button data-cgopen="'+esc(g.id)+'" data-tip="Open '+esc(g.name)+'" aria-label="Open group '+esc(g.name)+'" style="display:flex;align-items:center;gap:6px;height:100%;max-width:140px;padding:0 8px 0 4px;border:0;background:none;color:'+fg+';font:inherit;font-size:12.5px;font-weight:600;cursor:pointer">'
+      +'<span style="width:18px;height:18px;border-radius:50%;background:#ede9fe;color:#5b21b6;font-size:10.5px;font-weight:700;display:inline-grid;place-items:center;flex-shrink:0">'+esc((g.name[0]||'?').toUpperCase())+'</span>'
+      +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.name)+'</span></button>'
+    :'<span style="display:flex;align-items:center;height:100%;padding:0 4px 0 10px;color:'+fg+';font-size:12.5px;font-weight:600;white-space:nowrap">No group</span>';
+  return '<div style="display:inline-flex;align-items:center;height:28px;border-radius:7px;border:1px solid '+border+';background:'+bg+'">'
+    +label
+    +'<button data-cxgroupbtn="'+c.id+'" data-tip="Change group" aria-label="Change group for '+esc(cxName(c))+'" style="display:flex;align-items:center;height:100%;padding:0 7px;border:0;border-left:1px solid '+border+';background:none;color:'+fg+';cursor:pointer">'
+    +'<svg viewBox="0 0 24 24" style="width:11px;height:11px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><path d="M6 9l6 6 6-6"/></svg></button></div>';
 }
 function buildCxGroupMenu(c){
   var cur=c.group||'', opts=[{id:'',name:'No group'}].concat(CGROUPS.map(function(g){return {id:g.id,name:g.name}}));
@@ -5366,22 +5527,22 @@ function cxSetGroup(c,gid){
   c.group=gid; renderContacts();
   note(esc(cxName(c))+' moved to '+(ng?esc(ng.name):'No group'));
 }
-function cxSecHead(t){return '<div style="'+M_HEAD+'">'+t+'</div>'}
+function cxSecHead(t){return '<div style="'+M_HEAD_SM+'">'+t+'</div>'}
 function buildCxRowMenu(c){
   var h=cxSecHead('Reach them')
-    +'<button data-cxact="call" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('phone')+'<span>Call</span></button>'
-    +'<button data-cxact="msg" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('msg')+'<span>Message</span></button>'
-    +'<button data-cxact="wa" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('wa')+'<span>WhatsApp</span></button>'
-    +M_SEP+cxSecHead('The record')
-    +'<button data-cxact="view" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('eye')+'<span>View</span></button>'
-    +'<button data-cxact="notes" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('file')+'<span>Notes</span></button>'
-    +'<button data-cxact="fav" data-h="background:#f1f5f9;" style="'+M_OPT+'color:'+(c.fav?'#b45309':'#1e293b')+'">'+ico('star',c.fav?'#b45309':'#64748b')+'<span>'+(c.fav?'Remove from Favourites':'Add to Favourites')+'</span></button>';
-  if(can('people'))h+='<button data-cxact="edit" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('pencil')+'<span>Edit</span></button>';
-  h+=M_SEP+cxSecHead('Mark as')
-    +'<button data-cxact="vip" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('star')+'<span>'+TAG_META.vip.menuLabel+'</span></button>'
-    +'<button data-cxact="dnc" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('noentry')+'<span>'+TAG_META.dnc.menuLabel+'</span></button>'
-    +'<button data-cxact="block" data-h="background:#f1f5f9;" style="'+M_OPT+'color:#1e293b">'+ico('block')+'<span>'+TAG_META.block.menuLabel+'</span></button>';
-  if(can('people'))h+=M_SEP+'<button data-cxact="del" data-h="background:#fef2f2;" style="'+M_OPT+'color:#dc2626">'+ico('trash','#dc2626')+'<span>Delete contact</span></button>';
+    +'<button data-cxact="call" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('phone')+'<span>Call</span></button>'
+    +'<button data-cxact="msg" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('msg')+'<span>Message</span></button>'
+    +'<button data-cxact="wa" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('wa')+'<span>WhatsApp</span></button>'
+    +M_SEP_SM+cxSecHead('The record')
+    +'<button data-cxact="view" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('eye')+'<span>View</span></button>'
+    +'<button data-cxact="notes" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('file')+'<span>Notes</span></button>'
+    +'<button data-cxact="fav" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:'+(c.fav?'#b45309':'#1e293b')+'">'+icoSm('star',c.fav?'#b45309':'#64748b')+'<span>'+(c.fav?'Remove from Favourites':'Add to Favourites')+'</span></button>';
+  if(can('people'))h+='<button data-cxact="edit" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('pencil')+'<span>Edit</span></button>';
+  h+=M_SEP_SM+cxSecHead('Mark as')
+    +'<button data-cxact="vip" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('star')+'<span>'+TAG_META.vip.menuLabel+'</span></button>'
+    +'<button data-cxact="dnc" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('noentry')+'<span>'+TAG_META.dnc.menuLabel+'</span></button>'
+    +'<button data-cxact="block" data-h="background:#f1f5f9;" style="'+M_OPT_SM+'color:#1e293b">'+icoSm('block')+'<span>'+TAG_META.block.menuLabel+'</span></button>';
+  if(can('people'))h+=M_SEP_SM+'<button data-cxact="del" data-h="background:#fef2f2;" style="'+M_OPT_SM+'color:#dc2626">'+icoSm('trash','#dc2626')+'<span>Delete contact</span></button>';
   return h;
 }
 function byCell(id,size){
@@ -5390,6 +5551,25 @@ function byCell(id,size){
   return '<button data-openperson="'+esc(id)+'" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:8px;color:#0f172a;font-weight:600;text-align:left">'+avP(r,size||24)+'<span>'+esc(r.dataset.name)+'</span></button>';
 }
 document.addEventListener('click',function(e){var t=e.target.closest('[data-openperson]');if(t){var r=personById(t.getAttribute('data-openperson'));if(r)openDrawer(r)}});
+document.addEventListener('click',function(e){var t=e.target.closest('[data-cgopen]');if(t){var g=CGROUPS.filter(function(x){return x.id===t.getAttribute('data-cgopen')})[0];if(g)openCxGroupMembers(g)}});
+var cxGroupDrill=null;
+function openCxGroupMembers(g){
+  cxGroupDrill=g; cxFilt.group=g.name; cxFilt.tag='Any'; cxq=''; $('#cxsearch').value='';
+  cxPage=1; cxTab='contacts';
+  paintCxTabs(); paintCxGroupChip(); paintCxTagChip(); paintCxGroupBanner();
+  showView('contacts');
+}
+function paintCxGroupBanner(){
+  var on=!!cxGroupDrill;
+  $('#cxNormalHead').style.display=on?'none':'';
+  $('#cxGroupHead').style.display=on?'flex':'none';
+  $('#cxToolbarRow').style.display=on?'none':'flex';
+  $('#cxGroupFChip').style.display=on?'none':'inline-flex';
+  (on?$('#cxGroupHeadToolSlot'):$('#cxToolbarRow')).insertBefore($('#cxTool'),on?null:$('#cgTool'));
+  $('#cxTool').style.marginLeft=on?'':'auto';
+  if(on)$('#cxGroupHeadName').textContent=cxGroupDrill.name;
+}
+$('#cxGroupBack').addEventListener('click',cxClearFilters);
 function paintCxCounts(){$('#cxCntContacts').textContent=CONTACTS.length;$('#cxCntGroups').textContent=CGROUPS.length}
 function paintCxTabs(){
   $$('[data-cxtab]').forEach(function(b){var on=b.getAttribute('data-cxtab')===cxTab;b.style.background=on?'#fff':'';b.style.color=on?'#0f172a':'';b.style.boxShadow=on?'0 1px 2px rgba(15,23,42,.08)':''});
@@ -5399,10 +5579,15 @@ function paintCxTabs(){
   $('#cgTool').style.display=cxTab==='groups'?'flex':'none';
 }
 $$('[data-cxtab]').forEach(function(b){b.addEventListener('click',function(){cxTab=b.getAttribute('data-cxtab');paintCxTabs();(cxTab==='contacts'?renderContacts:renderCGroups)();setTimeout(fitScrollCards,0)})});
+/* dynamic menu options can't use CSS classes (stripped at build time from JS string literals), so this
+   mirrors .opt/.ck inline instead of relying on the class names those build-time-expanded menus use */
+function cxOptRow(val,label){
+  return '<button data-opt="'+esc(val)+'" data-h="background:#f1f5f9;" style="box-sizing:border-box;display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:7px;font-size:13.5px;color:#1e293b;white-space:nowrap;background:none;border:0;font:inherit;cursor:pointer;text-align:left">'
+    +'<span data-ck style="width:14px;color:#2563eb;font-weight:700;visibility:hidden;font-size:13px;flex-shrink:0">✓</span><span>'+esc(label)+'</span></button>';
+}
 function renderCxGroupFMenu(){
   var m=$('[data-menu="cxgroupf"]');
-  var h='<button class="opt" data-opt="All" data-h="background:#f1f5f9;"><span class="ck" data-ck>✓</span><span>All</span></button>'
-    +CGROUPS.map(function(g){return '<button class="opt" data-opt="'+esc(g.name)+'" data-h="background:#f1f5f9;"><span class="ck" data-ck>✓</span><span>'+esc(g.name)+'</span></button>'}).join('');
+  var h=cxOptRow('All','All')+CGROUPS.map(function(g){return cxOptRow(g.name,g.name)}).join('');
   m.innerHTML=h;
   $$('[data-opt]',m).forEach(function(o){$('[data-ck]',o).style.visibility=o.dataset.opt===cxFilt.group?'visible':'hidden'});
 }
@@ -5445,7 +5630,7 @@ function renderContacts(){
       +'<td style="'+TDS+'">'+cxDate(c.ts)+'</td>'
       +'<td style="'+TDS+'"><button data-cxopen="'+c.id+'" data-tip="View details" aria-label="View '+esc(cxName(c))+'" style="border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;font:inherit" data-h="background:#f1f5f9;">'+cxAvatar(c)+'<div style="min-width:0"><div style="font-weight:600;color:#0f172a">'+esc(cxName(c))+'</div><div style="color:#2563eb;font-size:12px;margin-top:1px">'+(c.email?esc(c.email):'—')+'</div></div></button></td>'
       +'<td style="'+TDS+'">'+(c.phone?'<span style="display:inline-flex;align-items:center;gap:7px">'+cxFlag(c.phone)+'<button data-copy="'+esc(c.phone)+'" title="Click to copy" style="border:0;background:none;padding:0;font:inherit;color:#0f172a;cursor:pointer;font-size:13px;letter-spacing:.2px">'+esc(fmtNum(c.phone))+'</button></span>':'<span style="color:#94a3b8">—</span>')+'</td>'
-      +'<td style="'+TDS+'">'+cxGroupBtn(c)+'</td>'
+      +'<td style="'+TDS+'">'+cxGroupBtn(c,g)+'</td>'
       +'<td style="'+TDS+'">'+cxTagBtn(c)+'</td>'
       +'<td style="'+TDS+'">'+byCell(c.by)+'</td>'
       +'<td style="'+TDS+'text-align:center"><button data-cxmore="'+c.id+'" data-tip="Actions" aria-label="Actions for '+esc(cxName(c))+'" data-h="background:#e2e8f0;border-color:#cbd5e1;" style="width:32px;height:32px;border-radius:8px;display:inline-grid;place-items:center;cursor:pointer;border:1px solid #e2e8f0;background:#f1f5f9;color:#475569;transition:background-color .12s,border-color .12s">'+ico2('dots','currentColor',18)+'</button></td>'
@@ -5472,7 +5657,7 @@ function renderCGroups(){
   var rows=list.map(function(g){
     return '<tr data-cgrow2="'+g.id+'" style="position:relative;z-index:1;transition:background-color .1s">'
       +'<td style="'+TDS+'">'+cxDate(g.ts)+'</td>'
-      +'<td style="'+TDS+'"><div style="display:flex;align-items:center;gap:10px">'+kTile('groups')+'<button data-cgact="edit" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#0f172a;cursor:pointer">'+esc(g.name)+'</button></div></td>'
+      +'<td style="'+TDS+'"><div style="display:flex;align-items:center;gap:10px">'+kTile('groups')+'<button data-cgact="members" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#0f172a;cursor:pointer">'+esc(g.name)+'</button></div></td>'
       +'<td style="'+TDS+'">'+(g.members.length?'<button data-cgact="members" data-h="text-decoration:underline;" style="border:0;background:none;padding:0;font:inherit;color:#2563eb;font-weight:600;cursor:pointer">'+g.members.length+'</button>':'<span style="color:#94a3b8">0</span>')+'</td>'
       +'<td style="'+TDS+'">'+byCell(g.by)+'</td>'
       +'<td style="'+TDS+'text-align:center"><div style="display:inline-flex;gap:8px;align-items:center">'+rBtn('data-cgact="edit"','Edit group','pencil','blue')+rBtn('data-cgact="del"','Delete group','trash','red')+'</div></td>'
@@ -5500,7 +5685,7 @@ wirePagerBtns('cxpg',
   function(){return cxTab==='groups'?pagerSlice(cgFiltered(),cgPage,cgPerPage).totalPages:pagerSlice(cxFiltered(),cxPage,cxPerPage).totalPages},
   function(){cxTab==='groups'?renderCGroups():renderContacts()});
 $('#cxsClear').addEventListener('click',function(){cxq='';$('#cxsearch').value='';renderContacts();$('#cxsearch').focus()});
-function cxClearFilters(){cxq='';$('#cxsearch').value='';cxFilt={group:'All',tag:'Any'};cxPage=1;paintCxGroupChip();paintCxTagChip();renderContacts()}
+function cxClearFilters(){cxq='';$('#cxsearch').value='';cxFilt={group:'All',tag:'Any'};cxPage=1;cxGroupDrill=null;paintCxGroupBanner();paintCxGroupChip();paintCxTagChip();renderContacts()}
 $('#cxEmptyClear').addEventListener('click',cxClearFilters);
 $('#cxClearFilters').addEventListener('click',cxClearFilters);
 $('#cxChkAll').addEventListener('change',function(e){
@@ -5674,7 +5859,7 @@ $('#cnotedlg').addEventListener('mousedown',function(e){if(e.target===$('#cnoted
 $('#cgbody').addEventListener('click',function(e){
   var tr=e.target.closest('tr[data-cgrow2]'); if(!tr)return; var id=tr.getAttribute('data-cgrow2'), g=CGROUPS.filter(function(x){return x.id===id})[0]; if(!g)return;
   if(e.target.closest('[data-cgact="edit"]')){openCGroup(g);return}
-  if(e.target.closest('[data-cgact="members"]')){cxFilt.group=g.name;paintCxGroupChip();cxFilt.tag='Any';paintCxTagChip();cxq='';$('#cxsearch').value='';cxPage=1;cxTab='contacts';paintCxTabs();renderContacts();setTimeout(fitScrollCards,0);return}
+  if(e.target.closest('[data-cgact="members"]')){openCxGroupMembers(g);return}
   if(e.target.closest('[data-cgact="del"]')){
     showConfirm('Delete “'+esc(g.name)+'”?','Contacts already in it stay in the directory, just no longer grouped.','Delete',function(){
       var i=CGROUPS.indexOf(g); if(i<0)return; CGROUPS.splice(i,1);
@@ -5767,7 +5952,7 @@ function openContactView(c){
   var tm=TAG_META[c.tag||'standard'];
   $('#cvLabel').innerHTML=(c.label?esc(c.label)+' · ':'')+'<span style="font-weight:700;color:'+tm.fg+'">'+tm.label+'</span>';
   var g=c.group?CGROUPS.filter(function(x){return x.id===c.group})[0]:null;
-  $('#cvRows').innerHTML=cvRow('Email',c.email?esc(c.email):'')+cvRow('Phone',c.phone?esc(fmtNum(c.phone)):'')+cvRow('Company',c.company?esc(c.company):'')+cvRow('Website',c.website?esc(c.website):'')+cvRow('Socials',c.socials?esc(c.socials):'')+cvRow('Group',g?esc(g.name):'');
+  $('#cvRows').innerHTML=cvRow('Email',c.email?esc(c.email):'')+cvRow('Phone',c.phone?esc(fmtNum(c.phone)):'')+cvRow('Company',c.company?esc(c.company):'')+cvRow('Website',c.website?esc(c.website):'')+cvRow('Socials',c.socials?esc(c.socials):'')+cvRow('Group',g?'<button data-cgopen="'+esc(g.id)+'" style="border:0;background:none;padding:0;font:inherit;font-weight:inherit;color:#2563eb;cursor:pointer">'+esc(g.name)+'</button>':'');
   var missing=['email','phone','company','website','socials'].filter(function(k){return !c[k]});
   $('#cvIncomplete').style.display=missing.length?'block':'none';
   $('#cvIncomplete').textContent='Profile setup incomplete — missing '+missing.length+(missing.length===1?' field':' fields')+'.';
@@ -6112,14 +6297,14 @@ syncLocOptions();
 
 (function(){
   var now=Date.now(), seed=[
-    {id:'priya',name:'Priya Sharma',email:'priya.sharma@acme.com',role:'Agent',status:'Active',group:'Sales',num:'2001',num2:'+12139953031',phone:'+919812345671',presence:'Available',login:String(now-15*60e3),av:'2'},
-    {id:'rahul',name:'Rahul Mehta',email:'rahul.mehta@acme.com',role:'Agent',status:'Active',group:'Sales',num:'2002',num2:'',phone:'+919812345672',presence:'Busy',login:String(now-3*3600e3),av:'3'},
-    {id:'sana',name:'Sana Khan',email:'sana.khan@acme.com',role:'Agent',status:'Invited',group:'Support',num:'2003',num2:'',phone:'',presence:'Offline',login:'',invited:String(now-2*3600e3),av:'4'},
-    {id:'dev',name:'Dev Patel',email:'dev.patel@acme.com',role:'Agent',status:'Active',group:'Support',num:'2004',num2:'+12139953032',phone:'+919812345674',presence:'Available',login:String(now-40*60e3),av:'0',loc:'London Branch',city:'London, United Kingdom'}
+    {id:'priya',name:'Priya Sharma',email:'priya.sharma@acme.com',role:'Agent',status:'Active',group:'Sales',department:'Sales',num:'2001',num2:'+12139953031',phone:'+919812345671',presence:'Available',login:String(now-15*60e3),av:'2'},
+    {id:'rahul',name:'Rahul Mehta',email:'rahul.mehta@acme.com',role:'Agent',status:'Active',group:'Sales',department:'Sales',num:'2002',num2:'',phone:'+919812345672',presence:'Busy',login:String(now-3*3600e3),av:'3'},
+    {id:'sana',name:'Sana Khan',email:'sana.khan@acme.com',role:'Agent',status:'Invited',group:'Support',department:'Customer Support',num:'2003',num2:'',phone:'',presence:'Offline',login:'',invited:String(now-2*3600e3),av:'4'},
+    {id:'dev',name:'Dev Patel',email:'dev.patel@acme.com',role:'Agent',status:'Active',group:'Support',department:'Customer Support',num:'2004',num2:'+12139953032',phone:'+919812345674',presence:'Available',login:String(now-40*60e3),av:'0',loc:'London Branch',city:'London, United Kingdom'}
   ];
   var FAV_SEED={priya:1,rahul:1};
   seed.forEach(function(p){
-    addRow({id:p.id,dids:p.num2||'',name:p.name,email:p.email,role:p.role,status:p.status,group:p.group,loc:p.loc||'MCM',city:p.city||'Mumbai, India',num:p.num,num2:p.num2,phone:p.phone,presence:p.presence,login:p.login,invited:p.invited||'',removed:'0',fav:FAV_SEED[p.id]?'1':'0',self:'0',av:p.av});
+    addRow({id:p.id,dids:p.num2||'',name:p.name,email:p.email,role:p.role,status:p.status,group:p.group,department:p.department,loc:p.loc||'MCM',city:p.city||'Mumbai, India',num:p.num,num2:p.num2,phone:p.phone,presence:p.presence,login:p.login,invited:p.invited||'',removed:'0',fav:FAV_SEED[p.id]?'1':'0',self:'0',av:p.av});
   });
   var u=personById('umar'); if(u){u.dataset.group='Sales';renderRow(u)}
   syncGroupOptions();
@@ -6128,8 +6313,9 @@ syncLocOptions();
 applyColOrder(); paintColMenu(); setInterval(function(){rows().forEach(paintLogin)},30000);
 rows().forEach(paintGroupCell);
 rows().forEach(function(r){var a=$('[data-f="initials"]',r);if(a)a.style.boxShadow=presRing(r.dataset.presence)});
-darkenPagerArrows($$('[data-pg]')); darkenPagerArrows($$('[data-gpg]'));
+paintPagerBtns('pg',1,1); paintPagerBtns('gpg',1,1);
 apply(); initSession();
+sortPeopleBy('name',1);
 if(location.hash&&location.hash!=='#'&&location.hash!=='#people')applyHash(location.hash);else try{history.replaceState({h:'#people'},'','#people')}catch(e){}
 })();
 </script>

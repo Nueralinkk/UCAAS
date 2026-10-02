@@ -56,6 +56,7 @@ const IC = {
   undo: '<path d="M4 9h11a5 5 0 0 1 0 10H8M4 9l4-4M4 9l4 4"/>',
   msg: '<path d="M4 5h16v11H9l-5 4z"/>',
   dots: '<circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/>',
+  sort: '<path d="M7 7l5-5 5 5M7 17l5 5 5-5"/>',
 };
 
 let html = src.replace(/<i data-ic="(\w+)"([^>]*)><\/i>/g, (m, name, attrs) => {
