@@ -1932,15 +1932,6 @@ function pagerSlice(list,page,per){
 function darkenPagerArrows(btns){
   [btns[0],btns[1],btns[3],btns[4]].forEach(function(b){if(b){b.style.opacity='1';b.style.color='#334155'}});
 }
-/* the dark-theme stylesheet force-repaints every plain text <input> (!important) so it isn't left
-   looking like a light-mode form field at night; the current-page box is a text input for the
-   type-a-page-number feature, so it gets caught by that same rule unless pinned back here, also
-   with !important, which is the only thing that can out-rank another !important rule reliably */
-function pinPagerCur(cur){
-  if(!cur)return;
-  cur.style.setProperty('background','#2563eb','important');
-  cur.style.setProperty('color','#fff','important');
-}
 function paintPagerBtns(attr,page,totalPages){
   var btns=$$('[data-'+attr+']'); if(btns.length<5)return;
   var first=btns[0],prev=btns[1],cur=btns[2],next=btns[3],last=btns[4];
@@ -1948,7 +1939,6 @@ function paintPagerBtns(attr,page,totalPages){
   if(document.activeElement!==cur)cur.value=page;
   cur.title=totalPages>1?'Page '+page+' of '+totalPages+' — type a page number and press Enter':'Page '+page;
   darkenPagerArrows(btns);
-  pinPagerCur(cur);
 }
 function wirePagerBtns(attr,getPage,setPage,getTotalPages,rerender){
   $$('[data-'+attr+']').forEach(function(b,i){
@@ -6139,7 +6129,6 @@ applyColOrder(); paintColMenu(); setInterval(function(){rows().forEach(paintLogi
 rows().forEach(paintGroupCell);
 rows().forEach(function(r){var a=$('[data-f="initials"]',r);if(a)a.style.boxShadow=presRing(r.dataset.presence)});
 darkenPagerArrows($$('[data-pg]')); darkenPagerArrows($$('[data-gpg]'));
-pinPagerCur($$('[data-pg]')[2]); pinPagerCur($$('[data-gpg]')[2]);
 apply(); initSession();
 if(location.hash&&location.hash!=='#'&&location.hash!=='#people')applyHash(location.hash);else try{history.replaceState({h:'#people'},'','#people')}catch(e){}
 })();
