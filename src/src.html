@@ -393,24 +393,23 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
           <button class="tab" data-tab="people" style="background:#fff;color:#0f172a;box-shadow:0 1px 2px rgba(15,23,42,.08)"><i data-ic="users"></i>People<span class="cnt" id="cntP">2</span></button>
           <button class="tab" data-tab="removed"><i data-ic="trash"></i>Removed<span class="cnt" id="cntR">0</span></button>
         </div>
-        <label class="fsearch" style="margin-left:auto;width:260px;max-width:40vw">
+        <button class="link" id="clearAll" style="display:none">Clear filters</button>
+        <div class="showing">Showing <b id="sRange">1 – 2</b> of <b id="sTotal">2</b><span class="gdot"></span><span class="gnum" id="sAvail">0</span> available on this page</div>
+      </div>
+
+      <div class="tool">
+        <label class="fsearch" style="width:auto;flex:1 1 200px;max-width:260px;min-width:180px">
           <i data-ic="search"></i>
           <input id="psearch" placeholder="Search people" autocomplete="off">
           <button class="xbtn" id="psClear" style="display:none" title="Clear search"><i data-ic="x"></i></button>
         </label>
-        <div class="showing" style="margin-left:0">Showing <b id="sRange">1 – 2</b> of <b id="sTotal">2</b><span class="gdot"></span><span class="gnum" id="sAvail">0</span> available on this page</div>
-      </div>
-
-      <div class="tool">
         <button class="chip" data-dd="group"><span>Groups:</span><b data-lbl>All</b><i data-ic="chev"></i></button>
         <button class="chip" data-dd="location"><span>Location:</span><b data-lbl>All</b><i data-ic="chev"></i></button>
         <button class="chip" data-dd="presence"><span>Presence:</span><b data-lbl>Any</b><i data-ic="chev"></i></button>
         <button class="chip" data-dd="status"><span>Status:</span><b data-lbl>Any</b><i data-ic="chev"></i></button>
       <button class="chip" data-dd="role"><span>Role:</span><b data-lbl>Any</b><i data-ic="chev"></i></button>
-        <button class="chip" id="btnSort"><i data-ic="sort"></i>Sort:<b data-lbl style="margin-left:4px">Name A–Z</b><i data-ic="chev"></i></button>
         <button class="chip" id="btnViews"><i data-ic="star"></i>Views<i data-ic="chev"></i></button>
         <button class="chip" data-dd="cols" title="Show or hide columns"><i data-ic="list"></i>Columns<i data-ic="chev"></i></button>
-      <button class="link" id="clearAll" style="display:none">Clear filters</button>
       </div>
 
       <div class="bulk" id="bulk">
@@ -993,7 +992,6 @@ td{white-space:nowrap;padding:10px 12px;height:72px;border-bottom:1px solid #eef
 <div class="menu" data-menu="cols" style="min-width:236px;padding:8px"></div>
 <div class="menu" data-menu="bulkgrp" style="min-width:230px"></div>
 <div class="menu" data-menu="views" style="min-width:260px"></div>
-<div class="menu" data-menu="sort" style="min-width:210px;padding:6px"></div>
 
 <div class="menu" data-menu="perpage" style="min-width:110px" data-options="25|50|100"></div>
 <div class="menu" data-menu="setpresence" style="min-width:150px" data-options="Available|Busy|Do not disturb|Offline"></div>
@@ -1867,6 +1865,7 @@ addEventListener('scroll',function(e){if(openM&&e.target.nodeType===1&&openM.men
 var DEF={group:'All',location:'All',presence:'Any',status:'Any',role:'Any'};
 var filters=Object.assign({},DEF), tab='people', q='', sortKey=null, sortDir=1, perPage='50';
 function isFiltered(){return q!==''||Object.keys(DEF).some(function(k){return filters[k]!==DEF[k]})}
+function filtersActive(){return Object.keys(DEF).some(function(k){return filters[k]!==DEF[k]})}
 /* a filter chip is blue while its value differs from the default; the tick moves to the chosen option */
 function paintChip(chip,on,menu,val){
   chip.style.background=on?'#eff6ff':'#fff'; chip.style.borderColor=on?'#bfdbfe':'#e2e8f0'; chip.style.color=on?'#1d4ed8':'#475569';
@@ -1901,7 +1900,7 @@ function apply(){
   $('#sRange').textContent=vis?'1 – '+vis:'0'; $('#sTotal').textContent=vis; $('#sAvail').textContent=avail;
   $('#pgText').textContent=vis?'1–'+vis+' of '+vis+' '+(vis===1?'person':'people'):'0 people';
   var f=isFiltered();
-  $('#clearAll').style.display=f?'':'none'; $('#psClear').style.display=q?'':'none';
+  $('#clearAll').style.display=filtersActive()?'':'none'; $('#psClear').style.display=q?'':'none';
   emptyRow.style.display=vis?'none':'';
   var fr=$('#firstRun'), frOn=tab==='people'&&!isFiltered()&&nP===1&&can('people'); fr.style.display=frOn?'':'none'; if(frOn)tbody.insertBefore(fr,emptyRow);
   showEl($('#btnInvite'),can('people')&&!frOn); showEl($('#btnImport'),can('people')&&!frOn);
@@ -2050,41 +2049,11 @@ $$('[data-tab]').forEach(function(t){t.addEventListener('click',function(){
 })});
 
 /* sorting */
-function sortPeopleBy(k,dir){
-  sortKey=k; sortDir=dir;
-  rows().sort(function(a,c){
-    if(k==='login')return sortDir*((+a.dataset.login||0)-(+c.dataset.login||0));
-    return sortDir*(a.dataset[k]||'').localeCompare(c.dataset[k]||'');
-  }).forEach(function(r){tbody.insertBefore(r,emptyRow)});
-  $$('[data-sort]').forEach(function(x){var a=x.lastElementChild;a.textContent=x.dataset.sort===sortKey?(sortDir>0?'↑':'↓'):'⇅';a.style.color=x.dataset.sort===sortKey?'#2563eb':'#94a3b8'});
-  paintSortChip();
-}
 $$('[data-sort]').forEach(function(b){b.addEventListener('click',function(){
-  var k=b.dataset.sort, dir=(sortKey===k)?sortDir*-1:1;
-  sortPeopleBy(k,dir);
+  var k=b.dataset.sort; if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1}
+  rows().sort(function(a,c){return sortDir*(a.dataset[k]||'').localeCompare(c.dataset[k]||'')}).forEach(function(r){tbody.insertBefore(r,emptyRow)});
+  $$('[data-sort]').forEach(function(x){var a=x.lastElementChild;a.textContent=x.dataset.sort===sortKey?(sortDir>0?'↑':'↓'):'⇅';a.style.color=x.dataset.sort===sortKey?'#2563eb':'#94a3b8'});
 })});
-var SORT_OPTS=[
-  {k:'name',dir:1,label:'Name A–Z'},{k:'name',dir:-1,label:'Name Z–A'},
-  {k:'presence',dir:1,label:'Presence'},{k:'department',dir:1,label:'Department'},
-  {k:'loc',dir:1,label:'Location'},{k:'login',dir:-1,label:'Recently active'}
-];
-function paintSortChip(){
-  var lbl=$('#btnSort [data-lbl]'); if(!lbl)return;
-  var hit=SORT_OPTS.filter(function(o){return o.k===sortKey&&o.dir===sortDir})[0];
-  lbl.textContent=hit?hit.label:'Custom';
-}
-function renderSortMenu(){
-  var m=$('[data-menu="sort"]');
-  m.innerHTML=SORT_OPTS.map(function(o,i){
-    var on=sortKey===o.k&&sortDir===o.dir;
-    return '<button data-sortopt="'+i+'" data-h="background:#f1f5f9;" style="'+M_OPT+(on?'color:#2563eb;font-weight:600':'color:#1e293b')+'">'+(on?ico('tick','#2563eb'):'<span style="width:16px;display:inline-block"></span>')+'<span>'+o.label+'</span></button>';
-  }).join('');
-}
-$('#btnSort').addEventListener('click',function(){renderSortMenu();openMenu(this,$('[data-menu="sort"]'))});
-$('[data-menu="sort"]').addEventListener('click',function(e){
-  var o=e.target.closest('[data-sortopt]'); if(!o)return;
-  var opt=SORT_OPTS[+o.getAttribute('data-sortopt')]; closeMenu(); sortPeopleBy(opt.k,opt.dir);
-});
 
 /* ---------- selection + bulk ---------- */
 function selected(){return rows().filter(function(r){return visible(r)&&$('[data-chk]',r).checked})}
@@ -6315,7 +6284,6 @@ rows().forEach(paintGroupCell);
 rows().forEach(function(r){var a=$('[data-f="initials"]',r);if(a)a.style.boxShadow=presRing(r.dataset.presence)});
 paintPagerBtns('pg',1,1); paintPagerBtns('gpg',1,1);
 apply(); initSession();
-sortPeopleBy('name',1);
 if(location.hash&&location.hash!=='#'&&location.hash!=='#people')applyHash(location.hash);else try{history.replaceState({h:'#people'},'','#people')}catch(e){}
 })();
 </script>
