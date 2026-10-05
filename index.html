@@ -10233,7 +10233,7 @@
             + '<td style="' + TDS + '">' + (c.email ? esc(c.email) : '<span style="color:#94a3b8">—</span>') + '</td>'
             + '<td style="' + TDS + '"><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:700;background:' + tm.bg + ';color:' + tm.fg + '">' + tm.label + '</span></td>'
             + '<td style="' + TDS + 'text-align:center"><div style="display:inline-flex;gap:6px;align-items:center;justify-content:center">'
-            + rBtn('data-fvact="call"', 'Call', 'phone', 'blue') + rBtn('data-fvact="wa"', 'WhatsApp', 'wa', 'blue') + rBtn('data-fvact="notes"', 'Notes', 'file', 'blue') + rBtn('data-fvact="unfav"', 'Remove from Favourites', 'star', 'amber')
+            + rBtn('data-fvact="call"', 'Call', 'phone', 'blue') + rBtn('data-fvact="wa"', 'WhatsApp', 'wa', 'green') + rBtn('data-fvact="notes"', 'Notes', 'file', 'blue') + rBtn('data-fvact="unfav"', 'Remove from Favourites', 'star', 'amber')
             + '</div></td></tr>';
         }).join('');
         $('#fvEmpty').insertAdjacentHTML('beforebegin', rowsHtml);
@@ -10422,7 +10422,7 @@
         var h = cxSecHead('Reach them')
           + '<button data-cxact="call" data-h="background:#f1f5f9;" style="' + M_OPT_SM + 'color:#1e293b">' + icoSm('phone') + '<span>Call</span></button>'
           + '<button data-cxact="msg" data-h="background:#f1f5f9;" style="' + M_OPT_SM + 'color:#1e293b">' + icoSm('msg') + '<span>Message</span></button>'
-          + '<button data-cxact="wa" data-h="background:#f1f5f9;" style="' + M_OPT_SM + 'color:#1e293b">' + icoSm('wa') + '<span>WhatsApp</span></button>'
+          + '<button data-cxact="wa" data-h="background:#f1f5f9;" style="' + M_OPT_SM + 'color:#15803d">' + icoSm('wa', '#15803d') + '<span>WhatsApp</span></button>'
           + M_SEP_SM + cxSecHead('The record')
           + '<button data-cxact="view" data-h="background:#f1f5f9;" style="' + M_OPT_SM + 'color:#1e293b">' + icoSm('eye') + '<span>View</span></button>'
           + '<button data-cxact="notes" data-h="background:#f1f5f9;" style="' + M_OPT_SM + 'color:#1e293b">' + icoSm('file') + '<span>Notes</span></button>'
@@ -10840,7 +10840,7 @@
       /* ----- View a contact (read-only profile) ----- */
       var CV = null, cvOwn = false;
       function cvRow(label, value) { return '<div style="display:flex;gap:16px;padding:9px 0;border-top:1px solid #f1f5f9;font-size:13.5px"><span style="width:90px;flex-shrink:0;color:#64748b">' + label + '</span><span style="color:' + (value ? '#0f172a' : '#94a3b8') + ';font-weight:' + (value ? '500' : '400') + '">' + (value || 'Not added') + '</span></div>' }
-      function cvActBtn(key, icon, label) { return '<button data-cvact="' + key + '" data-tip="' + label + '" style="display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;cursor:pointer;font:inherit;color:#334155;padding:4px"><span style="width:42px;height:42px;border-radius:50%;background:#eff6ff;color:#2563eb;display:grid;place-items:center">' + ico2(icon, 'currentColor', 19) + '</span><span style="font-size:11.5px;font-weight:600">' + label + '</span></button>' }
+      function cvActBtn(key, icon, label, green) { var T = green ? ['#dcfce7', '#15803d'] : ['#eff6ff', '#2563eb']; return '<button data-cvact="' + key + '" data-tip="' + label + '" style="display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;cursor:pointer;font:inherit;color:#334155;padding:4px"><span style="width:42px;height:42px;border-radius:50%;background:' + T[0] + ';color:' + T[1] + ';display:grid;place-items:center">' + ico2(icon, 'currentColor', 19) + '</span><span style="font-size:11.5px;font-weight:600">' + label + '</span></button>' }
       function openContactView(c) {
         CV = c;
         var av = AVS[(+c.av) % AVS.length];
@@ -10853,7 +10853,7 @@
         var missing = ['email', 'phone', 'company', 'website', 'socials'].filter(function (k) { return !c[k] });
         $('#cvIncomplete').style.display = missing.length ? 'block' : 'none';
         $('#cvIncomplete').textContent = 'Profile setup incomplete — missing ' + missing.length + (missing.length === 1 ? ' field' : ' fields') + '.';
-        $('#cvActions').innerHTML = cvActBtn('call', 'phone', 'Call') + cvActBtn('sms', 'msg', 'SMS') + cvActBtn('wa', 'wa', 'WhatsApp');
+        $('#cvActions').innerHTML = cvActBtn('call', 'phone', 'Call') + cvActBtn('sms', 'msg', 'SMS') + cvActBtn('wa', 'wa', 'WhatsApp', true);
         cvOwn = grabOv(); $('#cvdlg').style.display = 'flex'; closeMenu(); mOpen($('#cvdlg'));
       }
       function closeCV() { if ($('#cvdlg').style.display !== 'flex') return; $('#cvdlg').style.display = 'none'; dropOv(cvOwn); CV = null; mReturnFocus() }
