@@ -1579,13 +1579,6 @@
                 style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px; color: #94a3b8;">
                 <path d="M6 9l6 6 6-6" />
               </svg></button>
-            <button data-dd="skill" data-h="background:#f8fafc;border-color:#cbd5e1;"
-              style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 5px; padding: 0 12px 0 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #475569; font-size: 13px; transition: background-color .12s,border-color .12s; white-space: nowrap; flex-shrink: 0;"><span
-                style="box-sizing: border-box;">Skill:</span><b data-lbl
-                style="box-sizing: border-box; color: #0f172a; font-weight: 600;">Any</b><svg viewBox="0 0 24 24"
-                style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px; color: #94a3b8;">
-                <path d="M6 9l6 6 6-6" />
-              </svg></button>
             <button id="btnViews" data-h="background:#f8fafc;border-color:#cbd5e1;"
               style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 5px; padding: 0 12px 0 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #475569; font-size: 13px; transition: background-color .12s,border-color .12s; white-space: nowrap; flex-shrink: 0;"><svg
                 viewBox="0 0 24 24"
@@ -6450,7 +6443,8 @@
       function presView(el, p) { el.textContent = ''; el.style.color = PC[p].t; var d = document.createElement('span'); d.style.cssText = 'width:8px;height:8px;border-radius:50%;flex-shrink:0;background:' + PD[p]; el.appendChild(d); el.appendChild(document.createTextNode(p)) }
       function ini(n) { var p = n.trim().split(/\s+/); return ((p[0] || '?')[0] + (p[1] ? p[1][0] : '')).toUpperCase() }
       var toastT;
-      function toast() { }   /* silent: only note() may pop up a message */
+      /* every toast() call now shows the same popup as note(), so actions confirm what happened */
+      function toast(msg) { note(msg) }
       function note(msg, act, cb, tone) {
         var t = $('#toast'), a = $('#toastAct'), ic = $('#toastIcon'), bar = $('#toastBar'), bad = tone === 'danger';
         $('#toastMsg').textContent = msg; t.style.display = 'block';
@@ -6507,7 +6501,7 @@
       addEventListener('scroll', function (e) { if (openM && e.target.nodeType === 1 && openM.menu.contains(e.target)) return; closeMenu() }, true); addEventListener('resize', closeMenu);
 
       /* ---------- state + filtering ---------- */
-      var DEF = { group: 'All', location: 'All', presence: 'Any', status: 'Any', role: 'Any', skill: 'Any' };
+      var DEF = { group: 'All', location: 'All', presence: 'Any', status: 'Any', role: 'Any' };
       var filters = Object.assign({}, DEF), tab = 'people', q = '', sortKey = null, sortDir = 1, perPage = '50';
       function isFiltered() { return q !== '' || Object.keys(DEF).some(function (k) { return filters[k] !== DEF[k] }) }
       function filtersActive() { return Object.keys(DEF).some(function (k) { return filters[k] !== DEF[k] }) }
@@ -6528,7 +6522,7 @@
       function setFilter(k, v) { filters[k] = v; updateChip(k); apply() }
       function visible(r) { return r.style.display !== 'none' }
       function apply() {
-        var ql = q.trim().toLowerCase(), vis = 0, avail = 0, nP = 0, nR = 0, skillMap = prefRead(SKILLS_KEY);
+        var ql = q.trim().toLowerCase(), vis = 0, avail = 0, nP = 0, nR = 0;
         rows().forEach(function (r) {
           var d = r.dataset, removed = d.removed === '1'; removed ? nR++ : nP++;
           var g = filters.group, l = filters.location, p = filters.presence, s = filters.status;
@@ -6536,7 +6530,6 @@
             && (g === 'All' || (g === 'No group' ? !d.group : inGroup(r, g)))
             && (l === 'All' || d.loc === l) && (p === 'Any' || d.presence === p) && (s === 'Any' || d.status === s)
             && (filters.role === 'Any' || d.role === filters.role)
-            && (filters.skill === 'Any' || (skillMap[d.id] || []).indexOf(filters.skill) > -1)
             && (!ql || (d.name + ' ' + d.email + ' ' + d.num + ' ' + d.num2 + ' ' + d.role + ' ' + d.group + ' ' + d.loc + ' ' + d.city).toLowerCase().indexOf(ql) > -1);
           r.style.display = ok ? '' : 'none';
           if (!ok) $('[data-chk]', r).checked = false;
@@ -6928,7 +6921,7 @@
       }
       drawer.addEventListener('click', function (e) {
         var q = e.target.closest('[data-qa]'), del = e.target.closest('[data-skdel]');
-        if (del && ctx) { var sk = prefRead(SKILLS_KEY); sk[ctx.dataset.id] = (sk[ctx.dataset.id] || []).filter(function (_, i) { return i !== +del.dataset.skdel }); prefWrite(SKILLS_KEY, sk); paintDrawerExtra(ctx); syncSkillOptions(); return }
+        if (del && ctx) { var sk = prefRead(SKILLS_KEY); sk[ctx.dataset.id] = (sk[ctx.dataset.id] || []).filter(function (_, i) { return i !== +del.dataset.skdel }); prefWrite(SKILLS_KEY, sk); paintDrawerExtra(ctx); return }
         if (!q || !ctx) return;
         var act = q.dataset.qa, name = ctx.dataset.name, num = ctx.dataset.num;
         if (act === 'call') { $('#dCall').click(); return }
@@ -6946,7 +6939,7 @@
         var v = e.target.value.trim(); if (!v) return; e.preventDefault();
         var sk = prefRead(SKILLS_KEY), list = sk[ctx.dataset.id] || [];
         if (list.indexOf(v) < 0) list.push(v);
-        sk[ctx.dataset.id] = list; prefWrite(SKILLS_KEY, sk); paintDrawerExtra(ctx); syncSkillOptions();
+        sk[ctx.dataset.id] = list; prefWrite(SKILLS_KEY, sk); paintDrawerExtra(ctx);
         var again = $('#dSkIn'); if (again) again.focus();
       });
       drawer.addEventListener('change', function (e) {
@@ -9150,17 +9143,6 @@
         if (filters.role !== 'Any' && names.indexOf(filters.role) < 0) filters.role = 'Any';
         updateChip('role');
       }
-      /* Skill filter: the options are the skills saved on people in the drawer. Rebuilt whenever those change. */
-      function personSkills() { var m = prefRead(SKILLS_KEY), all = {}; Object.keys(m).forEach(function (id) { (m[id] || []).forEach(function (s) { all[s] = 1 }) }); return Object.keys(all).sort() }
-      function syncSkillOptions() {
-        var names = personSkills(), menu = $('[data-menu="skill"]');
-        if (!menu) { menu = $('[data-menu="role"]').cloneNode(false); menu.dataset.menu = 'skill'; $('[data-menu="role"]').parentNode.appendChild(menu) }
-        menu.innerHTML = '';
-        ['Any'].concat(names).forEach(function (n) { var o = roleOptTpl.cloneNode(true); o.setAttribute('data-opt', n); o.lastElementChild.textContent = n; menu.appendChild(o) });
-        if (filters.skill !== 'Any' && names.indexOf(filters.skill) < 0) filters.skill = 'Any';
-        updateChip('skill'); apply();
-      }
-      syncSkillOptions();
       function rolesTouched() { renderRoles(); if (vD.style.display !== 'none') renderDetail(); if (RV && $('#rvdlg').style.display === 'flex') renderRoleView(RV) }
 
       /* ----- list ----- */
@@ -11141,7 +11123,7 @@
           addRow({ id: p.id, dids: p.num2 || '', name: p.name, email: p.email, role: p.role, status: p.status, group: p.group, department: p.department, loc: p.loc || 'MCM', city: p.city || 'Mumbai, India', num: p.num, num2: p.num2, phone: p.phone, presence: p.presence, login: p.login, invited: p.invited || '', removed: '0', fav: FAV_SEED[p.id] ? '1' : '0', self: '0', av: p.av });
         });
         var u = personById('umar'); if (u) { u.dataset.group = 'Sales'; renderRow(u) }
-        syncGroupOptions(); 
+        syncGroupOptions();
       })();
       (function () { var t0 = Date.now(); rows().forEach(function (r) { if (r.dataset.id === 'anu') r.dataset.login = String(t0); else if (r.dataset.id === 'umar') r.dataset.login = String(t0 - 26 * 3600e3); paintLogin(r) }) })();
       applyColOrder(); paintColMenu(); setInterval(function () { rows().forEach(paintLogin) }, 30000);
