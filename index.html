@@ -1579,6 +1579,13 @@
                 style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px; color: #94a3b8;">
                 <path d="M6 9l6 6 6-6" />
               </svg></button>
+            <button data-dd="skill" data-h="background:#f8fafc;border-color:#cbd5e1;"
+              style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 5px; padding: 0 12px 0 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #475569; font-size: 13px; transition: background-color .12s,border-color .12s; white-space: nowrap; flex-shrink: 0;"><span
+                style="box-sizing: border-box;">Skill:</span><b data-lbl
+                style="box-sizing: border-box; color: #0f172a; font-weight: 600;">Any</b><svg viewBox="0 0 24 24"
+                style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 14px; height: 14px; color: #94a3b8;">
+                <path d="M6 9l6 6 6-6" />
+              </svg></button>
             <button id="btnViews" data-h="background:#f8fafc;border-color:#cbd5e1;"
               style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 5px; padding: 0 12px 0 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #475569; font-size: 13px; transition: background-color .12s,border-color .12s; white-space: nowrap; flex-shrink: 0;"><svg
                 viewBox="0 0 24 24"
@@ -5831,6 +5838,7 @@
         </svg></button>
     </div>
     <div style="box-sizing: border-box; padding: 20px; overflow-y: auto; flex: 1;">
+      <div id="dExtra" style="box-sizing: border-box; padding-bottom: 6px;"></div>
       <div
         style="box-sizing: border-box; display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid #f1f5f9;">
         <span style="box-sizing: border-box; color: #64748b;">Role</span><span id="dRole"
@@ -6499,7 +6507,7 @@
       addEventListener('scroll', function (e) { if (openM && e.target.nodeType === 1 && openM.menu.contains(e.target)) return; closeMenu() }, true); addEventListener('resize', closeMenu);
 
       /* ---------- state + filtering ---------- */
-      var DEF = { group: 'All', location: 'All', presence: 'Any', status: 'Any', role: 'Any' };
+      var DEF = { group: 'All', location: 'All', presence: 'Any', status: 'Any', role: 'Any', skill: 'Any' };
       var filters = Object.assign({}, DEF), tab = 'people', q = '', sortKey = null, sortDir = 1, perPage = '50';
       function isFiltered() { return q !== '' || Object.keys(DEF).some(function (k) { return filters[k] !== DEF[k] }) }
       function filtersActive() { return Object.keys(DEF).some(function (k) { return filters[k] !== DEF[k] }) }
@@ -6520,7 +6528,7 @@
       function setFilter(k, v) { filters[k] = v; updateChip(k); apply() }
       function visible(r) { return r.style.display !== 'none' }
       function apply() {
-        var ql = q.trim().toLowerCase(), vis = 0, avail = 0, nP = 0, nR = 0;
+        var ql = q.trim().toLowerCase(), vis = 0, avail = 0, nP = 0, nR = 0, skillMap = prefRead(SKILLS_KEY);
         rows().forEach(function (r) {
           var d = r.dataset, removed = d.removed === '1'; removed ? nR++ : nP++;
           var g = filters.group, l = filters.location, p = filters.presence, s = filters.status;
@@ -6528,6 +6536,7 @@
             && (g === 'All' || (g === 'No group' ? !d.group : inGroup(r, g)))
             && (l === 'All' || d.loc === l) && (p === 'Any' || d.presence === p) && (s === 'Any' || d.status === s)
             && (filters.role === 'Any' || d.role === filters.role)
+            && (filters.skill === 'Any' || (skillMap[d.id] || []).indexOf(filters.skill) > -1)
             && (!ql || (d.name + ' ' + d.email + ' ' + d.num + ' ' + d.num2 + ' ' + d.role + ' ' + d.group + ' ' + d.loc + ' ' + d.city).toLowerCase().indexOf(ql) > -1);
           r.style.display = ok ? '' : 'none';
           if (!ok) $('[data-chk]', r).checked = false;
@@ -6860,7 +6869,7 @@
         $('#dNum').textContent = [d.num, d.num2].filter(Boolean).join(' / ') || 'None'; $('#dPres').textContent = d.presence;
         $('#dRemL').textContent = d.removed === '1' ? 'Restore' : 'Remove';
         $('#dRem').style.color = d.removed === '1' ? '#15803d' : '#dc2626'; showEl($('#dRem'), can('people'));
-        paintDFav(r);
+        paintDFav(r); paintDrawerExtra(r);
         dOv.style.display = 'block'; drawer.style.display = 'flex'; closeMenu(); if (appHeader) { appHeader.style.position = 'static'; appHeader.style.zIndex = '1' }
         requestAnimationFrame(function () { dOv.style.opacity = 1; drawer.style.transform = 'translateX(0)' });
       }
@@ -6876,8 +6885,77 @@
       $('#dRem').addEventListener('click', function () { ctx.dataset.removed === '1' ? restoreRows([ctx]) : removeRows([ctx]) });
       document.addEventListener('click', function (e) { var t = e.target.closest('[data-toast]'); if (t) toast(t.dataset.toast) });
 
+      /* drawer extras: time zone, presence, quick actions and collapsible sections.
+         Skills and personal notes are kept per browser (localStorage), keyed by person id. */
+      var NOTES_KEY = 'ucaas.personNotes', SKILLS_KEY = 'ucaas.personSkills';
+      function prefRead(k) { try { return JSON.parse(localStorage.getItem(k)) || {} } catch (e) { return {} } }
+      function prefWrite(k, o) { try { localStorage.setItem(k, JSON.stringify(o)) } catch (e) { } }
+      function hierOf(r) {
+        var id = r.dataset.id, mgr = null, reports = [];
+        groupsOf(r).some(function (n) { var g = groups.filter(function (x) { return x.name === n })[0]; if (g && g.manager && g.manager !== id) mgr = personById(g.manager); return !!mgr });
+        groups.forEach(function (g) { if (g.manager === id) gMembers(g).forEach(function (p) { if (p !== r && reports.indexOf(p) < 0) reports.push(p) }) });
+        return { mgr: mgr, reports: reports };
+      }
+      function drawerSvg(path) { return '<svg viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;width:18px;height:18px;display:block">' + path + '</svg>' }
+      function drawerSection(title, body, open) {
+        return '<details' + (open ? ' open' : '') + ' style="border-bottom:1px solid #f1f5f9;padding:12px 0"><summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600">' + title + '<span aria-hidden="true" style="color:#94a3b8;font-size:14px">&#9662;</span></summary><div style="margin-top:10px">' + body + '</div></details>';
+      }
+      function paintDrawerExtra(r) {
+        var d = r.dataset, id = d.id, loc = locByName(d.loc), h = hierOf(r), notes = prefRead(NOTES_KEY), skills = prefRead(SKILLS_KEY), mine = skills[id] || [];
+        var btn = 'box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;padding:10px 4px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#1e293b;font:inherit;font-size:12px;font-weight:500;cursor:pointer';
+        var quick = [
+          ['call', 'Call', ico2('phone', '#334155', 18)],
+          ['sms', 'SMS', ico2('msg', '#334155', 18)],
+          ['video', 'Video', ico2('video', '#334155', 18)],
+          ['email', 'Email', drawerSvg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>')],
+          ['copy', 'Copy link', drawerSvg('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>')]
+        ].map(function (q) { return '<button data-qa="' + q[0] + '" style="' + btn + '">' + q[2] + q[1] + '</button>' }).join('');
+        var mgrHtml = h.mgr ? '<button data-openperson="' + esc(h.mgr.dataset.id) + '" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#2563eb;cursor:pointer">' + esc(h.mgr.dataset.name) + '</button>' : '<span style="color:#94a3b8">No manager set</span>';
+        var repHtml = h.reports.length ? h.reports.map(function (p) { return '<button data-openperson="' + esc(p.dataset.id) + '" style="display:flex;justify-content:space-between;width:100%;border:0;background:none;padding:6px 0;font:inherit;color:#0f172a;cursor:pointer;text-align:left"><span style="font-weight:600;color:#2563eb">' + esc(p.dataset.name) + '</span><span style="color:#64748b;font-size:12.5px">' + esc(p.dataset.role) + '</span></button>' }).join('') : '<span style="color:#94a3b8">No direct reports</span>';
+        var skillHtml = mine.map(function (s, i) { return '<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#f1f5f9;color:#334155;font-size:12.5px">' + esc(s) + '<button data-skdel="' + i + '" aria-label="Remove ' + esc(s) + '" style="border:0;background:none;padding:0;cursor:pointer;color:#64748b;font:inherit;line-height:1">&times;</button></span>' }).join(' ');
+        skillHtml += '<input id="dSkIn" placeholder="Add a skill or language, press Enter" autocomplete="off" style="box-sizing:border-box;display:block;width:100%;margin-top:10px;height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:13px;outline:0">';
+        var noteHtml = '<textarea data-note placeholder="Private notes for this person (only on this browser)" style="box-sizing:border-box;width:100%;height:84px;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical;outline:0">' + esc(notes[id] || '') + '</textarea>';
+        $('#dExtra').innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;font-size:13px">'
+          + '<span style="color:#475569">' + (loc ? 'Local time <b style="color:#0f172a">' + tzClock(loc.tz) + '</b> · ' + esc(loc.tz) : 'Time zone not set') + '</span>'
+          + '<span id="dExtraPres" style="display:inline-flex;align-items:center;gap:6px;font-weight:600"></span></div>'
+          + '<div style="display:flex;gap:6px;margin-bottom:8px">' + quick + '</div>'
+          + drawerSection('Organization hierarchy', '<div style="font-size:13.5px;color:#334155">Reports to: ' + mgrHtml + '</div>', true)
+          + drawerSection('Direct reports (' + h.reports.length + ')', repHtml)
+          + drawerSection('Skills &amp; languages (' + mine.length + ')', skillHtml)
+          + drawerSection('Personal notes', noteHtml);
+        presView($('#dExtraPres'), d.presence);
+      }
+      drawer.addEventListener('click', function (e) {
+        var q = e.target.closest('[data-qa]'), del = e.target.closest('[data-skdel]');
+        if (del && ctx) { var sk = prefRead(SKILLS_KEY); sk[ctx.dataset.id] = (sk[ctx.dataset.id] || []).filter(function (_, i) { return i !== +del.dataset.skdel }); prefWrite(SKILLS_KEY, sk); paintDrawerExtra(ctx); syncSkillOptions(); return }
+        if (!q || !ctx) return;
+        var act = q.dataset.qa, name = ctx.dataset.name, num = ctx.dataset.num;
+        if (act === 'call') { $('#dCall').click(); return }
+        if (act === 'sms') { note(num ? 'Texting ' + name + ' on ' + num + '…' : 'No number assigned to ' + name); return }
+        if (act === 'video') { note('Starting a video call with ' + name + '…'); return }
+        if (act === 'email') { if (ctx.dataset.email) location.href = 'mailto:' + ctx.dataset.email; else note('No email on file for ' + name); return }
+        if (act === 'copy') {
+          var link = location.href.split('#')[0] + '#person/' + ctx.dataset.id;
+          if (navigator.clipboard) navigator.clipboard.writeText(link).then(function () { note('Link copied') }, function () { note('Could not copy the link', null, null, 'danger') });
+          else note('Could not copy the link', null, null, 'danger');
+        }
+      });
+      drawer.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || e.target.id !== 'dSkIn' || !ctx) return;
+        var v = e.target.value.trim(); if (!v) return; e.preventDefault();
+        var sk = prefRead(SKILLS_KEY), list = sk[ctx.dataset.id] || [];
+        if (list.indexOf(v) < 0) list.push(v);
+        sk[ctx.dataset.id] = list; prefWrite(SKILLS_KEY, sk); paintDrawerExtra(ctx); syncSkillOptions();
+        var again = $('#dSkIn'); if (again) again.focus();
+      });
+      drawer.addEventListener('change', function (e) {
+        if (!e.target.matches('[data-note]') || !ctx) return;
+        var nt = prefRead(NOTES_KEY); nt[ctx.dataset.id] = e.target.value; prefWrite(NOTES_KEY, nt);
+      });
+
       tbody.addEventListener('click', function (e) {
-        var pn = e.target.closest('[data-person]'); if (pn) { openPerson(pn.closest('tr')); return }
+        var pn = e.target.closest('[data-person]'); if (pn) { openDrawer(pn.closest('tr')); return }
         var o = e.target.closest('[data-open]'); if (o) { openDrawer(o.closest('tr')); return }
         var m = e.target.closest('[data-more]'); if (m) {
           ctx = m.closest('tr'); var menu = $('[data-menu="rowmenu"]');
@@ -9072,6 +9150,17 @@
         if (filters.role !== 'Any' && names.indexOf(filters.role) < 0) filters.role = 'Any';
         updateChip('role');
       }
+      /* Skill filter: the options are the skills saved on people in the drawer. Rebuilt whenever those change. */
+      function personSkills() { var m = prefRead(SKILLS_KEY), all = {}; Object.keys(m).forEach(function (id) { (m[id] || []).forEach(function (s) { all[s] = 1 }) }); return Object.keys(all).sort() }
+      function syncSkillOptions() {
+        var names = personSkills(), menu = $('[data-menu="skill"]');
+        if (!menu) { menu = $('[data-menu="role"]').cloneNode(false); menu.dataset.menu = 'skill'; $('[data-menu="role"]').parentNode.appendChild(menu) }
+        menu.innerHTML = '';
+        ['Any'].concat(names).forEach(function (n) { var o = roleOptTpl.cloneNode(true); o.setAttribute('data-opt', n); o.lastElementChild.textContent = n; menu.appendChild(o) });
+        if (filters.skill !== 'Any' && names.indexOf(filters.skill) < 0) filters.skill = 'Any';
+        updateChip('skill'); apply();
+      }
+      syncSkillOptions();
       function rolesTouched() { renderRoles(); if (vD.style.display !== 'none') renderDetail(); if (RV && $('#rvdlg').style.display === 'flex') renderRoleView(RV) }
 
       /* ----- list ----- */
@@ -10270,8 +10359,9 @@
       }
       document.addEventListener('click', function (e) { var t = e.target.closest('[data-openperson]'); if (t) { var r = personById(t.getAttribute('data-openperson')); if (r) openDrawer(r) } });
       document.addEventListener('click', function (e) { var t = e.target.closest('[data-cgopen]'); if (t) { var g = CGROUPS.filter(function (x) { return x.id === t.getAttribute('data-cgopen') })[0]; if (g) openCxGroupMembers(g) } });
-      var cxGroupDrill = null;
+      var cxGroupDrill = null, cxDrillFrom = 'contacts';
       function openCxGroupMembers(g) {
+        if (!cxGroupDrill) cxDrillFrom = cxTab;
         cxGroupDrill = g; cxFilt.group = g.name; cxFilt.tag = 'Any'; cxq = ''; $('#cxsearch').value = '';
         cxPage = 1; cxTab = 'contacts';
         paintCxTabs(); paintCxGroupChip(); paintCxTagChip(); paintCxGroupBanner();
@@ -10286,8 +10376,14 @@
         (on ? $('#cxGroupHeadToolSlot') : $('#cxToolbarRow')).insertBefore($('#cxTool'), on ? null : $('#cgTool'));
         $('#cxTool').style.marginLeft = on ? '' : 'auto';
         if (on) $('#cxGroupHeadName').textContent = cxGroupDrill.name;
+        var backLbl = cxDrillFrom === 'groups' ? 'Back to contact groups' : 'Back to all contacts';
+        $('#cxGroupBack').title = backLbl; $('#cxGroupBack').setAttribute('aria-label', backLbl);
       }
-      $('#cxGroupBack').addEventListener('click', cxClearFilters);
+      /* the back arrow returns to the tab the group was opened from (Groups), not always the All contacts list */
+      $('#cxGroupBack').addEventListener('click', function () {
+        var back = cxDrillFrom === 'groups' ? 'groups' : 'contacts';
+        cxClearFilters(); cxTab = back; paintCxTabs(); (back === 'groups' ? renderCGroups : renderContacts)(); setTimeout(fitScrollCards, 0);
+      });
       function paintCxCounts() { $('#cxCntContacts').textContent = CONTACTS.length; $('#cxCntGroups').textContent = CGROUPS.length }
       function paintCxTabs() {
         $$('[data-cxtab]').forEach(function (b) { var on = b.getAttribute('data-cxtab') === cxTab; b.style.background = on ? '#fff' : ''; b.style.color = on ? '#0f172a' : ''; b.style.boxShadow = on ? '0 1px 2px rgba(15,23,42,.08)' : '' });
@@ -11045,7 +11141,7 @@
           addRow({ id: p.id, dids: p.num2 || '', name: p.name, email: p.email, role: p.role, status: p.status, group: p.group, department: p.department, loc: p.loc || 'MCM', city: p.city || 'Mumbai, India', num: p.num, num2: p.num2, phone: p.phone, presence: p.presence, login: p.login, invited: p.invited || '', removed: '0', fav: FAV_SEED[p.id] ? '1' : '0', self: '0', av: p.av });
         });
         var u = personById('umar'); if (u) { u.dataset.group = 'Sales'; renderRow(u) }
-        syncGroupOptions();
+        syncGroupOptions(); 
       })();
       (function () { var t0 = Date.now(); rows().forEach(function (r) { if (r.dataset.id === 'anu') r.dataset.login = String(t0); else if (r.dataset.id === 'umar') r.dataset.login = String(t0 - 26 * 3600e3); paintLogin(r) }) })();
       applyColOrder(); paintColMenu(); setInterval(function () { rows().forEach(paintLogin) }, 30000);
