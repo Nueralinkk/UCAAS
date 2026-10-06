@@ -22,6 +22,12 @@
       background: #18181b !important
     }
 
+    html[data-theme="dark"] [style*="background:#f4f6fb"],
+    html[data-theme="dark"] [style*="background: #f4f6fb"],
+    html[data-theme="dark"] [style*="background:#eef2fa"],
+    html[data-theme="dark"] [style*="background: #eef2fa"] {
+      background: #0d0d0f !important
+    }
     html[data-theme="dark"] [style*="background:#f5f7fb"],
     html[data-theme="dark"] [style*="background: #f5f7fb"],
     html[data-theme="dark"] [style*="background:rgb(245, 247, 251)"],
@@ -2898,6 +2904,8 @@
       </div>
 
       <div id="viewInteractions" style="box-sizing: border-box; display: none;"></div>
+
+      <div id="viewAnalytics" style="box-sizing: border-box; display: none;"></div>
 
       <div id="viewContacts" style="box-sizing: border-box; display: none;">
         <div id="cxNormalHead" style="box-sizing: border-box;">
@@ -7027,50 +7035,31 @@
         var nt = prefRead(NOTES_KEY); nt[ctx.dataset.id] = e.target.value; prefWrite(NOTES_KEY, nt);
       });
 
-      /* Interactions tab: call list, dialpad and call panels, laid out like the phone page */
+      /* Interactions: call data, the list, the dialer and the call detail views */
       var IX_CALLS = [
-        { n: '+1 646 934 8292', dir: 'out', dur: '00:16', date: '23 Sep', status: 'Completed' },
-        { n: '+1 914 373 7206', dir: 'out', dur: '00:02', date: '23 Sep', status: 'Completed' },
-        { n: '+1 315 961 6248', dir: 'out', dur: '00:25', date: '21 Sep', status: 'Completed' },
-        { n: '+1 832 847 6880', dir: 'in', dur: '00:14', date: '21 Sep', status: 'Completed' },
-        { n: 'Jeet Nakrani', num: '+91 93210 58425', dir: 'out', dur: '00:19', date: '21 Sep', status: 'Completed' },
-        { n: '+1 503 218 4410', dir: 'in', dur: '00:00', date: '20 Sep', status: 'Missed' }
+        { id: 'c1', n: '+1 646 934 8292', num: '+1 646 934 8292', dir: 'out', dur: '00:16', ago: 13, status: 'Completed', rec: true, count: 17, summary: 'Customer asked about the renewal date and agreed to a callback on Monday.', transcript: ['Agent: Hello, thanks for calling back.', 'Customer: I wanted to check when my plan renews.', 'Agent: It renews on the first of next month.', 'Customer: Okay, please call me back on Monday.'] },
+        { id: 'c2', n: '+1 914 373 7206', num: '+1 914 373 7206', dir: 'out', dur: '00:02', ago: 13, status: 'Completed', rec: false, count: 28, summary: 'The call ended after two seconds, so there is no conversation to summarise.', transcript: [] },
+        { id: 'c3', n: '+1 315 961 6248', num: '+1 315 961 6248', dir: 'out', dur: '00:25', ago: 15, status: 'Completed', rec: true, count: 45, summary: 'Quote request for three extra lines with voicemail on each.', transcript: ['Agent: How many lines do you need?', 'Customer: Three, with voicemail on each.', 'Agent: I will send the quote by email today.'] },
+        { id: 'c4', n: '+1 832 847 6880', num: '+1 832 847 6880', dir: 'in', dur: '00:14', ago: 15, status: 'Completed', rec: false, count: 76, summary: 'Short inbound call about an invoice that looked wrong.', transcript: ['Customer: My invoice looks wrong.', 'Agent: I will check it and call you back.'] },
+        { id: 'c5', n: 'Jeet Nakrani', num: '1000', dir: 'out', dur: '00:19', ago: 15, status: 'Completed', rec: false, internal: true, count: 27, summary: 'Internal call between extensions.', transcript: ['Jeet: Can you send me the file?', 'Umar: Sending it now.'] },
+        { id: 'c6', n: '+1 659 901 6340', num: '+1 659 901 6340', dir: 'in', dur: '00:24', ago: 15, status: 'Completed', rec: true, count: 11, summary: 'Support question about call forwarding to a mobile phone.', transcript: ['Customer: How do I forward calls to my mobile?', 'Agent: Dial star 72 and then your number.'] }
       ];
-      var ixState = { tab: 'Calls', f: 'All', q: '', r: 'Copilot', dial: '' };
-      var IX_RIGHT = {
-        Copilot: '<div style="width:44px;height:44px;border-radius:12px;background:#eff6ff;color:#2563eb;display:grid;place-items:center;margin:8px auto 12px">' + drawerSvg('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>') + '</div><div style="font-weight:600;color:#0f172a">Copilot is armed.</div><p style="color:#64748b;font-size:13.5px;line-height:1.5;margin:8px 0 0">It transcribes as soon as a call connects, and you can ask it about the call while you are on it.</p>',
-        Summary: '<p style="color:#64748b;font-size:13.5px;margin:0">A summary appears here after a call ends.</p>',
-        Transcript: '<p style="color:#64748b;font-size:13.5px;margin:0">The transcript appears here once a call connects.</p>',
-        Notes: '<p style="color:#64748b;font-size:13.5px;margin:0">Notes you take during a call are saved here.</p>',
-        History: '<p style="color:#64748b;font-size:13.5px;margin:0">Earlier calls with this person appear here.</p>',
-        Contact: '<p style="color:#64748b;font-size:13.5px;margin:0">Contact details appear here when a call is connected.</p>'
-      };
-      function paintIxList() {
-        var q = ixState.q.toLowerCase();
-        var src = ixState.tab === 'Recordings' ? IX_REC : ixState.tab === 'Voicemails' ? IX_VM : IX_CALLS;
-        var list = src.filter(function (c) {
-          var fOk = src !== IX_CALLS || ixState.f === 'All' || (ixState.f === 'Inbound' && c.dir === 'in') || (ixState.f === 'Outbound' && c.dir === 'out') || (ixState.f === 'Missed' && c.status === 'Missed');
-          return fOk && (!q || (c.n + ' ' + (c.num || '')).toLowerCase().indexOf(q) > -1);
-        });
-        $('#ixList').innerHTML = list.length ? list.map(function (c) {
-          var missed = c.status === 'Missed', num = c.num || c.n;
-          return '<button data-ixnum="' + esc(num) + '" style="box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;padding:10px;border:0;border-bottom:1px solid #f1f5f9;background:none;font:inherit;text-align:left;cursor:pointer">'
-            + '<span style="width:34px;height:34px;border-radius:9px;background:' + (missed ? '#fef2f2' : '#eff6ff') + ';display:grid;place-items:center;flex-shrink:0">' + ico2(c.dir === 'in' ? 'cidIn' : 'cidOut', missed ? '#dc2626' : '#2563eb', 16) + '</span>'
-            + '<span style="min-width:0;flex:1"><span style="display:block;font-weight:600;color:#0f172a;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(c.n) + '</span>'
-            + '<span style="display:flex;gap:8px;align-items:center;font-size:12px;color:#64748b;margin-top:3px"><span style="color:' + (missed ? '#b91c1c' : '#15803d') + ';background:' + (missed ? '#fee2e2' : '#dcfce7') + ';border-radius:6px;padding:1px 7px;font-weight:600">' + (missed ? 'Missed' : 'Completed') + '</span>' + esc(c.dur) + ' · ' + esc(c.date) + '</span></span></button>';
-        }).join('') : '<div style="text-align:center;color:#64748b;font-size:13px;padding:24px 8px">No calls match this filter.</div>';
-      }
-      function paintIxDial() {
-        $('#ixDial').textContent = ixState.dial || 'Search contacts or dial a number'; $('#ixDial').style.color = ixState.dial ? '#0f172a' : '#94a3b8'; $('#ixDial').style.fontWeight = ixState.dial ? '600' : '400'; $('#ixDial').style.fontSize = ixState.dial ? '20px' : '14px';
-        var cb = $('[data-ixcall]'); cb.style.background = ixState.dial ? '#15803d' : '#e2e8f0'; cb.style.color = ixState.dial ? '#fff' : '#94a3b8';
-      }
-      /* Interactions: sample lists, dropdown options, and the styles for the Copilot tabs and menus */
-      var IX_REC = [
-        { n: '+1 646 934 8292', dir: 'out', dur: '00:16', date: '23 Sep', status: 'Completed' },
-        { n: 'Jeet Nakrani', num: '+91 93210 58425', dir: 'out', dur: '00:19', date: '21 Sep', status: 'Completed' }
+      var IX_VM = [
+        { id: 'v1', n: '+1 832 847 6880', num: '+1 832 847 6880', dir: 'in', dur: '00:23', ago: 15, status: 'Completed', count: 3, summary: 'Caller asked for a call back about an invoice.', transcript: ['Customer: Hi, it is about my invoice. Please call me back.'] },
+        { id: 'v2', n: 'Jeet Nakrani', num: '1000', dir: 'out', dur: '00:51', ago: 15, status: 'Completed', internal: true, count: 1, summary: 'Internal voicemail.', transcript: ['Jeet: Please check the schedule and call me back.'] }
       ];
-      var IX_VM = [ { n: '+1 503 218 4410', dir: 'in', dur: '00:32', date: '20 Sep', status: 'Completed' } ];
       var IX_OPTS = { period: ['Last 7 Days', 'Last 30 Days', 'Last 90 Days'], cid: ['No caller ID', '+1 646 934 8292', '+1 914 373 7206'] };
+      var IX_AI = ['Ask question', 'Summary', 'Transcript', 'Take notes', 'History', 'Contact'];
+      var IX_ASSIGN = ['Unassigned', 'Anu Nadar', 'Umar Ansari', 'Priya Sharma'];
+      var IX_ICON = { play: '<path d="M8 5l11 7-11 7z"/>', download: '<path d="M12 4v11M7 10l5 5 5-5M4 20h16"/>', chat: '<path d="M4 5h16v11H9l-5 4z"/>', back: '<path d="M15 6l-6 6 6 6"/>', phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>' };
+      var IXB = 'box-sizing:border-box;font:inherit;font-size:13px;cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:9px;border:0;';
+      var ixState = { tab: 'Calls', f: 'All', q: '', ai: 'Ask question', dial: '', cid: 'No caller ID', sel: null, inDetail: false };
+      var ixQA = {}, ixDialerHtml = '';
+      function ixItems() { return ixState.tab === 'Voicemails' ? IX_VM : ixState.tab === 'Recordings' ? IX_CALLS.filter(function (c) { return c.rec }) : IX_CALLS }
+      function ixFind(id) { return IX_CALLS.concat(IX_VM).filter(function (x) { return x.id === id })[0] || null }
+      function ixIsVm(c) { return IX_VM.indexOf(c) > -1 }
+      function ixPill(t, bg, fg) { return '<span style="font-size:11px;font-weight:600;border-radius:6px;padding:2px 7px;background:' + bg + ';color:' + fg + '">' + esc(t) + '</span>' }
+      function ixSvg(d, s, c) { return '<svg viewBox="0 0 24 24" style="width:' + (s || 16) + 'px;height:' + (s || 16) + 'px;stroke:' + (c || 'currentColor') + ';fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:block">' + d + '</svg>' }
       function ixStyle() {
         if (document.getElementById('ixStyle')) return;
         var st = document.createElement('style'); st.id = 'ixStyle';
@@ -7093,8 +7082,8 @@
             var k = m.dataset.key, val = o.dataset.ixpick, b = $('[data-ixdd="' + k + '"]');
             closeMenu(); if (!b) return;
             $('[data-ixlbl]', b).textContent = val;
-            if (k === 'cid') { ixState.cid = val; $('#ixCid').innerHTML = val === 'No caller ID' ? '&mdash;' : esc(val) }
-            else { ixState.period = val; note('Period set to ' + val) }
+            if (k === 'cid') { ixState.cid = val; paintIxDial() }
+            else { ixState.days = parseInt(val.match(/\d+/)[0], 10); paintIxList(); note('Showing calls from the ' + val.toLowerCase()) }
           });
         }
         m.dataset.key = key;
@@ -7102,9 +7091,139 @@
         m.innerHTML = IX_OPTS[key].map(function (o) { return '<button data-ixpick="' + esc(o) + '" class="ix-opt' + (o === cur ? ' on' : '') + '">' + esc(o) + '</button>' }).join('');
         openMenu(btn, m, false);
       }
+      function paintIxList() {
+        var q = ixState.q.toLowerCase(), src = ixItems();
+        var list = src.filter(function (c) {
+          var fOk = ixState.tab !== 'Calls' || ixState.f === 'All' || (ixState.f === 'Inbound' && c.dir === 'in') || (ixState.f === 'Outbound' && c.dir === 'out') || (ixState.f === 'Missed' && c.status === 'Missed');
+          return fOk && c.ago <= ixState.days && (!q || (c.n + ' ' + (c.num || '')).toLowerCase().indexOf(q) > -1);
+        });
+        $('#ixList').innerHTML = list.length ? list.map(function (c) {
+          var sel = c.id === ixState.sel;
+          var tags = ixPill(c.status, '#dcfce7', '#15803d') + (ixIsVm(c) ? ixPill('Voicemail', '#fef3c7', '#b45309') : '') + (c.internal ? ixPill('Internal', '#e2e8f0', '#334155') : '');
+          return '<button data-ixid="' + c.id + '" style="box-sizing:border-box;display:flex;gap:10px;align-items:flex-start;width:100%;padding:10px;margin-bottom:4px;border:1px solid ' + (sel ? '#bfdbfe' : 'transparent') + ';border-radius:12px;background:' + (sel ? '#eff6ff' : 'none') + ';font:inherit;text-align:left;cursor:pointer">'
+            + '<span style="width:32px;height:32px;border-radius:9px;background:' + (c.dir === 'in' ? '#dcfce7' : '#eff6ff') + ';display:grid;place-items:center;flex-shrink:0">' + ico2(c.dir === 'in' ? 'cidIn' : 'cidOut', c.dir === 'in' ? '#15803d' : '#2563eb', 15) + '</span>'
+            + '<span style="min-width:0;flex:1"><span style="display:flex;justify-content:space-between;gap:6px;font-weight:600;color:#0f172a;font-size:13px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(c.n) + '</span><span style="font-size:11px;color:#64748b;flex-shrink:0">' + c.count + '</span></span>'
+            + '<span style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center">' + tags + '</span>'
+            + '<span style="display:block;font-size:11.5px;color:#64748b;margin-top:4px">' + esc(c.dur) + ' · ' + esc(ixDate(c)) + '</span></span></button>';
+        }).join('') : '<div style="text-align:center;color:#64748b;font-size:13px;padding:24px 8px">Nothing to show here.</div>';
+      }
+      function paintIxDial() {
+        var dl = $('#ixDial'); if (!dl) return;
+        dl.textContent = ixState.dial || 'Search contacts or dial a number'; dl.style.color = ixState.dial ? '#0f172a' : '#94a3b8'; dl.style.fontWeight = ixState.dial ? '600' : '400'; dl.style.fontSize = ixState.dial ? '20px' : '14px';
+        var cb = $('[data-ixcall]'); if (cb) { cb.style.background = ixState.dial ? '#15803d' : '#e2e8f0'; cb.style.color = ixState.dial ? '#fff' : '#94a3b8' }
+        var cid = $('#ixCid'); if (cid) cid.innerHTML = ixState.cid === 'No caller ID' ? '&mdash;' : esc(ixState.cid);
+      }
+      function ixDetailHtml(c) {
+        var vm = ixIsVm(c), title = c.n.indexOf('+') === 0 ? 'Unknown Contact' : c.n;
+        var av = (c.n.indexOf('+') === 0 && !c.internal) ? 'UC' : ini(c.n);
+        var sub = c.internal ? 'Extension ' + c.num + ' · internal' : c.num + ' · ' + c.count + ' calls';
+        var head = '<div style="box-sizing:border-box;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid #e8ecf3;border-radius:14px;padding:12px 14px">'
+          + '<button data-ixback style="' + IXB + 'background:#f1f5f9;color:#334155">' + ixSvg(IX_ICON.back, 14, '#334155') + 'Dialer</button>'
+          + '<span style="width:42px;height:42px;border-radius:50%;background:#7c3aed;color:#fff;display:grid;place-items:center;font-weight:700;flex-shrink:0">' + esc(av) + '</span>'
+          + '<div style="min-width:0;flex:1"><div style="font-weight:700;color:#0f172a;font-size:15px">' + esc(title) + '</div><div style="font-size:12.5px;color:#64748b;font-family:monospace">' + esc(sub) + '</div></div>'
+          + '<button data-ixact="add" style="' + IXB + 'background:#fff;color:#334155;border:1px solid #e2e8f0">Add to contacts</button>'
+          + '<button data-ixact="callnum" style="' + IXB + 'background:#2563eb;color:#fff;font-weight:600">' + ixSvg(IX_ICON.phone, 15, '#fff') + (c.internal ? 'Call ext ' + esc(c.num) : 'Call') + '</button></div>';
+        var body;
+        if (vm) {
+          var pv = prefRead('ucaas.ixVm')[c.id] || {};
+          var opts = IX_ASSIGN.map(function (o) { return '<option' + ((pv.assign || 'Unassigned') === o ? ' selected' : '') + '>' + esc(o) + '</option>' }).join('');
+          body = '<div style="box-sizing:border-box;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 14px;margin-top:10px"><div style="font-weight:600;color:#1e3a8a;font-size:13px">Voicemail retention</div><div style="font-size:12.5px;color:#334155;margin-top:3px">Voicemail audio and transcripts are kept until someone deletes them or an administrator sets a retention period.</div></div>'
+            + '<div style="box-sizing:border-box;background:#fff;border:1px solid #e8ecf3;border-radius:14px;padding:14px;margin-top:10px">'
+            + '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">' + ixPill(c.status, '#dcfce7', '#15803d') + ixPill('Voicemail', '#fef3c7', '#b45309') + ixPill('Transcript', '#ede9fe', '#6d28d9') + '</div>'
+            + '<div style="font-size:12.5px;color:#64748b;font-family:monospace">' + esc(ixDate(c)) + ' · ' + esc(c.dur) + '</div>'
+            + '<p style="font-size:13.5px;color:#334155;margin:10px 0 0">' + esc(c.transcript[0] || '') + '</p></div>'
+            + '<div style="box-sizing:border-box;background:#f8fafc;border:1px solid #e8ecf3;border-radius:14px;padding:14px;margin-top:10px">'
+            + '<div style="font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;margin-bottom:10px">Voicemail follow-up</div>'
+            + '<label style="display:block;font-size:12.5px;color:#334155;margin-bottom:4px">Assigned to</label>'
+            + '<select data-ixassign="' + c.id + '" style="box-sizing:border-box;width:100%;height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 8px;font:inherit;font-size:13px;background:#fff">' + opts + '</select>'
+            + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#334155;margin:10px 0"><input type="checkbox" data-ixresolve="' + c.id + '"' + (pv.resolved ? ' checked' : '') + '> Resolved</label>'
+            + '<label style="display:block;font-size:12.5px;color:#334155;margin-bottom:4px">Note</label>'
+            + '<textarea data-ixvnote="' + c.id + '" placeholder="e.g. Called back, left a message" style="box-sizing:border-box;width:100%;height:70px;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font:inherit;font-size:13px;resize:none">' + esc(pv.note || '') + '</textarea>'
+            + '<div style="display:flex;justify-content:flex-end;margin-top:8px"><button data-ixvsave="' + c.id + '" style="' + IXB + 'background:#2563eb;color:#fff">Save</button></div></div>';
+        } else {
+          var acts = [['play', IX_ICON.play, 'Play recording'], ['download', IX_ICON.download, 'Download'], ['transcript', IX_ICON.chat, 'Open transcript']];
+          body = '<div style="box-sizing:border-box;background:#fff;border:1px solid #e8ecf3;border-radius:14px;padding:14px;margin-top:10px;display:flex;gap:12px;align-items:flex-start">'
+            + '<span style="width:36px;height:36px;border-radius:10px;background:' + (c.dir === 'in' ? '#dcfce7' : '#eff6ff') + ';display:grid;place-items:center;flex-shrink:0">' + ico2(c.dir === 'in' ? 'cidIn' : 'cidOut', c.dir === 'in' ? '#15803d' : '#2563eb', 16) + '</span>'
+            + '<div style="flex:1;min-width:0"><div style="font-size:13.5px;color:#0f172a;font-weight:600">' + (c.dir === 'in' ? 'Incoming call' : 'Outgoing call') + '</div>'
+            + '<div style="font-size:12.5px;color:#64748b;font-family:monospace;margin-top:2px">' + esc(ixDate(c)) + ' · ' + esc(c.dur) + '</div>'
+            + '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">' + ixPill(c.status, '#dcfce7', '#15803d') + (c.rec ? ixPill('Recorded', '#e0f2fe', '#0369a1') : '') + '</div></div>'
+            + '<div style="display:flex;gap:6px">' + acts.map(function (a) { return '<button data-ixact="' + a[0] + '" title="' + a[2] + '" aria-label="' + a[2] + '" style="box-sizing:border-box;width:34px;height:34px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#334155;cursor:pointer;display:grid;place-items:center">' + ixSvg(a[1], 16, '#334155') + '</button>' }).join('') + '</div></div>';
+        }
+        return head + body;
+      }
+      /* the centre column shows the dialer, or the selected call's detail */
+      function paintIxDetail() {
+        var c = ixFind(ixState.sel), center = $('#ixCenter');
+        if (!center) return;
+        if (!c) {
+          if (!ixState.inDetail) return;
+          center.innerHTML = ixDialerHtml; ixState.inDetail = false;
+          $$('[data-ixdd="cid"] [data-ixlbl]', center).forEach(function (l) { l.textContent = ixState.cid });
+          paintIxDial(); return;
+        }
+        center.innerHTML = '<div style="box-sizing:border-box;width:100%;max-width:520px;overflow-y:auto;min-height:0;height:100%">' + ixDetailHtml(c) + '</div>';
+        ixState.inDetail = true;
+      }
+      function ixAnswer(c, q) {
+        if (!c.transcript || !c.transcript.length) return 'This call has no transcript to answer from.';
+        var words = q.toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length > 2 }), best = '', score = 0;
+        c.transcript.forEach(function (line) { var s = words.filter(function (w) { return line.toLowerCase().indexOf(w) > -1 }).length; if (s > score) { score = s; best = line } });
+        return score ? best : 'I could not find that in this call’s transcript.';
+      }
+      /* the AI section: each heading shows its own content for the selected call */
+      function paintIxRight() {
+        var c = ixFind(ixState.sel), host = $('#ixRight'), off = !c || c.internal;
+        $$('[data-ixr]', $('#viewInteractions')).forEach(function (b) { b.classList.toggle('on', b.dataset.ixr === ixState.ai) });
+        var blur = $('#ixAiBlur'); if (blur) blur.style.display = c && c.internal ? 'flex' : 'none';
+        var ask = $('#ixAsk'); if (ask) ask.disabled = off;
+        if (!c) { host.innerHTML = '<p style="color:#64748b;font-size:13px;margin:8px 0 0">Select a call or voicemail to see its summary, transcript and notes.</p>'; return }
+        var p = 'font-size:13px;color:#334155;line-height:1.5;margin:0', h = '';
+        if (ixState.ai === 'Ask question') {
+          var qa = ixQA[c.id] || [];
+          h = qa.length ? qa.map(function (x) { return '<div style="text-align:left;margin-bottom:12px"><div style="background:#eff6ff;color:#1e3a8a;border-radius:12px;padding:8px 10px;font-size:13px;margin-bottom:6px">' + esc(x.q) + '</div><div style="background:#f8fafc;border:1px solid #e8ecf3;border-radius:12px;padding:8px 10px;font-size:13px;color:#334155">' + esc(x.a) + '</div></div>' }).join('') : '<p style="' + p + ';color:#64748b">Ask a question about this call below. Answers come from its transcript.</p>';
+        } else if (ixState.ai === 'Summary') {
+          h = '<p style="' + p + ';text-align:left">' + esc(c.summary || 'No summary for this call.') + '</p>';
+        } else if (ixState.ai === 'Transcript') {
+          h = (c.transcript && c.transcript.length) ? c.transcript.map(function (l) { return '<p style="' + p + ';text-align:left;margin-bottom:8px">' + esc(l) + '</p>' }).join('') : '<p style="' + p + ';color:#64748b">No transcript for this call.</p>';
+        } else if (ixState.ai === 'Take notes') {
+          var nt = prefRead('ucaas.ixNotes')[c.id] || '';
+          h = '<div style="text-align:left"><textarea data-ixnote="' + c.id + '" placeholder="Type notes for this call" style="box-sizing:border-box;width:100%;height:150px;border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;resize:none">' + esc(nt) + '</textarea><div style="display:flex;justify-content:flex-end;margin-top:8px"><button data-ixnsave="' + c.id + '" style="' + IXB + 'background:#2563eb;color:#fff">Save notes</button></div></div>';
+        } else if (ixState.ai === 'History') {
+          h = IX_CALLS.concat(IX_VM).filter(function (x) { return x.num === c.num }).map(function (x) { return '<div style="text-align:left;border-bottom:1px solid #f1f5f9;padding:8px 0;font-size:13px;color:#334155">' + esc(ixDate(x)) + ' · ' + esc(x.dur) + ' · ' + (x.dir === 'in' ? 'incoming' : 'outgoing') + (ixIsVm(x) ? ' · voicemail' : '') + '</div>' }).join('');
+        } else {
+          var saved = CONTACTS.filter(function (x) { return x.phone && x.phone.replace(/\D/g, '') === c.num.replace(/\D/g, '') }).length;
+          h = '<div style="text-align:left;font-size:13px;color:#334155;line-height:1.8"><div>Name: ' + esc(c.n) + '</div><div>Number: ' + esc(c.num) + '</div><div>Saved in contacts: ' + (saved ? 'yes' : 'no') + '</div></div>';
+        }
+        host.innerHTML = h;
+      }
+      function ixSend() {
+        var c = ixFind(ixState.sel);
+        if (!c) return note('Select a call first');
+        if (c.internal) return note('AI is not available for internal calls');
+        var q = $('#ixAsk').value.trim(); if (!q) return note('Type a question first');
+        ixState.ai = 'Ask question'; ixQA[c.id] = (ixQA[c.id] || []).concat([{ q: q, a: ixAnswer(c, q) }]);
+        $('#ixAsk').value = ''; paintIxRight();
+      }
+      function ixSaveVm(id, field, val) { var s = prefRead('ucaas.ixVm'); s[id] = s[id] || {}; s[id][field] = val; prefWrite('ucaas.ixVm', s) }
+      function ixSaveNote(id, val) { var s = prefRead('ucaas.ixNotes'); s[id] = val; prefWrite('ucaas.ixNotes', s) }
+      function ixAddContact(c) {
+        var digits = c.num.replace(/\D/g, '');
+        if (CONTACTS.some(function (x) { return x.phone && x.phone.replace(/\D/g, '') === digits })) return note('Already in contacts');
+        var parts = c.n.split(' '), isNum = c.n.indexOf('+') === 0;
+        CONTACTS.push({ id: 'cx' + Date.now().toString(36), first: c.internal ? c.n : (isNum ? c.num : parts[0]), last: (c.internal || isNum) ? '' : parts.slice(1).join(' '), email: '', phone: c.num, company: '', kind: 'contact', tag: 'standard', notes: '', group: '', by: '', ts: Date.now(), av: CONTACTS.length % 7 });
+        note('Added to contacts');
+      }
+      function ixAction(a) {
+        var c = ixFind(ixState.sel); if (!c) return;
+        if (a === 'play') return ixPlay(c);
+        if (a === 'download') return ixDownload(c);
+        if (a === 'transcript') { ixState.ai = 'Transcript'; paintIxRight(); return }
+        if (a === 'callnum') return ixDialDigits(c.num);
+        if (a === 'add') return ixAddContact(c);
+      }
       /* top bar: the tab for the current view is highlighted; every page under Directory keeps Directory lit */
       function paintTopNav(v) {
-        var want = v === 'interactions' ? 'Interactions' : 'Directory';
+        var want = v === 'interactions' ? 'Interactions' : v === 'analytics' ? 'Analytics' : 'Directory';
         $$('a').forEach(function (a) {
           var t = a.textContent.trim();
           if (['Dashboard', 'Directory', 'Interactions', 'Analytics', 'Settings'].indexOf(t) < 0) return;
@@ -7114,9 +7233,204 @@
         });
       }
       /* builds the phone layout: icon rail, call list, dialpad and Copilot panel */
+      /* Interactions: real actions (play, download, call), date filter and the icon-rail pages */
+      var IX_THREADS = [ { id: 't1', name: '+1 646 934 8292' }, { id: 't2', name: 'Jeet Nakrani' }, { id: 't3', name: '+1 659 901 6340' } ];
+      var IX_AGENTS = [ { id: 'a1', name: 'Anu Nadar', st: 'Available' }, { id: 'a2', name: 'Umar Ansari', st: 'Busy' }, { id: 'a3', name: 'Priya Sharma', st: 'Offline' } ];
+      var IX_CAMP = [ { id: 'k1', name: 'Renewal reminders', total: 5, done: 2 }, { id: 'k2', name: 'Q4 outreach', total: 12, done: 7 } ];
+      var IXCARD = 'box-sizing:border-box;background:#fff;border:1px solid #e8ecf3;border-radius:14px;padding:14px 16px;';
+      var IXIN = 'box-sizing:border-box;height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:13px;outline:0;';
+      ixState.days = 30; ixState.page = null; ixState.inPage = false; ixState.thread = null;
+
+      function ixDate(c) { var d = new Date(); d.setDate(d.getDate() - c.ago); return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) }
+      function ixPrefList(k) { var v = prefRead(k); return Array.isArray(v) ? v : [] }
+      function copyText(text, msg) {
+        if (!navigator.clipboard) return note('Could not copy the invite', null, null, 'danger');
+        navigator.clipboard.writeText(text).then(function () { note(msg) }, function () { note('Could not copy the invite', null, null, 'danger') });
+      }
+      /* plays the transcript aloud with the browser's speech voice; pressing Play again stops it */
+      function ixPlay(c) {
+        if (!(c.rec || ixIsVm(c)) || !c.transcript.length) return note('No recording for this call');
+        if (!window.speechSynthesis) return note('Playback is not supported in this browser');
+        if (speechSynthesis.speaking) { speechSynthesis.cancel(); return note('Playback stopped') }
+        speechSynthesis.speak(new SpeechSynthesisUtterance(c.transcript.join('. ')));
+        note('Playing the recording — press Play again to stop');
+      }
+      function ixDownload(c) {
+        if (!c.transcript.length) return note('No transcript to download for this call');
+        var text = 'Call with ' + c.n + ' (' + c.num + ')\nDate: ' + ixDate(c) + '\nDuration: ' + c.dur + '\n\nSummary: ' + c.summary + '\n\nTranscript:\n' + c.transcript.join('\n') + '\n';
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' })); a.download = 'call-' + c.id + '-transcript.txt';
+        document.body.appendChild(a); a.click(); a.remove();
+        note('Transcript downloaded');
+      }
+      /* opens the phone app with the number; a short extension number is internal and cannot be dialled from the browser */
+      function ixDialDigits(v) {
+        var d = (v || '').replace(/[^\d+]/g, '');
+        if (!d) return note('Enter a number first');
+        if (/^\d{3,4}$/.test(d)) return note('Extension ' + d + ' is internal; dial it from your desk phone or app');
+        window.location.href = 'tel:' + d;
+        note('Opening your phone app to call ' + v);
+      }
+
+      function ixPageShell(title, sub, body) {
+        return '<div style="box-sizing:border-box;width:100%;max-width:640px;display:flex;flex-direction:column;gap:12px;height:100%;overflow-y:auto;min-height:0;padding:4px 2px">'
+          + '<div style="' + IXCARD + 'padding:12px 16px"><div style="font-weight:700;color:#0f172a;font-size:16px">' + esc(title) + '</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(sub) + '</div></div>' + body + '</div>';
+      }
+      function ixThreadHtml(list, msgs) {
+        var sel = ixState.thread || list[0].id;
+        var tabs = list.map(function (t) {
+          var on = t.id === sel;
+          return '<button data-ixpa="thread" data-ixpv="' + t.id + '" style="' + IXB + (on ? 'background:#eff6ff;color:#2563eb;font-weight:600' : 'background:#f1f5f9;color:#334155') + '">' + esc(t.name) + (t.st ? ' · ' + esc(t.st) : '') + '</button>';
+        }).join('');
+        var m = msgs[sel] || [];
+        var lines = m.length ? m.map(function (x) {
+          return '<div style="display:flex;justify-content:' + (x.me ? 'flex-end' : 'flex-start') + '"><div style="max-width:75%;background:' + (x.me ? '#2563eb' : '#f1f5f9') + ';color:' + (x.me ? '#fff' : '#0f172a') + ';border-radius:12px;padding:8px 11px;font-size:13px">' + esc(x.text) + '</div></div>';
+        }).join('') : '<div style="color:#64748b;font-size:13px">No messages yet. Say hello.</div>';
+        return '<div style="' + IXCARD + 'display:flex;gap:6px;flex-wrap:wrap">' + tabs + '</div>'
+          + '<div style="' + IXCARD + 'display:flex;flex-direction:column;gap:8px;min-height:220px">' + lines + '</div>'
+          + '<div style="display:flex;gap:8px"><input id="ixMsg" placeholder="Type a message" autocomplete="off" style="' + IXIN + 'flex:1;min-width:0"><button data-ixpa="send" style="' + IXB + 'background:#2563eb;color:#fff;font-weight:600">Send</button></div>';
+      }
+      function ixPageHtml() {
+        var pg = ixState.page, msgs = prefRead('ucaas.ixMsgs');
+        if (pg === 'Chat') return ixPageShell('Chat', 'Message your contacts', ixThreadHtml(IX_THREADS, msgs));
+        if (pg === 'Agent Chat') return ixPageShell('Agent Chat', 'Message your team', ixThreadHtml(IX_AGENTS, msgs));
+        if (pg === 'Inbox') {
+          var read = prefRead('ucaas.ixRead'), unread = IX_VM.filter(function (v) { return !read[v.id] }).length;
+          var rows = IX_VM.map(function (v) {
+            var r = !!read[v.id];
+            return '<div style="' + IXCARD + 'display:flex;gap:10px;align-items:flex-start"><span style="width:8px;height:8px;border-radius:50%;margin-top:7px;flex-shrink:0;background:' + (r ? '#cbd5e1' : '#2563eb') + '"></span>'
+              + '<div style="flex:1;min-width:0"><div style="font-weight:600;color:#0f172a;font-size:13.5px">' + esc(v.n) + '</div><div style="font-size:12.5px;color:#334155;margin-top:3px">' + esc(v.transcript[0]) + '</div><div style="font-size:12px;color:#64748b;margin-top:4px">' + esc(ixDate(v)) + ' · ' + esc(v.dur) + '</div></div>'
+              + '<div style="display:flex;flex-direction:column;gap:6px"><button data-ixpa="open" data-ixpv="' + v.id + '" style="' + IXB + 'background:#f1f5f9;color:#334155">Open</button><button data-ixpa="toggleread" data-ixpv="' + v.id + '" style="' + IXB + 'background:#fff;border:1px solid #e2e8f0;color:#334155">' + (r ? 'Mark unread' : 'Mark read') + '</button></div></div>';
+          }).join('');
+          return ixPageShell('Inbox', unread + ' unread voicemail' + (unread === 1 ? '' : 's'), rows);
+        }
+        if (pg === 'Tasks') {
+          var tasks = ixPrefList('ucaas.ixTasks');
+          var tl = tasks.length ? tasks.map(function (t, i) {
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9"><input type="checkbox" data-ixtask="' + i + '"' + (t.done ? ' checked' : '') + '><span style="flex:1;font-size:13.5px;color:' + (t.done ? '#94a3b8' : '#0f172a') + ';text-decoration:' + (t.done ? 'line-through' : 'none') + '">' + esc(t.t) + '</span><button data-ixpa="deltask" data-ixpv="' + i + '" aria-label="Delete task" style="' + IXB + 'background:none;color:#64748b;padding:0 8px">&times;</button></div>';
+          }).join('') : '<div style="color:#64748b;font-size:13px">No tasks yet.</div>';
+          var open = tasks.filter(function (t) { return !t.done }).length;
+          return ixPageShell('Tasks', open + ' open', '<div style="' + IXCARD + '"><div style="display:flex;gap:8px;margin-bottom:10px"><input id="ixTaskIn" placeholder="Add a task" autocomplete="off" style="' + IXIN + 'flex:1;min-width:0"><button data-ixpa="addtask" style="' + IXB + 'background:#2563eb;color:#fff;font-weight:600">Add</button></div>' + tl + '</div>');
+        }
+        if (pg === 'Calendar') {
+          var ev = ixPrefList('ucaas.ixEvents');
+          var el = ev.length ? ev.map(function (x, i) {
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13.5px"><span style="font-family:monospace;color:#2563eb;min-width:150px">' + esc(x.day) + ' ' + esc(x.time) + '</span><span style="flex:1;color:#0f172a">' + esc(x.title) + '</span><button data-ixpa="delevent" data-ixpv="' + i + '" aria-label="Delete event" style="' + IXB + 'background:none;color:#64748b;padding:0 8px">&times;</button></div>';
+          }).join('') : '<div style="color:#64748b;font-size:13px">No events yet.</div>';
+          return ixPageShell('Calendar', ev.length + ' event' + (ev.length === 1 ? '' : 's'), '<div style="' + IXCARD + 'display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="ixEvTitle" placeholder="Event title" style="' + IXIN + 'grid-column:1 / 3"><input id="ixEvDay" type="date" style="' + IXIN + '"><input id="ixEvTime" type="time" style="' + IXIN + '"><button data-ixpa="addevent" style="' + IXB + 'background:#2563eb;color:#fff;font-weight:600;grid-column:1 / 3;justify-content:center">Add event</button></div><div style="' + IXCARD + '">' + el + '</div>');
+        }
+        if (pg === 'Campaign') {
+          var cs = prefRead('ucaas.ixCamp');
+          var cl = IX_CAMP.map(function (k) {
+            var run = cs[k.id] === 'running', pct = Math.round(k.done / k.total * 100);
+            return '<div style="' + IXCARD + '"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div style="font-weight:600;color:#0f172a;font-size:14px">' + esc(k.name) + '</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">' + k.done + ' of ' + k.total + ' contacts reached</div></div>'
+              + '<button data-ixpa="camp" data-ixpv="' + k.id + '" style="' + IXB + (run ? 'background:#fef3c7;color:#b45309;font-weight:600' : 'background:#15803d;color:#fff;font-weight:600') + '">' + (run ? 'Pause' : 'Start') + '</button></div>'
+              + '<div style="height:6px;background:#f1f5f9;border-radius:6px;margin-top:10px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:' + (run ? '#2563eb' : '#94a3b8') + '"></div></div>'
+              + '<div style="font-size:12px;color:' + (run ? '#15803d' : '#64748b') + ';margin-top:6px">' + (run ? 'Running' : 'Paused') + '</div></div>';
+          }).join('');
+          return ixPageShell('Campaign', 'Lead lists you can dial', cl);
+        }
+        if (pg === 'Video') {
+          var rooms = ixPrefList('ucaas.ixRooms');
+          var rl = rooms.length ? rooms.map(function (r, i) {
+            return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13.5px"><span style="font-family:monospace;color:#0f172a">' + esc(r) + '</span><button data-ixpa="copyroom" data-ixpv="' + i + '" style="' + IXB + 'background:#f1f5f9;color:#334155">Copy invite</button></div>';
+          }).join('') : '<div style="color:#64748b;font-size:13px">No meetings yet.</div>';
+          return ixPageShell('Video', 'Start a meeting room', '<div style="' + IXCARD + '"><button data-ixpa="newroom" style="' + IXB + 'background:#2563eb;color:#fff;font-weight:600">New meeting</button><div style="margin-top:10px">' + rl + '</div></div>');
+        }
+        return '';
+      }
+      /* the icon rail: Phone shows the phone layout; other items replace the centre column with their page */
+      function paintIxRail() {
+        $$('[data-ixrail]', $('#viewInteractions')).forEach(function (b) {
+          var on = b.dataset.ixrail === (ixState.page || 'Phone');
+          b.style.background = on ? '#e3edff' : 'none'; b.style.color = on ? '#2563eb' : '#334155'; b.style.fontWeight = on ? '600' : '500';
+        });
+      }
+      function paintIxTabStyles() {
+        $$('[data-ixtab]', $('#viewInteractions')).forEach(function (b) { var on = b.dataset.ixtab === ixState.tab; b.style.color = on ? '#0f172a' : '#64748b'; b.style.fontWeight = on ? '600' : '500'; b.style.borderBottom = on ? '2px solid #2563eb' : '0' });
+      }
+      function paintIxPage() {
+        var left = $('#ixLeft'), ai = $('#ixAi'), center = $('#ixCenter');
+        if (!left || !center) return;
+        var pg = !!ixState.page;
+        left.style.display = pg ? 'none' : ''; if (ai) ai.style.display = pg ? 'none' : '';
+        if (pg) { ixState.inPage = true; ixState.inDetail = false; center.innerHTML = ixPageHtml(); return }
+        if (ixState.inPage) {
+          ixState.inPage = false; center.innerHTML = ixDialerHtml;
+          $$('[data-ixdd="cid"] [data-ixlbl]', center).forEach(function (l) { l.textContent = ixState.cid });
+          paintIxDial();
+        }
+        paintIxDetail();
+      }
+      /* switches the icon-rail page; optionally opens a call or voicemail in the phone view */
+      function ixGo(page, sel, tab) {
+        ixState.page = page; ixState.sel = sel || null; ixState.thread = null;
+        if (tab) ixState.tab = tab;
+        paintIxRail(); paintIxTabStyles(); paintIxList(); paintIxPage(); paintIxRight();
+      }
+      function ixPageAction(a, v) {
+        if (a === 'thread') { ixState.thread = v; return paintIxPage() }
+        if (a === 'send') {
+          var inp = $('#ixMsg'), txt = inp ? inp.value.trim() : ''; if (!txt) return;
+          var t = ixState.thread || (ixState.page === 'Agent Chat' ? IX_AGENTS[0].id : IX_THREADS[0].id);
+          var ms = prefRead('ucaas.ixMsgs'); ms[t] = (ms[t] || []).concat([{ me: true, text: txt }]); prefWrite('ucaas.ixMsgs', ms);
+          return paintIxPage();
+        }
+        if (a === 'open') return ixGo(null, v, 'Voicemails');
+        if (a === 'toggleread') { var rd = prefRead('ucaas.ixRead'); rd[v] = !rd[v]; prefWrite('ucaas.ixRead', rd); return paintIxPage() }
+        if (a === 'addtask') {
+          var ti = $('#ixTaskIn'), tt = ti ? ti.value.trim() : ''; if (!tt) return note('Type a task first');
+          var tk = ixPrefList('ucaas.ixTasks'); tk.push({ t: tt, done: false }); prefWrite('ucaas.ixTasks', tk); return paintIxPage();
+        }
+        if (a === 'deltask') { var tk2 = ixPrefList('ucaas.ixTasks'); tk2.splice(+v, 1); prefWrite('ucaas.ixTasks', tk2); return paintIxPage() }
+        if (a === 'addevent') {
+          var title = $('#ixEvTitle').value.trim(), day = $('#ixEvDay').value, time = $('#ixEvTime').value;
+          if (!title || !day) return note('Add a title and a date');
+          var evs = ixPrefList('ucaas.ixEvents'); evs.push({ title: title, day: day, time: time || 'All day' }); prefWrite('ucaas.ixEvents', evs); return paintIxPage();
+        }
+        if (a === 'delevent') { var evs2 = ixPrefList('ucaas.ixEvents'); evs2.splice(+v, 1); prefWrite('ucaas.ixEvents', evs2); return paintIxPage() }
+        if (a === 'camp') {
+          var cs = prefRead('ucaas.ixCamp'); cs[v] = cs[v] === 'running' ? 'paused' : 'running'; prefWrite('ucaas.ixCamp', cs);
+          paintIxPage(); return note(cs[v] === 'running' ? 'Campaign running (dialing needs a connected phone system)' : 'Campaign paused');
+        }
+        if (a === 'newroom') {
+          var room = 'ROOM-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+          var rs = ixPrefList('ucaas.ixRooms'); rs.unshift(room); prefWrite('ucaas.ixRooms', rs); paintIxPage();
+          return copyText('Join my meeting: ' + room, 'Meeting created and invite copied');
+        }
+        if (a === 'copyroom') { var rl = ixPrefList('ucaas.ixRooms'); return copyText('Join my meeting: ' + rl[+v], 'Invite copied') }
+      }
+      $('#viewInteractions').addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        if (e.target.id === 'ixMsg') ixPageAction('send');
+        else if (e.target.id === 'ixTaskIn') ixPageAction('addtask');
+      });
+      /* dialpad keyboard: digits, *, #, + and Backspace; Enter places the call */
+      function ixKeyActive() {
+        var v = $('#viewInteractions');
+        return !!v && v.style.display !== 'none' && !ixState.page && !ixState.inDetail && !!$('#ixDial');
+      }
+      document.addEventListener('keydown', function (e) {
+        if (!ixKeyActive() || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+        if (/^[0-9*#+]$/.test(e.key)) { e.preventDefault(); ixState.dial += e.key; paintIxDial() }
+        else if (e.key === 'Backspace') { e.preventDefault(); ixState.dial = ixState.dial.slice(0, -1); paintIxDial() }
+        else if (e.key === 'Enter') { e.preventDefault(); ixDialDigits(ixState.dial) }
+      });
+      /* holding 0 types + (as on a phone); a short press still types 0 */
+      var ixHold = null;
+      $('#viewInteractions').addEventListener('pointerdown', function (e) {
+        if (!e.target.closest('[data-ixk="0"]')) return;
+        var h = { fired: false };
+        h.t = setTimeout(function () { h.fired = true; ixState.dial += '+'; paintIxDial() }, 500);
+        ixHold = h;
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (name) {
+        $('#viewInteractions').addEventListener(name, function () { if (ixHold && !ixHold.fired) { clearTimeout(ixHold.t); ixHold = null } });
+      });
       function buildIxView() {
         ixStyle();
-        var ic =function (d, s, c) { return '<svg viewBox="0 0 24 24" style="width:' + (s || 18) + 'px;height:' + (s || 18) + 'px;stroke:' + (c || 'currentColor') + ';fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:block">' + d + '</svg>' };
+        var ic = function (d, s, c) { return '<svg viewBox="0 0 24 24" style="width:' + (s || 18) + 'px;height:' + (s || 18) + 'px;stroke:' + (c || 'currentColor') + ';fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:block">' + d + '</svg>' };
         var P = {
           phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
           chat: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/>',
@@ -7146,14 +7460,13 @@
         var label = 'font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;';
         var segBtn = 'box-sizing:border-box;font:inherit;flex:1;height:30px;border:0;border-radius:8px;cursor:pointer;font-size:12.5px;background:none;color:#64748b;';
         var tabBtn = 'box-sizing:border-box;font:inherit;background:none;border:0;padding:9px 0;cursor:pointer;color:#64748b;font-weight:500;font-size:13px;';
+        var aiTabs = IX_AI.map(function (t) { return '<button data-ixr="' + t + '" class="ix-tab">' + t + '</button>' }).join('');
 
         $('#viewInteractions').style.margin = '-32px -38px -52px';
         $('#viewInteractions').innerHTML =
           '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#fff;border-top:1px solid #e8ecf3;overflow:hidden">'
-          // icon rail
           + '<nav style="box-sizing:border-box;width:90px;flex-shrink:0;border-right:1px solid #eef1f5;padding:10px 8px;display:flex;flex-direction:column;gap:4px;background:#fafbfd;overflow:hidden">' + railHtml + '</nav>'
-          // phone list
-          + '<section style="box-sizing:border-box;width:330px;flex-shrink:0;border-right:1px solid #eef1f5;display:flex;flex-direction:column;min-height:0">'
+          + '<section id="ixLeft" style="box-sizing:border-box;width:330px;flex-shrink:0;border-right:1px solid #eef1f5;display:flex;flex-direction:column;min-height:0">'
           + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px"><h2 style="box-sizing:border-box;margin:0;font-size:20px;color:#0f172a">Phone</h2>'
           + '<button data-ixdd="period" style="box-sizing:border-box;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#334155;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px 8px"><span data-ixlbl>Last 30 Days</span>' + ic(P.chev, 14, '#94a3b8') + '</button></div>'
           + '<div style="box-sizing:border-box;display:flex;gap:16px;padding:0 16px;border-bottom:1px solid #eef1f5">'
@@ -7163,8 +7476,7 @@
           + '<div style="box-sizing:border-box;position:relative;margin:10px 16px 6px"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;display:flex">' + ic(P.search, 15) + '</span>'
           + '<input id="ixSearch" placeholder="Search contacts or calls" autocomplete="off" style="box-sizing:border-box;width:100%;height:36px;border:1px solid #e2e8f0;border-radius:9px;padding:0 10px 0 32px;font:inherit;font-size:13px;outline:0"></div>'
           + '<div id="ixList" style="box-sizing:border-box;flex:1;overflow-y:auto;min-height:0;padding:0 8px 8px"></div></section>'
-          // dialpad and ready state
-          + '<section style="box-sizing:border-box;flex:1;min-width:0;background:#f8fafc;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;overflow:hidden">'
+          + '<section id="ixCenter" style="box-sizing:border-box;flex:1;min-width:0;background:#f8fafc;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;overflow:hidden">'
           + '<div style="' + cardCss + '"><div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="' + label + '">Calling as</span>'
           + '<button data-ixdd="cid" style="box-sizing:border-box;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#475569;background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:4px 10px">' + ic(P.globe, 14, '#64748b') + '<span data-ixlbl>No caller ID</span></button></div>'
           + '<div id="ixDial" style="box-sizing:border-box;min-height:40px;border:1px solid #e2e8f0;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px 12px;margin-bottom:10px"></div>'
@@ -7175,32 +7487,52 @@
           + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #f1f5f9;font-size:13px"><span style="color:#64748b">Station</span><span style="color:#15803d;font-weight:600">WebRTC · registered</span></div>'
           + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #f1f5f9;font-size:13px"><span style="color:#64748b">Extension</span><span style="color:#0f172a;font-weight:600">1000</span></div>'
           + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #f1f5f9;font-size:13px"><span style="color:#64748b">Caller ID</span><span id="ixCid" style="color:#0f172a;font-weight:600">&mdash;</span></div></div></section>'
-          // copilot panel
-          + '<section style="box-sizing:border-box;width:410px;flex-shrink:0;border-left:1px solid #eef1f5;display:flex;flex-direction:column;min-height:0">'
-          + '<div style="box-sizing:border-box;display:flex;flex-wrap:nowrap;gap:1px;padding:10px 6px;border-bottom:1px solid #eef1f5;font-size:12px;overflow:hidden">'
-          + ['Copilot', 'Summary', 'Transcript', 'Notes', 'History', 'Contact'].map(function (t) { return '<button data-ixr="' + t + '" class="ix-tab">' + t + '</button>' }).join('')
-          + '</div><div id="ixRight" style="box-sizing:border-box;flex:1;overflow-y:auto;padding:16px 18px;text-align:center"></div>'
+          + '<section id="ixAi" style="box-sizing:border-box;width:420px;flex-shrink:0;border-left:1px solid #eef1f5;display:flex;flex-direction:column;min-height:0;position:relative">'
+          + '<div id="ixAiBlur" style="display:none;position:absolute;inset:0;z-index:5;background:rgba(248,250,252,.8);backdrop-filter:blur(5px);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px"><div style="font-weight:700;color:#0f172a;font-size:15px">Internal call</div><p style="color:#64748b;font-size:13px;line-height:1.5;margin:8px 0 0">AI features are not available for calls between extensions.</p></div>'
+          + '<div style="box-sizing:border-box;display:flex;flex-wrap:nowrap;gap:1px;padding:10px 6px;border-bottom:1px solid #eef1f5;font-size:12px;overflow:hidden">' + aiTabs + '</div>'
+          + '<div id="ixRight" style="box-sizing:border-box;flex:1;overflow-y:auto;padding:16px 18px;text-align:center"></div>'
           + '<div style="box-sizing:border-box;padding:12px 16px;border-top:1px solid #eef1f5"><span style="display:inline-block;font-size:12px;color:#475569;border:1px solid #e2e8f0;border-radius:999px;padding:4px 10px;margin-bottom:8px">Answers from this call</span>'
-          + '<div style="box-sizing:border-box;display:flex;gap:8px"><input id="ixAsk" placeholder="Ask Copilot about this call" autocomplete="off" style="box-sizing:border-box;flex:1;min-width:0;height:40px;border:1px solid #e2e8f0;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;background:#f8fafc">'
-          + '<button data-ixsend style="box-sizing:border-box;width:40px;height:40px;border:0;border-radius:10px;background:#2563eb;color:#fff;cursor:pointer;display:grid;place-items:center">' + ic(P.send, 17, 'currentColor') + '</button></div></div></section>'
+          + '<div style="box-sizing:border-box;display:flex;gap:8px"><input id="ixAsk" placeholder="Ask a question about this call" autocomplete="off" style="box-sizing:border-box;flex:1;min-width:0;height:40px;border:1px solid #e2e8f0;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;background:#fff">'
+          + '<button data-ixsend title="Send" aria-label="Send" style="box-sizing:border-box;width:40px;height:40px;border:0;border-radius:10px;background:#2563eb;color:#fff;cursor:pointer;display:grid;place-items:center">' + ic(P.send, 17, '#fff') + '</button></div></div></section>'
           + '</div>';
+        ixDialerHtml = $('#ixCenter').innerHTML;
         $('#ixSearch').addEventListener('input', function () { ixState.q = this.value; paintIxList() });
-        paintIxList(); paintIxDial(); paintIxRight(); paintIxTabs();
+        $('#ixAsk').addEventListener('keydown', function (e) { if (e.key === 'Enter') ixSend() });
+        paintIxList(); paintIxDial(); paintIxDetail(); paintIxRight(); paintIxTabs(); paintIxRail();
       }
-      function paintIxRight() { $('#ixRight').innerHTML = IX_RIGHT[ixState.r]; $$('[data-ixr]', $('#viewInteractions')).forEach(function (b) { b.classList.toggle('on', b.dataset.ixr === ixState.r) }) }
       function paintIxTabs() { $$('[data-ixf]', $('#viewInteractions')).forEach(function (b) { var on = b.dataset.ixf === ixState.f; b.style.background = on ? '#fff' : 'none'; b.style.color = on ? '#0f172a' : '#64748b'; b.style.fontWeight = on ? '600' : '500'; b.style.boxShadow = on ? '0 1px 2px rgba(15,23,42,.08)' : 'none' }) }
       $('#viewInteractions').addEventListener('click', function (e) {
         var t;
+        if ((t = e.target.closest('[data-ixpa]'))) { ixPageAction(t.dataset.ixpa, t.dataset.ixpv); return }
         if ((t = e.target.closest('[data-ixdd]'))) { openIxMenu(t); return }
-        if ((t = e.target.closest('[data-ixrail]'))) { if (t.dataset.ixrail !== 'Phone') note(t.dataset.ixrail + ' is not part of this preview'); return }
-        if (e.target.closest('[data-ixsend]')) { note($('#ixAsk').value.trim() ? 'Copilot answers appear once a call is connected' : 'Type a question first'); return }
+        if ((t = e.target.closest('[data-ixrail]'))) { ixGo(t.dataset.ixrail === 'Phone' ? null : t.dataset.ixrail); return }
+        if (e.target.closest('[data-ixsend]')) { ixSend(); return }
         if ((t = e.target.closest('[data-ixf]'))) { ixState.f = t.dataset.ixf; paintIxTabs(); paintIxList(); return }
-        if ((t = e.target.closest('[data-ixtab]'))) { ixState.tab = t.dataset.ixtab; paintIxList(); $$('[data-ixtab]', $('#viewInteractions')).forEach(function (b) { var on = b === t; b.style.color = on ? '#0f172a' : '#64748b'; b.style.fontWeight = on ? '600' : '500'; b.style.borderBottom = on ? '2px solid #2563eb' : '0' }); return }
-        if ((t = e.target.closest('[data-ixnum]'))) { ixState.dial = t.dataset.ixnum; paintIxDial(); return }
-        if ((t = e.target.closest('[data-ixk]'))) { ixState.dial += t.dataset.ixk; paintIxDial(); return }
+        if ((t = e.target.closest('[data-ixtab]'))) {
+          ixState.tab = t.dataset.ixtab; ixState.sel = null;
+          $$('[data-ixtab]', $('#viewInteractions')).forEach(function (b) { var on = b === t; b.style.color = on ? '#0f172a' : '#64748b'; b.style.fontWeight = on ? '600' : '500'; b.style.borderBottom = on ? '2px solid #2563eb' : '0' });
+          paintIxList(); paintIxDetail(); paintIxRight(); return;
+        }
+        if ((t = e.target.closest('[data-ixid]'))) { ixState.sel = t.dataset.ixid; paintIxList(); paintIxDetail(); paintIxRight(); return }
+        if (e.target.closest('[data-ixback]')) { ixState.sel = null; paintIxList(); paintIxDetail(); paintIxRight(); return }
+        if ((t = e.target.closest('[data-ixr]'))) { ixState.ai = t.dataset.ixr; paintIxRight(); return }
+        if ((t = e.target.closest('[data-ixact]'))) { ixAction(t.dataset.ixact); return }
+        if (e.target.closest('[data-ixvsave]')) { note('Voicemail follow-up saved'); return }
+        if ((t = e.target.closest('[data-ixnsave]'))) { var ta = $('[data-ixnote="' + t.dataset.ixnsave + '"]'); ixSaveNote(t.dataset.ixnsave, ta ? ta.value : ''); note('Notes saved'); return }
+        if ((t = e.target.closest('[data-ixk]'))) {
+          if (ixHold && ixHold.fired) { ixHold = null; return }
+          ixState.dial += t.dataset.ixk; paintIxDial(); return;
+        }
         if (e.target.closest('[data-ixdel]')) { ixState.dial = ixState.dial.slice(0, -1); paintIxDial(); return }
-        if (e.target.closest('[data-ixcall]')) { note(ixState.dial ? 'Calling ' + ixState.dial + '…' : 'Enter a number or pick a call first'); return }
-        if ((t = e.target.closest('[data-ixr]'))) { ixState.r = t.dataset.ixr; paintIxRight(); return }
+        if (e.target.closest('[data-ixcall]')) { ixDialDigits(ixState.dial); return }
+      });
+      $('#viewInteractions').addEventListener('change', function (e) {
+        var t = e.target;
+        if (t.hasAttribute('data-ixtask')) { var tk = ixPrefList('ucaas.ixTasks'); if (tk[+t.dataset.ixtask]) { tk[+t.dataset.ixtask].done = t.checked; prefWrite('ucaas.ixTasks', tk); paintIxPage() } return }
+        if (t.dataset.ixassign) return ixSaveVm(t.dataset.ixassign, 'assign', t.value);
+        if (t.dataset.ixresolve) return ixSaveVm(t.dataset.ixresolve, 'resolved', t.checked);
+        if (t.dataset.ixvnote) return ixSaveVm(t.dataset.ixvnote, 'note', t.value);
+        if (t.dataset.ixnote) return ixSaveNote(t.dataset.ixnote, t.value);
       });
       /* the top-bar "Interactions" link opens this view */
       document.addEventListener('click', function (e) {
@@ -7208,7 +7540,704 @@
         var t = a.textContent.trim();
         if (t === 'Interactions') { e.preventDefault(); showView('interactions') }
         else if (t === 'Directory' && a.closest('header')) { e.preventDefault(); showView('people') }
+        else if (t === 'Analytics' && a.closest('header')) { e.preventDefault(); showView('analytics') }
       });
+      /* Analytics: the Callbacks analytics page (header, stat cards, task table or board, queue voicemail) */
+      var AN_RANGE = {
+        'Today': { sched: 8, over: 8, cal: 7, con: 1, vm: 0, vmt: '00:00' },
+        'Last 7 days': { sched: 21, over: 9, cal: 15, con: 6, vm: 4, vmt: '03:42' },
+        'Last 30 days': { sched: 64, over: 17, cal: 49, con: 15, vm: 19, vmt: '21:08' }
+      };
+      var AN_TASKS = [
+        { t: 'helllloooo', c: 'Oct 03, 03:58 PM', d: 'Oct 04, 01:07 AM', s: 'New' },
+        { t: 'helllo', c: 'Oct 03, 03:57 PM', d: 'Oct 03, 10:07 PM', s: 'New' },
+        { t: 'hellooo', c: 'Oct 03, 03:57 PM', d: 'Oct 04, 04:07 PM', s: 'New' },
+        { t: 'heello', c: 'Oct 03, 03:56 PM', d: 'Oct 05, 04:06 PM', s: 'New' },
+        { t: 'hello again', c: 'Oct 03, 02:15 PM', d: 'Oct 03, 03:24 PM', s: 'Completed' }
+      ];
+      var AN_VQ = [
+        { t: 'Invoice follow-up', c: 'Oct 03, 11:20 AM', d: 'Oct 04, 09:00 AM', s: 'Queued' },
+        { t: 'Renewal reminder', c: 'Oct 02, 04:45 PM', d: 'Oct 03, 10:00 AM', s: 'Played' }
+      ];
+      var AN_RAIL = [
+        ['Queues', 'queues'], ['Agents', 'agents'], ['Calls', 'calls'], ['Flows', 'flows'], ['Boards', 'boards'], ['Live', 'live'],
+        ['Callbacks', 'callbacks'], ['Campaigns', 'grid'], ['Speech', 'mic'], ['Reports', 'bars'], ['AI Wall', 'sparkle'],
+        ['Queue', 'pie'], ['Video', 'video'], ['Monitoring', 'monitor'], ['Coaching', 'coach'], ['Agent Activity', 'pulse']
+      ];
+      var AN_PATH = {
+        grid: '<circle cx="6" cy="6" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="18" cy="6" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/><circle cx="6" cy="18" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="18" cy="18" r="1.5"/>',
+        mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+        bars: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+        sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+        pie: '<path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',
+        video: '<path d="M22 8l-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+        monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+        coach: '<circle cx="9" cy="8" r="3.5"/><path d="M3 20a6 6 0 0 1 12 0M17 11l2 2 4-4"/>',
+        pulse: '<path d="M3 12h4l2-6 4 12 2-6h6"/>'
+      };
+      var anState = { range: 'Today', tab: 'Scheduled tasks', board: false, sel: 'Callbacks', tasks: AN_TASKS.map(function (x) { return Object.assign({}, x) }) };
+      function anIcon(k) { return ixSvg(AN_PATH[k] || Q_PATH[k] || IX_ICON.phone, 20, 'currentColor') }
+      function anStatus(s, i) {
+        var done = s === 'Completed';
+        return '<button data-anstatus="' + i + '" style="box-sizing:border-box;font:inherit;font-size:12px;font-weight:600;border:0;border-radius:999px;padding:3px 10px;cursor:pointer;background:' + (done ? '#dcfce7' : '#dbeafe') + ';color:' + (done ? '#15803d' : '#1d4ed8') + '">' + s + '</button>';
+      }
+      function anStat(label, value, sub, red, tip) {
+        return '<div title="' + esc(tip) + '" style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;padding:14px 16px;min-width:0">'
+          + '<div style="font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600">' + esc(label) + '</div>'
+          + '<div style="font-size:' + (sub !== undefined && sub !== null && value.length > 6 ? '22px' : '28px') + ';font-weight:700;color:' + (red ? '#dc2626' : '#0f172a') + ';margin-top:6px;line-height:1.1">' + esc(value) + '</div>'
+          + (sub ? '<div style="font-size:11.5px;color:#64748b;margin-top:6px">' + esc(sub) + '</div>' : '') + '</div>';
+      }
+      function anTable() {
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 16px;border-bottom:1px solid #eef1f5';
+        var td = 'padding:14px 16px;border-bottom:1px solid #f1f5f9;font-size:13.5px;color:#0f172a;white-space:nowrap';
+        if (anState.tab === 'Queue voicemail') {
+          return '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + '">Voicemail</th><th style="' + th + '">Queued</th><th style="' + th + '">Due</th><th style="' + th + '">Status</th></tr></thead><tbody>'
+            + AN_VQ.map(function (x) { return '<tr><td style="' + td + '">' + esc(x.t) + '</td><td style="' + td + '">' + esc(x.c) + '</td><td style="' + td + '">' + esc(x.d) + '</td><td style="' + td + '">' + esc(x.s) + '</td></tr>' }).join('')
+            + '</tbody></table>';
+        }
+        if (anState.board) {
+          var cols = ['New', 'Completed'].map(function (st) {
+            var items = anState.tasks.map(function (x, i) { return { x: x, i: i } }).filter(function (o) { return o.x.s === st });
+            return '<div style="flex:1;min-width:0;background:#f8fafc;border:1px solid #e8ecf3;border-radius:12px;padding:12px"><div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:10px">' + st + ' · ' + items.length + '</div>'
+              + items.map(function (o) { return '<button data-anstatus="' + o.i + '" style="box-sizing:border-box;display:block;width:100%;text-align:left;font:inherit;background:#fff;border:1px solid #e3e8f1;border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer"><div style="font-weight:600;color:#0f172a;font-size:13px">' + esc(o.x.t) + '</div><div style="font-size:11.5px;color:#64748b;margin-top:4px">Due ' + esc(o.x.d) + '</div></button>' }).join('')
+              + '</div>';
+          });
+          return '<div style="display:flex;gap:12px;padding:16px">' + cols.join('') + '</div>';
+        }
+        return '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + '">Task</th><th style="' + th + '">Created</th><th style="' + th + '">Due</th><th style="' + th + '">Status</th></tr></thead><tbody>'
+          + anState.tasks.map(function (x, i) { return '<tr><td style="' + td + '">' + esc(x.t) + '</td><td style="' + td + ';color:#334155">' + esc(x.c) + '</td><td style="' + td + ';color:#334155">' + esc(x.d) + '</td><td style="padding:14px 16px;border-bottom:1px solid #f1f5f9">' + anStatus(x.s, i) + '</td></tr>' }).join('')
+          + '</tbody></table>';
+      }
+      function anPage() {
+        if (anState.sel === 'Monitoring') return monPage();
+        if (anState.sel === 'Queues') return qPage();
+        var r = AN_RANGE[anState.range], tabBtn = function (t) { var on = anState.tab === t; return '<button data-antab="' + t + '" style="box-sizing:border-box;font:inherit;font-size:13px;border:0;cursor:pointer;padding:7px 14px;border-radius:8px;background:' + (on ? '#fff' : 'none') + ';color:' + (on ? '#0f172a' : '#64748b') + ';font-weight:' + (on ? '600' : '500') + ';box-shadow:' + (on ? '0 1px 2px rgba(15,23,42,.08)' : 'none') + '">' + t + '</button>' };
+        var rangeOpts = Object.keys(AN_RANGE).map(function (k) { return '<option' + (k === anState.range ? ' selected' : '') + '>' + k + '</option>' }).join('');
+        var rail = AN_RAIL.map(function (x) {
+          var on = x[0] === anState.sel;
+          return '<button data-anrail="' + x[0] + '" style="box-sizing:border-box;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+        }).join('');
+        return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">'
+          + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + rail + '</nav>'
+          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">'
+          + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid #e3e8f1;border-left:4px solid #2563eb;border-radius:14px;padding:18px 20px">'
+          + '<div><h2 style="box-sizing:border-box;margin:0;font-size:22px;color:#0f172a">Callbacks analytics</h2>'
+          + '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#475569;margin-top:6px"><span style="width:8px;height:8px;border-radius:50%;background:#10b981"></span>Live status · report totals follow the selected range</div>'
+          + '<div style="font-size:12px;color:#94a3b8;margin-top:4px">Hover any figure for what it means</div></div>'
+          + '<div style="display:flex;align-items:center;gap:10px"><select data-anrange style="box-sizing:border-box;height:40px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:14px;background:#fff;min-width:150px">' + rangeOpts + '</select>'
+          + '<span style="box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:13px;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#10b981"></span>Live</span>'
+          + '<button data-anboard style="box-sizing:border-box;font:inherit;font-size:14px;font-weight:600;height:40px;padding:0 18px;border:0;border-radius:10px;background:' + (anState.board ? '#1e40af' : '#2563eb') + ';color:#fff;cursor:pointer">Boards</button></div></div>'
+          + '<div style="box-sizing:border-box;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px">'
+          + anStat('Scheduled tasks', String(r.sched), null, false, 'Tasks scheduled for the selected range')
+          + anStat('Overdue tasks', String(r.over), null, true, 'Tasks past their due time and not completed')
+          + anStat('Tasks by source', 'CALENDAR', 'CALENDAR: ' + r.cal + ' · CONTACT: ' + r.con, false, 'Where the tasks were created from')
+          + anStat('Voicemails today', String(r.vm), null, false, 'Voicemails received in the selected range')
+          + anStat('Voicemail time today', r.vmt, null, false, 'Total voicemail length in the selected range')
+          + '</div>'
+          + '<div style="box-sizing:border-box;display:inline-flex;gap:2px;margin-top:16px;background:#eef2f7;border-radius:10px;padding:3px">' + tabBtn('Scheduled tasks') + tabBtn('Queue voicemail') + '</div>'
+          + '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;margin-top:12px;overflow:auto">' + anTable() + '</div>'
+          + '</div></div>';
+      }
+      /* Analytics: Queue performance page (opened from the Queue item in the Analytics rail) */
+      var QS = { range: 'Today', mode: 'Live', hours: 16, chart: 'line' };
+      var Q_RAIL = [['Callbacks', 'callbacks'], ['Campaigns', 'grid'], ['Speech', 'mic'], ['Reports', 'bars'], ['AI Wall', 'sparkle'], ['Queues', 'queues'], ['Agents', 'agents'], ['Calls', 'calls'], ['Flows', 'flows'], ['Boards', 'boards'], ['Live', 'live']];
+      var Q_PATH = {
+        back: '<path d="M15 6l-6 6 6 6"/>',
+        queues: '<rect x="3" y="7" width="11" height="11" rx="2"/><rect x="10" y="3" width="11" height="11" rx="2"/>',
+        callbacks: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/><path d="M15 3h6v6M21 3l-6 6"/>',
+        agents: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+        calls: IX_ICON.phone,
+        flows: '<path d="M6 4v16M18 4v16M6 8h12M6 16h12"/>',
+        boards: '<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/>',
+        live: '<circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/>',
+        line: '<path d="M3 17l5-5 4 3 8-8"/>',
+        bars: '<path d="M6 20V10M12 20V4M18 20v-7"/>',
+        combo: '<path d="M3 17l5-5 4 3 8-8"/><path d="M6 20v-4M12 20v-8M18 20v-5"/>'
+      };
+      function qRailHtml() {
+        return AN_RAIL.map(function (x) {
+          var on = x[0] === 'Boards' ? QS.mode === 'Boards' : x[0] === 'Queues' ? QS.mode !== 'Boards' : x[0] === anState.sel;
+          return '<button data-qrail="' + x[0] + '" style="box-sizing:border-box;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+        }).join('');
+      }
+      /* Queues and Boards: queues are the directory groups; members and presence come from the directory, the call figures are dummy values */
+      function qCell(icon, tone, label, value, sub, unit) {
+        var c = { orange: ['#fff7ed', '#c2410c'], blue: ['#eff6ff', '#2563eb'], green: ['#ecfdf5', '#15803d'] }[tone];
+        return '<div style="box-sizing:border-box;flex:1;min-width:0;padding:16px 18px;border-right:1px solid #eef1f5">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center"><span style="width:34px;height:34px;border-radius:10px;background:' + c[0] + ';color:' + c[1] + ';display:grid;place-items:center">' + qIco(icon, 17, c[1]) + '</span><span style="width:8px;height:8px;border-radius:50%;background:#10b981"></span></div>'
+          + '<div style="font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;margin-top:12px">' + esc(label) + '</div>'
+          + '<div style="font-size:28px;font-weight:700;color:#0f172a;margin-top:4px;line-height:1.1">' + esc(value) + (unit ? '<span style="font-size:13px;font-weight:500;color:#64748b;margin-left:4px">' + esc(unit) + '</span>' : '') + '</div>'
+          + '<div style="font-size:12.5px;color:#64748b;margin-top:6px">' + esc(sub) + '</div></div>';
+      }
+      var Q_ICON2 = {
+        users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+        clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+        user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+        phone: IX_ICON.phone,
+        headset: '<path d="M4 14v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+        megaphone: '<path d="M3 11v4h4l8 4V7L7 11z"/><path d="M19 9a4 4 0 0 1 0 6"/>',
+        timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/>',
+        bot: '<rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01"/>',
+        line: '<path d="M3 17l5-5 4 3 8-8"/>',
+        bars: '<path d="M6 20V10M12 20V4M18 20v-7"/>',
+        combo: '<path d="M3 17l5-5 4 3 8-8"/><path d="M6 20v-4M12 20v-8M18 20v-5"/>'
+      };
+      function qIco(k, s, c) { return ixSvg(Q_ICON2[k], s || 17, c || 'currentColor') }
+      var QSORT = { 'Worst service level': 'Sorted by worst service level', 'Busiest': 'Sorted by busiest', 'Most abandoned': 'Sorted by most abandoned' };
+      QS.sort = 'Worst service level'; QS.chart = 'line';
+      function qCard(extra, inner) { return '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden;' + (extra || '') + '">' + inner + '</div>' }
+      /* the queue data: one queue per directory group that has members; numbers are dummy but follow the group size */
+      function qData() {
+        var seen = {}, queues = groups.filter(function (g) { return g && g.name }).map(function (g) {
+          var mem = gMembers(g).filter(function (p) { if (seen[p.dataset.id]) return false; return true });
+          var n = mem.length, seed = g.name.length + n * 3;
+          var online = mem.filter(function (p) { return p.dataset.presence === 'Available' }).length;
+          var busy = mem.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
+          var offered = n ? 6 + seed * 2 : 0, answered = n ? Math.max(0, offered - (seed % 4)) : 0;
+          return { name: g.name, members: mem, online: online, busy: busy, offered: offered, answered: answered, abandoned: offered - answered,
+            sl: offered ? Math.round(answered / offered * 100) : null, waiting: n ? seed % 3 : 0, longest: n && seed % 3 ? '00:' + (20 + seed * 4 % 40) : '—',
+            avg: n ? '00:' + (40 + seed * 7 % 50) : '—' };
+        }).filter(function (q) { return q.members.length });
+        queues.forEach(function (q) { q.members.forEach(function (p) { seen[p.dataset.id] = 1 }) });
+        var all = []; queues.forEach(function (q) { q.members.forEach(function (p) { if (all.indexOf(p) < 0) all.push(p) }) });
+        var offered = queues.reduce(function (a, q) { return a + q.offered }, 0), answered = queues.reduce(function (a, q) { return a + q.answered }, 0);
+        var abandoned = offered - answered, leads = CGROUPS.filter(function (g) { return g.kind === 'lead' });
+        return {
+          queues: queues, members: all,
+          waiting: queues.reduce(function (a, q) { return a + q.waiting }, 0),
+          longest: queues.filter(function (q) { return q.waiting }).map(function (q) { return q.longest })[0] || '—',
+          online: all.filter(function (p) { return p.dataset.presence === 'Available' }).length,
+          busy: all.filter(function (p) { return p.dataset.presence === 'Busy' }).length,
+          offline: all.filter(function (p) { return p.dataset.presence !== 'Available' && p.dataset.presence !== 'Busy' }).length,
+          offered: offered, answered: answered, abandoned: abandoned,
+          sl: offered ? Math.round(answered / offered * 100) : null,
+          leads: leads.length, leadsAll: leads.length,
+          callbacks: CONTACTS.filter(function (c) { return /callback/i.test(c.notes || '') }).length
+        };
+      }
+      function qHeader(d) {
+        var modeBtn = function (t) { var on = QS.mode === t; return '<button data-qmode="' + t + '" style="box-sizing:border-box;font:inherit;font-size:14px;font-weight:' + (on ? '600' : '500') + ';border:0;cursor:pointer;padding:8px 16px;border-radius:8px;background:' + (on ? '#fff' : 'none') + ';color:' + (on ? '#0f172a' : '#64748b') + ';box-shadow:' + (on ? '0 1px 2px rgba(15,23,42,.1)' : 'none') + '">' + t + '</button>' };
+        var rangeOpts = Object.keys(AN_RANGE).map(function (k) { return '<option' + (k === QS.range ? ' selected' : '') + '>' + k + '</option>' }).join('');
+        var qn = d.queues.length, mn = d.members.length;
+        return '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid #e3e8f1;border-left:4px solid #6366f1;border-radius:14px;padding:18px 20px">'
+          + '<div><h2 style="box-sizing:border-box;margin:0;font-size:26px;letter-spacing:-.3px;color:#0f172a">Queue performance</h2>'
+          + '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#475569;margin-top:6px"><span style="width:7px;height:7px;border-radius:50%;background:#10b981"></span>Live · totals refresh every 15s</div>'
+          + '<div style="font-size:13px;color:#475569;margin-top:2px">' + qn + ' queue' + (qn === 1 ? '' : 's') + ' · ' + mn + ' member' + (mn === 1 ? '' : 's') + '</div>'
+          + '<div style="font-size:12px;color:#94a3b8;margin-top:4px">Hover any figure for what it means</div></div>'
+          + '<div style="display:flex;align-items:center;gap:10px"><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);display:flex;color:#475569;pointer-events:none">' + qIco('timer', 15, '#475569') + '</span><select data-qrange style="box-sizing:border-box;height:40px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px 0 32px;font:inherit;font-size:14px;background:#fff;min-width:140px">' + rangeOpts + '</select></div>'
+          + '<div style="display:inline-flex;gap:2px;background:#e8edf5;border-radius:10px;padding:3px">' + modeBtn('Live') + modeBtn('Boards') + '</div></div></div>';
+      }
+      function qRightNow(d) {
+        var pct = d.members.length ? Math.round(d.busy / d.members.length * 100) : 0;
+        return '<div style="display:flex;align-items:center;gap:12px;margin:20px 0 10px;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#64748b;font-weight:600">Right now<span style="flex:1;height:1px;background:#e3e8f1"></span></div>'
+          + qCard('display:flex', qCell('users', 'orange', 'Waiting', String(d.waiting), 'across ' + d.queues.length + ' queue' + (d.queues.length === 1 ? '' : 's'), 'callers')
+          + qCell('clock', 'orange', 'Longest wait', d.longest, d.longest === '—' ? 'nobody waiting' : 'longest current wait', '')
+          + qCell('user', 'blue', 'Online now', String(d.online), d.busy + ' on a call · ' + d.online + ' free', 'of ' + d.members.length)
+          + qCell('phone', 'green', 'On a call now', pct + '%', d.busy + ' of ' + d.members.length + ' online', ''));
+      }
+      /* dummy hourly series for the chart, scaled to the day's totals */
+      function qSeries(d) {
+        var n = QS.hours, off = [], ans = [], svc = [], base = Math.max(1, Math.round(d.offered / Math.max(1, n) * 1.6));
+        for (var i = 0; i < n; i++) {
+          var b = Math.max(0, Math.round(base * (0.6 + 0.5 * Math.abs(Math.sin(i / 2.4)))));
+          off.push(b); ans.push(Math.max(0, b - (i % 4 === 0 ? 1 : 0))); svc.push(Math.min(100, 60 + (i * 7) % 35));
+        }
+        return { off: off, ans: ans, svc: svc };
+      }
+      function qChartSvg(d) {
+        var s = qSeries(d), n = QS.hours, W = 760, H = 230, P = 34;
+        var yMax = Math.max(4, Math.max.apply(null, s.off) + 1), step = (W - 2 * P) / (n - 1), bw = Math.max(3, step * 0.35);
+        var X = function (i) { return P + i * step }, Y = function (v) { return H - P - v / yMax * (H - 2 * P) }, S = function (p) { return H - P - p / 100 * (H - 2 * P) };
+        var g = '';
+        [0, yMax / 2, yMax].forEach(function (v) { g += '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="#eef1f5"/><text x="' + (P - 6) + '" y="' + (Y(v) + 4) + '" font-size="11" fill="#94a3b8" text-anchor="end">' + Math.round(v) + '</text>' });
+        for (var h = 0; h < n; h += 2) g += '<text x="' + X(h) + '" y="' + (H - 8) + '" font-size="11" fill="#94a3b8" text-anchor="middle">' + ('0' + h).slice(-2) + ':00</text>';
+        var line = function (arr, f, col, dash) { return '<polyline fill="none" stroke="' + col + '" stroke-width="2" ' + (dash ? 'stroke-dasharray="5 4" ' : '') + 'points="' + arr.map(function (v, i) { return X(i) + ',' + f(v) }).join(' ') + '"/>' };
+        var bars = function (arr, dx, col) { return arr.map(function (v, i) { return '<rect x="' + (X(i) + dx) + '" y="' + Y(v) + '" width="' + bw + '" height="' + (H - P - Y(v)) + '" fill="' + col + '" rx="2"/>' }).join('') };
+        var body;
+        if (QS.chart === 'bar') body = bars(s.off, -bw, '#bfdbfe') + bars(s.ans, 0, '#86efac');
+        else if (QS.chart === 'combo') body = bars(s.off, -bw / 2, '#bfdbfe') + line(s.ans, Y, '#16a34a') + line(s.svc, S, '#f59e0b', true);
+        else body = line(s.off, Y, '#2563eb') + line(s.ans, Y, '#16a34a') + line(s.svc, S, '#f59e0b', true);
+        return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block">' + g + body + '</svg>';
+      }
+      function qChartCard(d) {
+        var chartBtn = function (k) { var on = QS.chart === k; return '<button data-qchart="' + k + '" aria-label="' + k + ' chart" style="box-sizing:border-box;width:34px;height:30px;border:1px solid ' + (on ? '#bfdbfe' : '#e2e8f0') + ';border-radius:8px;cursor:pointer;background:' + (on ? '#eff6ff' : '#fff') + ';color:' + (on ? '#2563eb' : '#475569') + ';display:grid;place-items:center">' + qIco(k, 16, 'currentColor') + '</button>' };
+        var stat = function (label, value, sub, pct) { return '<div style="flex:1;min-width:0;padding:16px 18px;border-right:1px solid #eef1f5"><div style="font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600">' + label + '</div><div style="font-size:24px;font-weight:700;color:#0f172a;margin-top:6px">' + value + '</div>' + (pct !== undefined ? '<div style="height:4px;background:#f1f5f9;border-radius:4px;margin-top:8px"><div style="height:4px;width:' + Math.min(100, pct || 0) + '%;background:#2563eb;border-radius:4px"></div></div>' : '') + '<div style="font-size:12px;color:#64748b;margin-top:6px">' + sub + '</div></div>' };
+        var abandonPct = d.offered ? Math.round(d.abandoned / d.offered * 100) : 0;
+        var stats = '<div style="display:flex;border-top:1px solid #eef1f5;margin-top:16px">' + stat('Service level', d.sl === null ? '—' : d.sl + '%', 'goal 80% in 20s', d.sl || 0) + stat('Answered', String(d.answered), 'calls', undefined) + stat('Abandon rate', abandonPct + '%', d.abandoned + ' abandoned', abandonPct) + stat('Avg handle time', '03:42', 'talk time per answered call', undefined) + '</div>';
+        var controls = '<div style="display:flex;align-items:center;gap:8px"><div style="display:flex;gap:4px">' + chartBtn('line') + chartBtn('bars') + chartBtn('combo') + '</div>'
+          + '<div style="display:inline-flex;align-items:center;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden"><button data-qhours="-" style="border:0;background:#f8fafc;width:30px;height:30px;cursor:pointer;font:inherit;color:#475569">&minus;</button><span style="font-size:13px;font-weight:600;color:#0f172a;min-width:48px;text-align:center">' + QS.hours + 'h</span><button data-qhours="+" style="border:0;background:#f8fafc;width:30px;height:30px;cursor:pointer;font:inherit;color:#475569">+</button></div></div>';
+        var legend = '<div style="display:flex;gap:16px;font-size:12.5px;color:#475569;margin-top:12px"><span><span style="display:inline-block;width:14px;height:2px;background:#2563eb;vertical-align:middle;margin-right:6px"></span>Offered</span><span><span style="display:inline-block;width:14px;height:2px;background:#16a34a;vertical-align:middle;margin-right:6px"></span>Answered</span><span><span style="display:inline-block;width:14px;border-top:2px dashed #f59e0b;vertical-align:middle;margin-right:6px"></span>Service level</span></div>';
+        return qCard('margin-top:14px', '<div style="height:3px;background:linear-gradient(90deg,#2563eb,#16a34a)"></div><div style="padding:16px 18px 0"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><div style="font-size:18px;font-weight:700;color:#0f172a">Service level &amp; volume</div><div style="font-size:12.5px;color:#64748b;margin-top:3px">Goal 80% answered within 20s · hover for detail, scroll to zoom</div></div>' + controls + '</div>' + legend + '</div><div style="padding:8px 18px 0">' + qChartSvg(d) + '</div>' + stats);
+      }
+      function qBreakdown(d) {
+        var C = 2 * Math.PI * 44, a = d.offered ? d.answered / d.offered : 0, b = d.offered ? d.abandoned / d.offered : 0, o = d.offered ? 0.04 : 0;
+        var seg = function (frac, col, off) { return frac ? '<circle cx="55" cy="55" r="44" fill="none" stroke="' + col + '" stroke-width="16" stroke-dasharray="' + (frac * C) + ' ' + C + '" transform="rotate(' + (-90 + off * 360) + ' 55 55)"/>' : '' };
+        var donut = '<svg width="110" height="110" viewBox="0 0 110 110"><circle cx="55" cy="55" r="44" fill="none" stroke="#e5e7eb" stroke-width="16"/>' + seg(a, '#16a34a', 0) + seg(b, '#dc2626', a) + seg(o, '#2563eb', a + b) + '</svg>';
+        var row = function (dot, label, v, pct) { return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #f1f5f9;font-size:13.5px;color:#0f172a"><span style="display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:' + dot + '"></span>' + label + '</span><span style="font-family:monospace;color:#64748b">' + v + ' &nbsp; ' + pct + '</span></div>' };
+        var outcome = qCard('', '<div style="padding:18px 20px"><div style="font-size:18px;font-weight:700;color:#0f172a">Outcome mix</div><div style="font-size:12.5px;color:#64748b;margin-top:3px">Every queue call today, by how it ended</div><div style="position:relative;width:110px;height:110px;margin:16px auto 8px">' + donut + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:18px;font-weight:700;color:#0f172a">' + Math.round(a * 100) + '%</div><div style="font-size:9px;letter-spacing:.6px;color:#64748b;text-transform:uppercase">Answered</div></div></div>'
+          + row('#16a34a', 'Answered', d.answered, Math.round(a * 100) + '%') + row('#dc2626', 'Abandoned', d.abandoned, Math.round(b * 100) + '%') + row('#2563eb', 'Other outcomes', 0, '0%') + '</div>');
+        var maxQ = Math.max(1, Math.max.apply(null, d.queues.map(function (q) { return q.offered }).concat([1])));
+        var bars = d.queues.map(function (q) { return '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13.5px;color:#0f172a"><span>' + esc(q.name) + '</span><span style="font-family:monospace;color:#0f172a">' + q.offered + '</span></div><div style="height:8px;background:#f1f5f9;border-radius:6px;margin-top:8px;overflow:hidden"><div style="height:8px;width:' + Math.round(q.offered / maxQ * 100) + '%;background:#2563eb;border-radius:6px"></div></div>' }).join('');
+        var offered = qCard('', '<div style="padding:18px 20px"><div style="font-size:18px;font-weight:700;color:#0f172a">Offered by queue</div><div style="font-size:12.5px;color:#64748b;margin-top:3px">All ' + d.queues.length + ' queue' + (d.queues.length === 1 ? '' : 's') + ' · ' + d.offered + ' calls offered</div>' + bars + '<div style="display:flex;gap:16px;font-size:12px;color:#64748b;margin-top:18px;padding-top:14px;border-top:1px solid #f1f5f9"><span><span style="color:#16a34a">●</span> Answered</span><span><span style="color:#dc2626">●</span> Abandoned</span><span><span style="color:#cbd5e1">●</span> Rest of the busiest queue\'s volume</span></div></div>');
+        return '<div style="font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#64748b;font-weight:600;margin:22px 0 10px;display:flex;align-items:center;gap:12px">Breakdown<span style="flex:1;height:1px;background:#e3e8f1"></span></div>'
+          + '<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:14px">' + outcome + offered + '</div>';
+      }
+      function qRow3(d) {
+        var busiest = d.queues.slice().sort(function (x, y) { return y.offered - x.offered })[0], worst = d.queues.filter(function (q) { return q.sl !== null }).sort(function (x, y) { return x.sl - y.sl })[0], waiting = d.queues.filter(function (q) { return q.waiting }).sort(function (x, y) { return y.waiting - x.waiting })[0];
+        var s = function (label, v) { return '<div style="padding:12px 0;border-top:1px solid #f1f5f9"><div style="font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600">' + label + '</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:15px;font-weight:700;color:#0f172a"><span>' + esc(v[0]) + '</span><span style="font-family:monospace;font-size:13px;color:#64748b">' + esc(v[1]) + '</span></div></div>' };
+        var standouts = qCard('', '<div style="padding:18px 20px"><div style="font-size:18px;font-weight:700;color:#0f172a">Standouts</div><div style="margin-top:8px">'
+          + s('Busiest queue', busiest ? [busiest.name, busiest.offered + ' offered'] : ['No calls yet', '—'])
+          + s('Lowest service level', worst ? [worst.name, worst.sl + '%'] : ['Nothing measured yet', '—'])
+          + s('Longest-waiting queue', waiting ? [waiting.name, waiting.longest] : ['Nobody waiting', '—'])
+          + s('Callbacks waiting', d.callbacks ? ['Callback requests', String(d.callbacks)] : ['Nobody asked for a callback', '0']) + '</div></div>');
+        var lrow = function (dot, label, v) { return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #f1f5f9;font-size:13.5px;color:#0f172a"><span style="display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:' + dot + '"></span>' + label + '</span><span style="font-family:monospace;color:#64748b">' + v + '</span></div>' };
+        var n = d.members.length || 1, pctOn = Math.round(d.online / n * 100);
+        var members = qCard('', '<div style="padding:18px 20px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:18px;font-weight:700;color:#0f172a">Members</div><button data-qopen="people" style="border:0;background:none;color:#2563eb;font:inherit;font-size:13px;cursor:pointer">Agents ›</button></div><div style="margin-top:12px;font-size:28px;font-weight:700;color:#0f172a">' + d.online + ' <span style="font-size:13px;font-weight:500;color:#64748b">of ' + d.members.length + ' member' + (d.members.length === 1 ? '' : 's') + ' online</span></div><div style="height:6px;background:#f1f5f9;border-radius:6px;margin:12px 0 4px;overflow:hidden"><div style="height:6px;width:' + pctOn + '%;background:#10b981"></div></div>'
+          + lrow('#f59e0b', 'On a call', d.busy) + lrow('#10b981', 'Available', d.online) + lrow('#cbd5e1', 'Offline', d.offline) + '</div>');
+        var events = d.members.slice(0, 4).map(function (p) { var st = p.dataset.presence; return '<div style="padding:10px 0;border-top:1px solid #f1f5f9;font-size:13px;color:#334155"><b style="color:#0f172a">' + esc(p.dataset.name) + '</b> · ' + esc(st) + ' · ' + esc(p.dataset.group || 'no group') + '</div>' }).join('');
+        var evCard = qCard('', '<div style="padding:18px 20px"><div style="display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:#0f172a">Queue events<span style="width:7px;height:7px;border-radius:50%;background:#10b981"></span></div><div style="margin-top:6px">' + (events || '<p style="font-size:13.5px;color:#475569">Nothing yet.</p>') + '</div></div>');
+        return '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px">' + standouts + members + evCard + '</div>';
+      }
+      function qTable(d) {
+        var tab = function (t) { var on = QS.sort === t; return '<button data-qsort="' + t + '" style="box-sizing:border-box;font:inherit;font-size:13px;border:0;cursor:pointer;padding:7px 14px;border-radius:8px;background:' + (on ? '#e0ebff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#475569') + ';font-weight:' + (on ? '600' : '500') + '">' + t + '</button>' };
+        var rows = d.queues.slice();
+        if (QS.sort === 'Busiest') rows.sort(function (x, y) { return y.offered - x.offered });
+        else if (QS.sort === 'Most abandoned') rows.sort(function (x, y) { return y.abandoned - x.abandoned });
+        else rows.sort(function (x, y) { return (x.sl === null ? 999 : x.sl) - (y.sl === null ? 999 : y.sl) });
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 16px;border-bottom:1px solid #eef1f5';
+        var td = 'padding:14px 16px;font-size:13.5px;color:#0f172a;white-space:nowrap';
+        var head = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 20px"><div><div style="font-size:18px;font-weight:700;color:#0f172a">Queues</div><div style="font-size:12.5px;color:#64748b;margin-top:3px">' + esc(QSORT[QS.sort]) + '</div></div><div style="display:flex;gap:4px">' + tab('Worst service level') + tab('Busiest') + tab('Most abandoned') + '</div></div>';
+        var body = rows.map(function (q) {
+          var dot = q.sl === null ? '#cbd5e1' : q.sl < 80 ? '#dc2626' : '#16a34a';
+          return '<tr><td style="' + td + '"><div style="display:flex;align-items:center;gap:10px"><span style="width:7px;height:7px;border-radius:50%;background:' + dot + '"></span><div><div style="font-weight:600">' + esc(q.name) + '</div><div style="font-size:12px;color:#64748b">' + q.members.length + ' member' + (q.members.length === 1 ? '' : 's') + '</div></div></div></td>'
+            + '<td style="' + td + ';text-align:right;font-family:monospace">' + q.offered + '</td><td style="' + td + ';text-align:right;font-family:monospace;color:#64748b">' + q.answered + '</td><td style="' + td + ';text-align:right;font-family:monospace;color:#64748b">' + q.abandoned + '</td><td style="' + td + ';text-align:right;color:#64748b">' + q.avg + '</td>'
+            + '<td style="' + td + '"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1;height:6px;background:#f1f5f9;border-radius:6px;min-width:120px;overflow:hidden"><div style="height:6px;width:' + (q.sl || 0) + '%;background:' + dot + '"></div></div><span style="color:#0f172a;font-family:monospace;min-width:40px">' + (q.sl === null ? '—' : q.sl + '%') + '</span></div></td></tr>';
+        }).join('');
+        var table = '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + '">Queue</th><th style="' + th + ';text-align:right">Offered</th><th style="' + th + ';text-align:right">Answered</th><th style="' + th + ';text-align:right">Abandoned</th><th style="' + th + ';text-align:right">Avg wait</th><th style="' + th + '">Service level</th></tr></thead><tbody>' + body + '</tbody></table>';
+        var legend = '<div style="border-top:1px solid #eef1f5;padding:12px 16px;font-size:12px;color:#64748b;text-align:right;font-family:monospace">' + d.offered + ' offered · ' + d.answered + ' answered · ' + d.abandoned + ' abandoned</div>';
+        return '<div style="margin-top:14px">' + qCard('', head + table + legend) + '</div>';
+      }
+      function boardsBody(d) {
+        var card = function (icon, label, value, sub) {
+          return '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;padding:14px 16px;min-width:0"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600">' + label + '</span>' + qIco(icon, 15, '#2563eb') + '</div>'
+            + '<div style="font-size:28px;font-weight:700;color:#0f172a;margin-top:10px;line-height:1.1">' + value + '</div>' + (sub ? '<div style="font-size:12px;color:#64748b;margin-top:4px">' + sub + '</div>' : '') + '</div>';
+        };
+        var rangeOpts = Object.keys(AN_RANGE).map(function (k) { return '<option' + (k === QS.range ? ' selected' : '') + '>' + k + '</option>' }).join('');
+        var header = '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid #e3e8f1;border-left:4px solid #6366f1;border-radius:14px;padding:18px 20px">'
+          + '<div><h2 style="box-sizing:border-box;margin:0;font-size:26px;letter-spacing:-.3px;color:#0f172a">Boards analytics</h2>'
+          + '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#475569;margin-top:6px"><span style="width:7px;height:7px;border-radius:50%;background:#10b981"></span>Live status · report totals follow the selected range</div>'
+          + '<div style="font-size:12px;color:#94a3b8;margin-top:4px">Hover any figure for what it means</div></div>'
+          + '<div style="display:flex;align-items:center;gap:10px"><select data-qrange style="box-sizing:border-box;height:40px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:14px;background:#fff;min-width:140px">' + rangeOpts + '</select>'
+          + '<button data-qmode="Live" style="box-sizing:border-box;font:inherit;font-size:13px;font-weight:600;height:36px;padding:0 12px;border:0;border-radius:999px;background:#ecfdf5;color:#047857;cursor:pointer">● Live</button>'
+          + '<button data-qmode="Boards" style="box-sizing:border-box;font:inherit;font-size:14px;font-weight:600;height:40px;padding:0 18px;border:0;border-radius:10px;background:#2563eb;color:#fff;cursor:pointer">Boards</button></div></div>';
+        var grid = '<div style="font-size:12.5px;color:#94a3b8;margin:16px 0 12px">A quick-glance overview across queues, campaigns and agents.</div>'
+          + '<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px">'
+          + card('headset', 'Active queues', String(d.queues.length), '')
+          + card('megaphone', 'Active campaigns', String(d.leads), 'of ' + d.leadsAll + ' total')
+          + card('users', 'Agents online', String(d.online), 'of ' + d.members.length + ' in queues')
+          + card('phone', 'Answered today', String(d.answered), d.offered + ' offered')
+          + card('timer', 'Avg handle time', '03:42', '')
+          + card('bot', 'AI containment', '18%', 'resolved without a human')
+          + '</div>';
+        return header + grid;
+      }
+      function qWrap(inner) {
+        return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">'
+          + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + qRailHtml() + '</nav>'
+          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">' + inner + '</div></div>';
+      }
+      function qPage() {
+        var d = qData();
+        if (QS.mode === 'Boards') return qWrap(boardsBody(d));
+        return qWrap(qHeader(d) + qRightNow(d) + qChartCard(d) + qBreakdown(d) + qRow3(d) + qTable(d));
+      }
+      function qClick(e) {
+        var t;
+        if ((t = e.target.closest('[data-qrail]'))) {
+          var n = t.dataset.qrail;
+          if (n === 'Callbacks' || n === 'Monitoring') anState.sel = n;
+          else if (n === 'Boards') QS.mode = 'Boards';
+          else if (n === 'Live') QS.mode = 'Live';
+          else if (n === 'Queues') QS.mode = 'Live';
+          else return note(n + ' is not part of this preview'), true;
+          anRepaint(); return true;
+        }
+        if ((t = e.target.closest('[data-qsort]'))) { QS.sort = t.dataset.qsort; anRepaint(); return true }
+        if ((t = e.target.closest('[data-qopen]'))) { showView(t.dataset.qopen); return true }
+        if ((t = e.target.closest('[data-qnote]'))) { note(t.dataset.qnote + ' is not part of this preview'); return true }
+        if ((t = e.target.closest('[data-qmode]'))) { QS.mode = t.dataset.qmode; anRepaint(); return true }
+        if ((t = e.target.closest('[data-qchart]'))) { QS.chart = t.dataset.qchart; anRepaint(); return true }
+        if ((t = e.target.closest('[data-qhours]'))) { QS.hours = Math.min(24, Math.max(8, QS.hours + (t.dataset.qhours === '+' ? 8 : -8))); anRepaint(); return true }
+        return false;
+      }
+      /* Monitoring: sub-menu (All Calls, All Extensions, Groups, Call Queue, Campaign) with the same layout as the reference */
+      var MS = { sub: 'Campaign', campaign: '', collapsed: false };
+      var MON_SUB = [
+        ['All Calls', 'phone'], ['All Extensions', 'users'], ['Groups', 'tree'], ['Call Queue', 'queues'], ['Campaign', 'grid']
+      ];
+      var MON_ICON = {
+        phone: IX_ICON.phone,
+        users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+        tree: '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v6h9"/>',
+        queues: '<rect x="3" y="7" width="11" height="11" rx="2"/><rect x="10" y="3" width="11" height="11" rx="2"/>',
+        grid: AN_PATH.grid,
+        chev: '<path d="M15 6l-6 6 6 6"/>',
+        chevR: '<path d="M9 6l6 6-6 6"/>'
+      };
+      function anRailHtml() {
+        return AN_RAIL.map(function (x) {
+          var on = x[0] === anState.sel;
+          return '<button data-anrail="' + x[0] + '" style="box-sizing:border-box;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+        }).join('');
+      }
+      function monTable(head, rows, empty) {
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 16px;border-bottom:1px solid #eef1f5';
+        var td = 'padding:13px 16px;font-size:13.5px;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap';
+        if (!rows.length) return '<div style="padding:40px 16px;text-align:center;color:#64748b;font-size:13px">' + esc(empty) + '</div>';
+        return '<table style="width:100%;border-collapse:collapse"><thead><tr>' + head.map(function (h) { return '<th style="' + th + '">' + esc(h) + '</th>' }).join('') + '</tr></thead><tbody>'
+          + rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td style="' + td + '">' + c + '</td>' }).join('') + '</tr>' }).join('') + '</tbody></table>';
+      }
+      /* Monitoring: the All Calls table (From, DID, Duration, Status, Direction, To, Call path, Actions) built from the calls and the directory */
+      MS.q = ''; MS.status = 'All'; MS.dir = 'All'; MS.list = [];
+      function monCallList() {
+        var people = rows().filter(function (r) { return r.dataset.removed !== '1' });
+        var pick = function (i) { return people.length ? people[i % people.length] : null };
+        var base = IX_CALLS.slice(0, 4).map(function (c, i) {
+          var p = pick(i);
+          return { from: c.n, did: c.num && c.num.length > 4 ? c.num : '+1 646 555 0' + (100 + i), dur: c.dur, status: c.status === 'Missed' ? 'Missed' : 'Completed', dir: c.dir,
+            to: c.internal ? 'Ext ' + c.num : (p ? p.dataset.name : '—'), path: (c.dir === 'in' ? 'Inbound › Main IVR › ' : 'Outbound › ') + (p ? (p.dataset.group || 'Direct') : 'Direct'), src: c };
+        });
+        var extra = people.slice(0, 2).map(function (p, j) {
+          return { from: '+1 555 01' + (10 + j), did: '+1 646 555 02' + (10 + j), dur: '00:' + (10 + (j * 13) % 50), status: j % 3 === 0 ? 'Missed' : 'Completed', dir: j % 2 ? 'in' : 'out',
+            to: p.dataset.name, path: 'Inbound › ' + (p.dataset.group || 'Direct') + ' › ' + p.dataset.name, src: null };
+        });
+        return base.concat(extra);
+      }
+      function monCallRowsHtml() {
+        var q = MS.q.toLowerCase();
+        MS.list = monCallList().filter(function (c) {
+          return (MS.status === 'All' || c.status === MS.status) && (MS.dir === 'All' || c.dir === (MS.dir === 'Inbound' ? 'in' : 'out'))
+            && (!q || [c.from, c.did, c.to, c.path].join(' ').toLowerCase().indexOf(q) > -1);
+        });
+        if (!MS.list.length) return '<tr><td colspan="8" style="padding:36px 16px;text-align:center;color:#64748b;font-size:13px">No calls match these filters.</td></tr>';
+        var td = 'padding:10px 10px;font-size:12.5px;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        var pill = function (t, bg, fg) { return '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:' + bg + ';color:' + fg + '">' + esc(t) + '</span>' };
+        var act = function (a, title, icon, i) { return '<button data-monact="' + a + '" data-monidx="' + i + '" title="' + title + '" aria-label="' + title + '" style="box-sizing:border-box;width:26px;height:26px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#334155;cursor:pointer;display:grid;place-items:center">' + ixSvg(icon, 15, '#334155') + '</button>' };
+        return MS.list.map(function (c, i) {
+          var st = c.status === 'Missed' ? pill('Missed', '#fee2e2', '#b91c1c') : pill('Completed', '#dcfce7', '#15803d');
+          var dr = c.dir === 'in' ? pill('Inbound', '#e0f2fe', '#0369a1') : pill('Outbound', '#ede9fe', '#6d28d9');
+          return '<tr><td style="' + td + '">' + esc(c.from) + '</td><td style="' + td + ';font-family:monospace;color:#475569">' + esc(c.did) + '</td><td style="' + td + ';font-family:monospace">' + esc(c.dur) + '</td><td style="' + td + '">' + st + '</td><td style="' + td + '">' + dr + '</td><td style="' + td + '">' + esc(c.to) + '</td><td style="' + td + ';color:#64748b;font-size:12.5px">' + esc(c.path) + '</td>'
+            + '<td style="' + td + '"><div style="display:flex;gap:6px">' + act('play', 'Play recording', IX_ICON.play, i) + act('download', 'Download transcript', IX_ICON.download, i) + act('transcript', 'Show transcript', IX_ICON.chat, i) + '</div></td></tr>';
+        }).join('');
+      }
+      function monCountText() { return 'Showing ' + MS.list.length + ' of ' + monCallList().length + ' calls' }
+      function monCallsView() {
+        var rowsHtml = monCallRowsHtml();
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var sel = 'box-sizing:border-box;height:38px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13px;background:#fff';
+        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #eef1f5">'
+          + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All calls</div><div id="monCallsCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monCountText()) + '</div></div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monq value="' + esc(MS.q) + '" placeholder="Search number, name or path" autocomplete="off" style="box-sizing:border-box;height:38px;width:220px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;outline:0">'
+          + '<button data-monexport="calls" style="box-sizing:border-box;height:38px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>' + '<select data-monst style="' + sel + '">' + ['All', 'Completed', 'Missed'].map(function (o) { return '<option' + (o === MS.status ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>'
+          + '<select data-mondir style="' + sel + '">' + ['All', 'Inbound', 'Outbound'].map(function (o) { return '<option' + (o === MS.dir ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
+        var head = '<thead><tr>' + ['From', 'DID', 'Duration', 'Status', 'Direction', 'To', 'Call path', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [15, 14, 9, 10, 10, 16, 16, 10][k] + '%">' + h + '</th>' }).join('') + '</tr></thead>';
+        return '<div>' + toolbar + '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' + head + '<tbody id="monCallsBody">' + rowsHtml + '</tbody></table></div>';
+      }
+      function monAct(a, i) {
+        if (a === 'listen') return note('Live listen needs your phone system connected');
+        var c = MS.list[i]; if (!c) return;
+        if (a === 'play') return c.src ? ixPlay(c.src) : note('No recording for this call');
+        if (a === 'download') return c.src ? ixDownload(c.src) : note('No transcript to download for this call');
+        if (a === 'transcript') return note(c.src && c.src.transcript.length ? c.src.transcript.join(' · ') : 'No transcript for this call');
+      }
+      /* Monitoring: All Extensions (summary cards that the Summary button shows or hides, and the extension table) built from the directory */
+      /* Monitoring: All Extensions. Summary switch (remembered), search, presence filter, row opens the person's profile */
+      MS.summary = localStorage.getItem('ucaas.monSummary') !== 'off';
+      MS.exq = ''; MS.exs = 'All';
+      function monExtList() {
+        var q = MS.exq.toLowerCase();
+        return rows().filter(function (r) {
+          var st = r.dataset.presence, okS = MS.exs === 'All' || (MS.exs === 'Online' && st === 'Available') || (MS.exs === 'On call' && st === 'Busy') || (MS.exs === 'Offline' && st !== 'Available' && st !== 'Busy');
+          return r.dataset.removed !== '1' && okS && (!q || [r.dataset.name, r.dataset.num, r.dataset.group, r.dataset.email].join(' ').toLowerCase().indexOf(q) > -1);
+        });
+      }
+      function monExtRowsHtml() {
+        var list = monExtList(), td = 'padding:13px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;vertical-align:middle;overflow:hidden;text-overflow:ellipsis';
+        var dash = '<span style="color:#94a3b8">---</span>';
+        if (!list.length) return '<tr><td colspan="8" style="padding:30px;text-align:center;color:#64748b">No extensions match these filters.</td></tr>';
+        return list.map(function (p, i) {
+          var av = AVS[(+p.dataset.av) % AVS.length], st = p.dataset.presence, onCall = st === 'Busy';
+          var role = p.dataset.role === 'Account owner' ? 'ADMIN' : (p.dataset.role || '').toUpperCase();
+          var name = '<div style="display:flex;align-items:center;gap:12px"><span style="width:38px;height:38px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:13px;position:relative;flex-shrink:0">' + esc(ini(p.dataset.name)) + '<span style="position:absolute;right:0;bottom:0;width:9px;height:9px;border-radius:50%;border:2px solid #fff;background:' + (st === 'Available' ? '#10b981' : st === 'Busy' ? '#f59e0b' : '#cbd5e1') + '"></span></span>'
+            + '<div style="min-width:0"><button data-monperson="' + esc(p.dataset.id) + '" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#0f172a;cursor:pointer;text-align:left">' + esc(p.dataset.name) + '</button><div style="font-size:10.5px;font-weight:700;color:#2563eb;letter-spacing:.4px">' + esc(role) + '</div><div style="font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis">' + esc(p.dataset.email || '') + '</div></div></div>';
+          var ext = '<span style="display:inline-flex;align-items:center;gap:6px;font-weight:600">' + ixSvg(AN_PATH.grid, 13, '#334155') + esc(p.dataset.num || '—') + '</span>';
+          var call = onCall ? { contact: '+1 646 934 8292', did: '+1 646 555 0' + (101 + i), dur: '00:0' + (2 + i % 7), dir: 'Inbound', path: 'Inbound › ' + (p.dataset.group || 'Direct') } : null;
+          var pill = onCall ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309">On call</span>'
+            : st === 'Available' ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#dcfce7;color:#15803d">Available</span>'
+            : '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#f1f5f9;color:#475569">' + esc(st || 'Offline') + '</span>';
+          return '<tr><td style="' + td + '">' + name + '</td><td style="' + td + '">' + ext + '</td><td style="' + td + '">' + esc(p.dataset.group || '—') + '</td><td style="' + td + '">' + (onCall ? esc(call.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.did) : dash) + '</td>'
+            + '<td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.dur) : '00:00') + '</td><td style="' + td + '">' + pill + '</td><td style="' + td + '">' + (onCall ? esc(call.dir) : dash) + '</td>'
+            + '<td style="' + td + '">' + (onCall ? '<button data-monact="listen" data-monidx="' + i + '" style="box-sizing:border-box;height:28px;padding:0 10px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#334155;font:inherit;font-size:12px;cursor:pointer">Listen</button>' : dash) + '</td></tr>';
+        }).join('');
+      }
+      function monExtCountText() { return 'Showing ' + monExtList().length + ' of ' + rows().filter(function (r) { return r.dataset.removed !== '1' }).length + ' extensions' }
+      function monExtView() {
+        var people = rows().filter(function (r) { return r.dataset.removed !== '1' });
+        var online = people.filter(function (p) { return p.dataset.presence === 'Available' }).length;
+        var busy = people.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
+        var offline = people.length - online - busy;
+        var waiting = qData().waiting;
+        var card = function (label, value, icon, tone) {
+          var c = { grey: ['#eef2f7', '#334155'], green: ['#dcfce7', '#15803d'], amber: ['#fef3c7', '#b45309'], red: ['#fee2e2', '#b91c1c'] }[tone];
+          return '<div style="box-sizing:border-box;flex:1;min-width:0;background:#fff;border:1px solid #e3e8f1;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+            + '<div><div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">' + label + '</div><div style="font-size:24px;font-weight:700;color:#0f172a;margin-top:6px">' + value + '</div></div>'
+            + '<span style="width:32px;height:32px;border-radius:50%;background:' + c[0] + ';color:' + c[1] + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(icon, 15, c[1]) + '</span></div>';
+        };
+        var cards = MS.summary ? '<div style="display:flex;gap:12px;margin-bottom:14px">'
+          + card('Calls waiting', String(waiting), MON_ICON.phone, 'grey') + card('Online users', String(online), MON_ICON.users, 'green')
+          + card('Offline users', String(offline), MON_ICON.chev, 'red') + card('Users on call', String(busy), MON_ICON.phone, 'amber') + '</div>' : '';
+        var sel = 'box-sizing:border-box;height:38px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13px;background:#fff';
+        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #eef1f5">'
+          + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All extensions</div><div id="monExtCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monExtCountText()) + '</div></div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monexq value="' + esc(MS.exq) + '" placeholder="Search name, extension or group" autocomplete="off" style="box-sizing:border-box;height:38px;width:230px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;outline:0">'
+          + '<button data-monexport="ext" style="box-sizing:border-box;height:38px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>' + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var table = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar + '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>'
+          + ['Name', 'Extension', 'Group', 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [20, 10, 11, 12, 11, 8, 10, 9, 9][k] + '%">' + h + '</th>' }).join('')
+          + '</tr></thead><tbody id="monExtBody">' + monExtRowsHtml() + '</tbody></table></div>';
+        return cards + table;
+      }
+      /* Monitoring quick wins: alert thresholds for queues and CSV export of the tables */
+      function monLimits() {
+        var v = {}; try { v = JSON.parse(localStorage.getItem('ucaas.monLimits')) || {} } catch (e) { }
+        return { waiting: v.waiting == null ? 3 : v.waiting, sl: v.sl == null ? 80 : v.sl };
+      }
+      function monAlerts() {
+        var L = monLimits(), out = [];
+        qData().queues.forEach(function (q) {
+          if (q.waiting > L.waiting) out.push({ q: q.name, t: q.waiting + ' waiting (limit ' + L.waiting + ')' });
+          if (q.sl !== null && q.sl < L.sl) out.push({ q: q.name, t: 'service level ' + q.sl + '% (goal ' + L.sl + '%)' });
+        });
+        return out;
+      }
+      function monAlertsCard() {
+        var L = monLimits(), al = monAlerts();
+        var inp = 'box-sizing:border-box;height:38px;width:110px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13px';
+        var form = '<div style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">'
+          + '<label style="font-size:12px;color:#334155;font-weight:600">Max waiting callers<br><input type="number" min="0" data-monlim="waiting" value="' + L.waiting + '" style="' + inp + '"></label>'
+          + '<label style="font-size:12px;color:#334155;font-weight:600">Min service level %<br><input type="number" min="0" max="100" data-monlim="sl" value="' + L.sl + '" style="' + inp + '"></label>'
+          + '<button data-monlimsave style="box-sizing:border-box;height:38px;padding:0 16px;border:0;border-radius:10px;background:#2563eb;color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Save limits</button></div>';
+        var list = al.length ? al.map(function (a) {
+          return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #fee2e2;font-size:13px;color:#0f172a"><span style="width:9px;height:9px;border-radius:50%;background:#dc2626;flex-shrink:0"></span><b>' + esc(a.q) + '</b><span style="color:#64748b">' + esc(a.t) + '</span></div>';
+        }).join('') : '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #dcfce7;font-size:13px;color:#15803d"><span style="width:9px;height:9px;border-radius:50%;background:#10b981"></span>All queues are within their limits</div>';
+        return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden;margin-bottom:14px"><div style="padding:14px 18px;font-size:15px;font-weight:700;color:#0f172a;border-bottom:1px solid #eef1f5;display:flex;align-items:center;gap:8px">Alerts' + (al.length ? '<span style="background:#dc2626;color:#fff;font-size:11px;border-radius:999px;padding:1px 8px">' + al.length + '</span>' : '') + '</div>'
+          + '<div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #eef1f5">' + form + '</div><div style="padding:0 18px 6px">' + list + '</div></div>';
+      }
+      function monCsv(headers, rows) {
+        var esc2 = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"' };
+        return [headers.map(esc2).join(',')].concat(rows.map(function (r) { return r.map(esc2).join(',') })).join('\n');
+      }
+      function monDownloadCsv(name, text) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' })); a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        note('Exported ' + name);
+      }
+      function monExport(kind) {
+        if (kind === 'calls') {
+          var c = MS.list.map(function (x) { return [x.from, x.did, x.dur, x.status, x.dir === 'in' ? 'Inbound' : 'Outbound', x.to, x.path] });
+          return monDownloadCsv('all-calls.csv', monCsv(['From', 'DID', 'Duration', 'Status', 'Direction', 'To', 'Call path'], c));
+        }
+        var e = monExtList().map(function (p) { return [p.dataset.name, p.dataset.num, p.dataset.group, p.dataset.email, p.dataset.presence] });
+        return monDownloadCsv('extensions.csv', monCsv(['Name', 'Extension', 'Group', 'Email', 'Presence'], e));
+      }
+      /* Monitoring: Department (groups, expandable) and Call Queue (agents and waiting callers), from the directory and the queues */
+      MS.open = {}; MS.queue = '';
+      function monAgentRow(p, i) {
+        var av = AVS[(+p.dataset.av) % AVS.length], st = p.dataset.presence, onCall = st === 'Busy';
+        var role = p.dataset.role === 'Account owner' ? 'ADMIN' : (p.dataset.role || '').toUpperCase();
+        var td = 'padding:14px 14px;font-size:13px;color:#0f172a;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        var dash = '<span style="color:#94a3b8">---</span>';
+        var who = '<div style="display:flex;align-items:center;gap:12px"><span style="width:38px;height:38px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:13px;position:relative;flex-shrink:0">' + esc(ini(p.dataset.name)) + '<span style="position:absolute;right:0;bottom:0;width:9px;height:9px;border-radius:50%;border:2px solid #fff;background:' + (st === 'Available' ? '#10b981' : st === 'Busy' ? '#f59e0b' : '#cbd5e1') + '"></span></span>'
+          + '<div style="min-width:0"><div style="font-weight:600;color:#0f172a">' + esc(p.dataset.name) + '</div><div style="font-size:10.5px;font-weight:700;color:#2563eb;letter-spacing:.4px">' + esc(role) + '</div><div style="font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis">' + esc(p.dataset.email || '') + '</div></div></div>';
+        var ext = '<span style="display:flex;align-items:center;gap:6px;font-weight:600;margin-left:50px;font-size:13px;color:#0f172a;margin-top:2px">' + ixSvg(AN_PATH.grid, 13, '#334155') + esc(p.dataset.num || '—') + '</span>';
+        var c = onCall ? { contact: '+1 646 934 8292', did: '+1 646 555 0' + (101 + i), dur: '00:0' + (2 + i % 7), dir: 'Inbound', path: 'Inbound › ' + (p.dataset.group || 'Direct') } : null;
+        return '<tr><td style="' + td + '"><div style="display:flex;flex-direction:column;gap:4px;min-width:0">' + who + ext + '</div></td><td style="' + td + '">' + (c ? esc(c.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (c ? esc(c.did) : dash) + '</td>'
+          + '<td style="' + td + ';font-family:monospace">' + (c ? esc(c.dur) : '00:00') + '</td>'
+          + '<td style="' + td + '">' + (c ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309">On call</span>' : dash) + '</td>'
+          + '<td style="' + td + '">' + (c ? esc(c.dir) : dash) + '</td><td style="' + td + ';color:#64748b;font-size:12px">' + (c ? esc(c.path) : dash) + '</td>'
+          + '<td style="' + td + '">' + (c ? '<button data-monact="listen" data-monidx="' + i + '" style="box-sizing:border-box;height:28px;padding:0 10px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#334155;font:inherit;font-size:12px;cursor:pointer">Listen</button>' : dash) + '</td></tr>';
+      }
+      function monAgentTable(members, firstHead) {
+        if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [24, 11, 11, 9, 10, 10, 16, 9];
+        return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
+      }
+      function monGroupsView() {
+        var list = groups.filter(function (g) { return g && g.name });
+        if (!list.length) return monEmpty('No departments yet', 'Create a group in the directory to see it here.');
+        var hint = '<div style="font-size:12.5px;color:#64748b;margin:0 2px 12px">Select a department to see its members and live calls.</div>';
+        return hint + list.map(function (g) {
+          var av0 = AVS[(g.ci + 4) % AVS.length], accent = av0[1];
+          var mem = gMembers(g), open = !!MS.open[g.name], busy = mem.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
+          var sub = open ? busy + ' live call' + (busy === 1 ? '' : 's') + ' in this department' : mem.length + ' member' + (mem.length === 1 ? '' : 's') + ' in department';
+          var stack = mem.slice(0, 4).map(function (p, k) {
+            var av = AVS[(+p.dataset.av) % AVS.length];
+            return '<span title="' + esc(p.dataset.name) + '" style="width:30px;height:30px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-size:11px;font-weight:700;border:2px solid #fff;margin-left:' + (k ? '-8px' : '0') + '">' + esc(ini(p.dataset.name)) + '</span>';
+          }).join('') + (mem.length > 4 ? '<span style="width:30px;height:30px;border-radius:50%;background:#e2e8f0;color:#334155;display:grid;place-items:center;font-size:11px;font-weight:700;border:2px solid #fff;margin-left:-8px">+' + (mem.length - 4) + '</span>' : '');
+          var arrow = '<span style="width:44px;height:44px;border-radius:50%;background:' + (open ? '#2563eb' : '#e0ebff') + ';color:' + (open ? '#fff' : '#1d4ed8') + ';display:grid;place-items:center;flex-shrink:0;transition:transform .2s;transform:rotate(' + (open ? '180' : '0') + 'deg);box-shadow:0 4px 10px rgba(37,99,235,.25)">' + ixSvg('M6 9l6 6 6-6', 22, open ? '#fff' : '#1d4ed8') + '</span>';
+          var head = '<button data-mongrp="' + esc(g.name) + '" aria-expanded="' + open + '" style="box-sizing:border-box;width:100%;display:flex;align-items:center;gap:14px;padding:18px 20px;border:0;background:' + (open ? '#f5f9ff' : '#fff') + ';font:inherit;text-align:left;cursor:pointer">'
+            + '<span style="width:44px;height:44px;border-radius:12px;background:' + av0[0] + ';color:' + accent + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(MON_ICON.tree, 20, accent) + '</span>'
+            + '<span style="flex:1;min-width:0"><span style="display:block;font-weight:700;color:#0f172a;font-size:16px">' + esc(g.name) + '</span><span style="display:block;font-size:12.5px;color:#64748b;margin-top:3px">' + esc(sub) + '</span></span>'
+            + '<span style="text-align:center;min-width:76px;padding:8px 12px;border-radius:12px;background:#eef4ff;flex-shrink:0"><span style="display:block;font-size:22px;font-weight:700;color:#2563eb;line-height:1.1">' + mem.length + '</span><span style="display:block;font-size:11px;color:#64748b;margin-top:2px">Total</span></span>' + ixSvg(open ? 'M6 9l6 6 6-6' : 'M9 6l6 6-6 6', 16, '#94a3b8') + '</button>';
+          var body = open ? '<div style="border-top:1px solid #e8eef6;background:#f8fafc;padding:12px 14px 14px">' + monAgentTable(mem, 'Agent') + '</div>' : '';
+          return '<div style="background:#fff;border:1px solid ' + (open ? '#bfdbfe' : '#e3e8f1') + ';border-left:5px solid ' + accent + ';border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:' + (open ? '0 10px 24px rgba(37,99,235,.12)' : '0 2px 8px rgba(15,23,42,.06)') + '">' + head + body + '</div>';
+        }).join('');
+      }
+      function monQueueView() {
+        var qs = qData().queues;
+        if (!qs.length) return monEmpty('No queues yet', 'Queues appear here when a group has members.');
+        var q = qs.filter(function (x) { return x.name === MS.queue })[0] || qs[0];
+        MS.queue = q.name;
+        var card = function (title, inner) { return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden;margin-bottom:14px"><div style="padding:14px 18px;font-size:15px;font-weight:700;color:#0f172a;border-bottom:1px solid #eef1f5">' + title + '</div>' + inner + '</div>' };
+        var callers = [];
+        for (var k = 0; k < q.waiting; k++) callers.push({ n: 'Caller ' + (k + 1), p: '+1 646 555 07' + k, st: 'Waiting', t: q.longest, path: 'Inbound › ' + q.name });
+        var td = 'padding:13px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var waitTable = '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + ['Name', 'Phone', 'State', 'Waiting time', 'Call path'].map(function (h, k2) { return '<th style="' + th + ';width:' + [22, 20, 16, 18, 24][k2] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>'
+          + callers.map(function (c) { return '<tr><td style="' + td + '">' + esc(c.n) + '</td><td style="' + td + ';font-family:monospace">' + esc(c.p) + '</td><td style="' + td + '">' + esc(c.st) + '</td><td style="' + td + ';font-family:monospace">' + esc(c.t) + '</td><td style="' + td + ';color:#64748b">' + esc(c.path) + '</td></tr>' }).join('') + '</tbody></table>';
+        var agents = card('Agents (' + q.members.length + ')', monAgentTable(q.members, 'Members'));
+        var waiting = card('Waiting Callers (' + callers.length + ')', callers.length ? waitTable : monEmpty('No queue calls available', 'Calls routed through queues will appear here.'));
+        return monAlertsCard() + agents + waiting;
+      }
+      function monEmpty(title, sub) {
+        return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:24px">'
+          + '<svg width="150" height="110" viewBox="0 0 150 110" style="display:block;margin-bottom:12px"><rect x="22" y="14" width="46" height="60" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2" transform="rotate(-8 45 44)"/><rect x="62" y="20" width="46" height="60" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2" transform="rotate(6 85 50)"/><circle cx="82" cy="72" r="14" fill="#fff" stroke="#64748b" stroke-width="3"/><path d="M92 82l12 12" stroke="#64748b" stroke-width="4" stroke-linecap="round"/><path d="M40 34h22M40 44h22M40 54h16" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/></svg>'
+          + '<div style="font-size:14px;font-weight:600;color:#0f172a">' + esc(title || 'No campaign calls available') + '</div><div style="font-size:13px;color:#64748b;margin-top:4px">' + esc(sub || 'Calls routed through campaigns will appear here.') + '</div></div>';
+      }
+      function monBody() {
+        if (MS.sub === 'All Calls') { return monCallsView() }
+        if (MS.sub === 'All Extensions') { return monExtView() }
+        if (MS.sub === 'Groups') { return monGroupsView() }
+        if (MS.sub === 'Call Queue') { return monQueueView() }
+        /* Campaign: calls come from the contacts in the chosen lead list */
+        var list = CGROUPS.filter(function (g) { return g.name === MS.campaign && g.kind === 'lead' })[0];
+        if (!list) return monEmpty();
+        var campRows = (list.members || []).map(function (id) { return CONTACTS.filter(function (c) { return c.id === id })[0] }).filter(Boolean).map(function (c, i) {
+          var st = ['Not reached', 'Answered', 'No answer'][i % 3];
+          return [esc(cxName(c)), esc(fmtNum(c.phone || '')), esc(st)];
+        });
+        return monTable(['Contact', 'Number', 'Status'], campRows, 'No contacts in this campaign.');
+      }
+      function monPage() {
+        var crumb = '<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#64748b"><span style="cursor:pointer" data-monsub="All Calls">Monitoring</span><span>›</span><b style="color:#0f172a;font-weight:600">' + esc(MS.sub === 'Groups' ? 'Department' : MS.sub === 'Call Queue' ? 'Call Queue › ' + MS.queue : MS.sub) + '</b></div>';
+        var camps = CGROUPS.filter(function (g) { return g.kind === 'lead' });
+        var select = MS.sub === 'Campaign' ? '<select data-moncamp style="box-sizing:border-box;height:38px;min-width:220px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13.5px;background:#fff">'
+          + '<option value="">Select Campaign</option>' + camps.map(function (c) { return '<option' + (c.name === MS.campaign ? ' selected' : '') + '>' + esc(c.name) + '</option>' }).join('') + '</select>' : '';
+        var sumBtn = MS.sub === 'All Extensions' ? '<label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;color:#0f172a"><span>Summary</span><button data-monsum role="switch" aria-checked="' + MS.summary + '" style="box-sizing:border-box;width:42px;height:24px;border:0;border-radius:999px;background:' + (MS.summary ? '#2563eb' : '#cbd5e1') + ';position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:' + (MS.summary ? '21px' : '3px') + ';width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s"></span></button></label>' : '';
+        var qSelQs = MS.sub === 'Call Queue' ? qData().queues : [];
+        var qSel = MS.sub === 'Call Queue' ? '<select data-monqsel style="box-sizing:border-box;height:38px;min-width:220px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13.5px;background:#fff">' + qSelQs.map(function (q) { return '<option' + (q.name === MS.queue ? ' selected' : '') + '>' + esc(q.name) + '</option>' }).join('') + '</select>' : '';
+        var side = '<aside id="monSide" style="box-sizing:border-box;width:' + (MS.collapsed ? '0' : '220px') + ';flex-shrink:0;border-right:' + (MS.collapsed ? '0' : '1px solid #e8ecf3') + ';background:#fff;position:relative;overflow:visible">'
+          + (MS.collapsed ? '' : '<div style="padding:18px 20px 10px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#64748b;font-weight:700">Monitoring</div>'
+          + MON_SUB.map(function (x) {
+            var on = MS.sub === x[0];
+            return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;border:0;border-bottom:1px solid #f1f5f9;background:none;font:inherit;font-size:14px;color:' + (on ? '#2563eb' : '#334155') + ';font-weight:' + (on ? '600' : '500') + ';cursor:pointer;text-align:left">' + ixSvg(MON_ICON[x[1]], 17, 'currentColor') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+          }).join(''))
+          + '<button data-moncollapse aria-label="Toggle sidebar" style="position:absolute;top:50%;right:-12px;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:0;background:#2563eb;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px rgba(37,99,235,.35);z-index:2">' + ixSvg(MS.collapsed ? MON_ICON.chevR : MON_ICON.chev, 13, '#fff') + '</button></aside>';
+        var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
+          + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid #e8ecf3;background:#fff">' + crumb + (select || sumBtn || qSel) + '</div>'
+          + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#eef2fa;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '18px 22px') + '">'
+          + (['All Extensions', 'Groups', 'Call Queue'].indexOf(MS.sub) > -1 ? '<div>' : '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;min-height:' + (MS.sub === 'Campaign' && !MS.campaign ? '100%' : 'auto') + ';overflow:hidden">') + monBody() + '</div></div></div>';
+        return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">'
+          + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>'
+          + side + content + '</div>';
+      }
+      function monClick(e) {
+        var t;
+        if (e.target.closest('[data-monlimsave]')) { var wv = document.querySelector('[data-monlim="waiting"]'), sv = document.querySelector('[data-monlim="sl"]'); localStorage.setItem('ucaas.monLimits', JSON.stringify({ waiting: Math.max(0, +wv.value || 0), sl: Math.min(100, Math.max(0, +sv.value || 0)) })); note('Alert limits saved'); anRepaint(); return true }
+        if ((t = e.target.closest('[data-monexport]'))) { monExport(t.dataset.monexport); return true }
+        if ((t = e.target.closest('[data-mongrp]'))) { var gn = t.dataset.mongrp; MS.open[gn] = !MS.open[gn]; anRepaint(); return true }
+        if ((t = e.target.closest('[data-monact]'))) { monAct(t.dataset.monact, +t.dataset.monidx); return true }
+        if (e.target.closest('[data-monsum]')) { MS.summary = !MS.summary; localStorage.setItem('ucaas.monSummary', MS.summary ? 'on' : 'off'); anRepaint(); return true }
+        if ((t = e.target.closest('[data-monperson]'))) { var mp = personById(t.dataset.monperson); if (mp) openDrawer(mp); return true }
+        if ((t = e.target.closest('[data-monsub]'))) { MS.sub = t.dataset.monsub; anRepaint(); return true }
+        if (e.target.closest('[data-moncollapse]')) { MS.collapsed = !MS.collapsed; anRepaint(); return true }
+        return false;
+      }
+      function buildAn() {
+        var host = $('#viewAnalytics'); if (!host) return;
+        if (!document.getElementById('anStyle')) {
+          var st = document.createElement('style'); st.id = 'anStyle';
+          st.textContent = '.an-rail{scrollbar-width:none;-ms-overflow-style:none}.an-rail::-webkit-scrollbar{display:none}';
+          document.head.appendChild(st);
+        }
+        host.style.margin = '-32px -38px -52px';
+        host.innerHTML = anPage();
+        host.addEventListener('input', function (e) {
+          if (!e.target.hasAttribute('data-monq')) return;
+          MS.q = e.target.value; var tb = document.getElementById('monCallsBody'); if (!tb) return;
+          tb.innerHTML = monCallRowsHtml(); document.getElementById('monCallsCount').textContent = monCountText();
+        });
+        host.addEventListener('input', function (e) {
+          if (!e.target.hasAttribute('data-monexq')) return;
+          MS.exq = e.target.value; var eb = document.getElementById('monExtBody'); if (!eb) return;
+          eb.innerHTML = monExtRowsHtml(); document.getElementById('monExtCount').textContent = monExtCountText();
+        });
+        host.addEventListener('mousedown', function (e) { if (e.target.closest('[data-anrail],[data-qrail],[data-monsub],[data-qmode],[data-antab]')) e.preventDefault() });
+        $('#viewAnalytics').addEventListener('click', anClick);
+        $('#viewAnalytics').addEventListener('change', anChange);
+      }
+      /* remembers the current section so a refresh reopens it */
+      function saveNav() {
+        try { localStorage.setItem('ucaas.nav', JSON.stringify({ view: curView, an: anState.sel, mon: MS.sub, camp: MS.campaign, qmode: QS.mode, qsort: QS.sort })) } catch (e) { }
+      }
+      function restoreNav() {
+        var v = null;
+        try { v = JSON.parse(localStorage.getItem('ucaas.nav')) } catch (e) { }
+        if (!v || !VIEW_IDS[v.view] || v.view === 'gdetail') return showView('people');
+        if (v.view === 'analytics') { anState.sel = v.an || 'Callbacks'; MS.sub = v.mon || 'Campaign'; MS.campaign = v.camp || ''; QS.mode = v.qmode || 'Live'; QS.sort = v.qsort || 'Worst service level'; anKey = null; return showView('analytics') }
+        showView(v.view);
+      }
+      /* rebuilds the Analytics page; a new section starts at the top, a change inside a section keeps the scroll position */
+      var anKey = null;
+      function anRepaint() {
+        var host = $('#viewAnalytics'), key = [anState.sel, MS.sub, QS.mode].join('|'), fresh = key !== anKey;
+        anKey = key;
+        var wy = window.scrollY, anc = [], keep = [];
+        if (!fresh) {
+          for (var p = host; p && p.nodeType === 1; p = p.parentNode) anc.push([p, p.scrollTop]);
+          host.querySelectorAll('*').forEach(function (el, i) { if (el.scrollTop) keep.push([i, el.scrollTop]) });
+        }
+        host.innerHTML = anPage();
+        if (fresh) window.scrollTo(0, 0);
+        else {
+          var all = host.querySelectorAll('*');
+          keep.forEach(function (k) { if (all[k[0]]) all[k[0]].scrollTop = k[1] });
+          anc.forEach(function (k) { k[0].scrollTop = k[1] });
+          window.scrollTo(0, wy);
+        }
+        saveNav();
+      }
+      function anClick(e) {
+        if (anState.sel === 'Queues' && qClick(e)) return;
+        if (anState.sel === 'Monitoring' && monClick(e)) return;
+        var t;
+        if ((t = e.target.closest('[data-anrail]'))) { var rn = t.dataset.anrail; if (rn === 'Callbacks' || rn === 'Monitoring') { anState.sel = rn; return anRepaint() } if (rn === 'Queues' || rn === 'Boards' || rn === 'Live') { anState.sel = 'Queues'; QS.mode = rn === 'Boards' ? 'Boards' : 'Live'; return anRepaint() } return note(rn + ' is not part of this preview') }
+        if ((t = e.target.closest('[data-antab]'))) { anState.tab = t.dataset.antab; anState.board = false; return anRepaint() }
+        if (e.target.closest('[data-anboard]')) { anState.board = !anState.board; return anRepaint() }
+        if ((t = e.target.closest('[data-anstatus]'))) { var x = anState.tasks[+t.dataset.anstatus]; x.s = x.s === 'New' ? 'Completed' : 'New'; return anRepaint() }
+      }
+      function anChange(e) {
+        if (e.target.hasAttribute('data-monqsel')) { MS.queue = e.target.value; anRepaint(); return }
+        if (e.target.hasAttribute('data-monexs')) { MS.exs = e.target.value; anRepaint(); return }
+        if (e.target.hasAttribute('data-monst')) { MS.status = e.target.value; anRepaint(); return }
+        if (e.target.hasAttribute('data-mondir')) { MS.dir = e.target.value; anRepaint(); return }
+        if (e.target.hasAttribute('data-moncamp')) { MS.campaign = e.target.value; anRepaint(); return }
+        if (e.target.hasAttribute('data-anrange')) { anState.range = e.target.value; anRepaint() }
+        if (e.target.hasAttribute('data-qrange')) { QS.range = e.target.value; anRepaint() }
+      }
+      buildAn();
       /* a location link opens the Locations page with a "Back to People" bar; it does not open the edit dialog */
       document.addEventListener('click', function (e) {
         if (e.target.closest('#viewGDetail')) return; /* the detail view has its own handler */
@@ -8116,7 +9145,7 @@
         } finally { navLock = false }
       }
       window.addEventListener('popstate', function () { backTo = null; applyHash(location.hash) });
-      var curView = '', VIEW_IDS = { people: '#viewPeople', groups: '#viewGroups', roles: '#viewRoles', locations: '#viewLocs', blocked: '#viewBlocked', favourites: '#viewFavourites', contacts: '#viewContacts', interactions: '#viewInteractions', gdetail: '#viewGDetail' };
+      var curView = '', VIEW_IDS = { people: '#viewPeople', groups: '#viewGroups', roles: '#viewRoles', locations: '#viewLocs', blocked: '#viewBlocked', favourites: '#viewFavourites', contacts: '#viewContacts', interactions: '#viewInteractions', analytics: '#viewAnalytics', gdetail: '#viewGDetail' };
       var backTo = null, keepBack = false;
       function paintBack() { var el = $('#backBar'); el.style.display = backTo ? 'inline-flex' : 'none'; if (backTo) $('#backLbl').textContent = 'Back to ' + backTo.label }
       function goWithBack(v, label, from) { backTo = { label: label, view: from }; keepBack = true; showView(v); keepBack = false; paintBack() }
@@ -8131,7 +9160,9 @@
         var side = v === 'gdetail' ? (dMode === 'person' ? 'people' : 'groups') : v;
         $$('a[data-side]').forEach(function (a) { styleSide(a, a.dataset.side === side) });
         closeMenu(); window.scrollTo(0, 0);
-        var sideNav = document.querySelector('aside'); if (sideNav) sideNav.style.display = v === 'interactions' ? 'none' : '';
+        var sideNav = document.querySelector('aside'); if (sideNav) sideNav.style.display = (v === 'interactions' || v === 'analytics') ? 'none' : '';
+        if (v === 'analytics') { anKey = null; anRepaint() }
+        saveNav();
         paintTopNav(v); if (v === 'groups') renderGroups(); if (v === 'roles') renderRoles(); if (v === 'locations') renderLocs(); if (v === 'blocked') renderBlocked(); if (v === 'favourites') renderFavourites(); if (v === 'contacts') { paintCxGroupBanner(); renderContacts(); renderCGroups(); paintCxCounts() } if (v === 'gdetail') renderDetail();
         setTimeout(fitScrollCards, 0);
         if (!navLock && !keepBack && changed) backTo = null; if (v !== 'gdetail') paintBack(); else $('#backBar').style.display = 'none';
@@ -11420,7 +12451,7 @@
       rows().forEach(function (r) { var a = $('[data-f="initials"]', r); if (a) a.style.boxShadow = presRing(r.dataset.presence) });
       paintPagerBtns('pg', 1, 1); paintPagerBtns('gpg', 1, 1);
       apply(); initSession();
-      if (location.hash && location.hash !== '#' && location.hash !== '#people') applyHash(location.hash); else try { history.replaceState({ h: '#people' }, '', '#people') } catch (e) { }
+      if (location.hash && location.hash !== '#' && location.hash !== '#people') applyHash(location.hash); else restoreNav();
     })();
   </script>
 
