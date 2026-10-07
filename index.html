@@ -28,6 +28,7 @@
     html[data-theme="dark"] [style*="background: #eef2fa"] {
       background: #0d0d0f !important
     }
+
     html[data-theme="dark"] [style*="background:#f5f7fb"],
     html[data-theme="dark"] [style*="background: #f5f7fb"],
     html[data-theme="dark"] [style*="background:rgb(245, 247, 251)"],
@@ -5881,7 +5882,8 @@
         style="box-sizing: border-box; font: inherit; cursor: pointer; padding: 0; text-align: left; width: 42px; height: 42px; border: 0; border-radius: 10px; background: #eff6ff; display: grid; place-items: center; color: #2563eb; transition: background-color .12s; flex-shrink: 0;"><svg
           viewBox="0 0 24 24"
           style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block;">
-          <path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13.5 6.5l4 4" />
+          <path d="M4 20h4L19 9l-4-4L4 16z" />
+          <path d="M13.5 6.5l4 4" />
         </svg></button>
       <button id="dClose" title="Close" data-h="background:#e6ebf2;"
         style="box-sizing: border-box; font: inherit; cursor: pointer; padding: 0; text-align: left; width: 42px; height: 42px; border: 0; border-radius: 10px; background: #f1f4f8; display: grid; place-items: center; color: #334155; transition: background-color .12s; flex-shrink: 0;"><svg
@@ -7249,9 +7251,9 @@
       }
       /* builds the phone layout: icon rail, call list, dialpad and Copilot panel */
       /* Interactions: real actions (play, download, call), date filter and the icon-rail pages */
-      var IX_THREADS = [ { id: 't1', name: '+1 646 934 8292' }, { id: 't2', name: 'Jeet Nakrani' }, { id: 't3', name: '+1 659 901 6340' } ];
-      var IX_AGENTS = [ { id: 'a1', name: 'Anu Nadar', st: 'Available' }, { id: 'a2', name: 'Umar Ansari', st: 'Busy' }, { id: 'a3', name: 'Priya Sharma', st: 'Offline' } ];
-      var IX_CAMP = [ { id: 'k1', name: 'Renewal reminders', total: 5, done: 2 }, { id: 'k2', name: 'Q4 outreach', total: 12, done: 7 } ];
+      var IX_THREADS = [{ id: 't1', name: '+1 646 934 8292' }, { id: 't2', name: 'Jeet Nakrani' }, { id: 't3', name: '+1 659 901 6340' }];
+      var IX_AGENTS = [{ id: 'a1', name: 'Anu Nadar', st: 'Available' }, { id: 'a2', name: 'Umar Ansari', st: 'Busy' }, { id: 'a3', name: 'Priya Sharma', st: 'Offline' }];
+      var IX_CAMP = [{ id: 'k1', name: 'Renewal reminders', total: 5, done: 2 }, { id: 'k2', name: 'Q4 outreach', total: 12, done: 7 }];
       var IXCARD = 'box-sizing:border-box;background:#fff;border:1px solid #e8ecf3;border-radius:14px;padding:14px 16px;';
       var IXIN = 'box-sizing:border-box;height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:13px;outline:0;';
       ixState.days = 30; ixState.page = null; ixState.inPage = false; ixState.thread = null;
@@ -7627,9 +7629,97 @@
           + anState.tasks.map(function (x, i) { return '<tr><td style="' + td + '">' + esc(x.t) + '</td><td style="' + td + ';color:#334155">' + esc(x.c) + '</td><td style="' + td + ';color:#334155">' + esc(x.d) + '</td><td style="padding:14px 16px;border-bottom:1px solid #f1f5f9">' + anStatus(x.s, i) + '</td></tr>' }).join('')
           + '</tbody></table>';
       }
+      /* Agent Activity: a per-agent, hour-by-hour timeline (matches the reference "Activity" screen) — one row
+         per hour of the chosen window, each showing either a status pill (Login/Available/On call/Wrap-up/
+         Break/Logout) or "No action" when nothing happened that hour. Figures are dummy but deterministic,
+         seeded per agent+hour so the same agent always shows the same shift pattern across re-renders. */
+      var AA = { agent: '', range: 'Today', start: '12:00 AM', end: '11:00 PM', type: 'All', hideEmpty: false };
+      var AA_TYPES = [
+        { t: 'Login', c: '#1d4ed8', bg: '#eff6ff', bd: '#bfdbfe' },
+        { t: 'Available', c: '#15803d', bg: '#dcfce7', bd: '#bbf7d0' },
+        { t: 'On call', c: '#b45309', bg: '#fef3c7', bd: '#fde68a' },
+        { t: 'Wrap-up', c: '#6d28d9', bg: '#ede9fe', bd: '#ddd6fe' },
+        { t: 'Break', c: '#0369a1', bg: '#e0f2fe', bd: '#bae6fd' },
+        { t: 'Logout', c: '#475569', bg: '#f1f5f9', bd: '#e2e8f0' }
+      ];
+      function aaAgents() { return monScopePeople() }
+      function aaParseHour(t) { var m = /^(\d+):(\d+)\s*(AM|PM)$/i.exec((t || '').trim()); if (!m) return null; var h = (+m[1]) % 12; if (/pm/i.test(m[3])) h += 12; return h }
+      function aaFmtHour(h) { var ap = h < 12 ? 'AM' : 'PM', h12 = h % 12; if (h12 === 0) h12 = 12; return h12 + ':00 ' + ap }
+      /* the shift is fixed (9am-6pm) for every agent in this dummy dataset; outside it every hour is "No action",
+         matching the empty-state look the reference screenshot happens to show for its (presumably off-shift) window */
+      function aaHourActivity(agent, hour) {
+        var pad = function (n) { return (n < 10 ? '0' : '') + n };
+        if (hour === 9) return { type: 'Login', from: '09:00', to: '09:0' + (2 + (agent.dataset.id || '').length % 7) };
+        if (hour === 18) return { type: 'Logout', from: '18:00', to: '18:00' };
+        if (hour > 9 && hour < 18) {
+          var seed = (agent.dataset.id || '').length * 11 + hour * 7 + (agent.dataset.name || '').length;
+          var pick = AA_TYPES[1 + seed % 4]; // Available / On call / Wrap-up / Break
+          var m1 = 5 + seed % 40, m2 = Math.min(59, m1 + 5 + seed % 10);
+          return { type: pick.t, from: pad(hour) + ':' + pad(m1), to: pad(hour) + ':' + pad(m2) };
+        }
+        return null;
+      }
+      function aaRow(hour, act) {
+        var pill, lineColor;
+        if (!act) { pill = '<span style="border:1px solid #fecaca;color:#dc2626;background:#fff;border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">No action</span>'; lineColor = '#fecaca' }
+        else {
+          var ty = AA_TYPES.filter(function (x) { return x.t === act.type })[0] || AA_TYPES[1];
+          pill = '<span style="border:1px solid ' + ty.bd + ';color:' + ty.c + ';background:' + ty.bg + ';border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">' + esc(act.type) + ' · ' + esc(act.from) + '–' + esc(act.to) + '</span>';
+          lineColor = ty.bd;
+        }
+        return '<div style="display:flex;align-items:center;padding:16px 0">'
+          + '<div style="width:90px;flex-shrink:0;font-size:13px;color:#334155;font-weight:600">' + aaFmtHour(hour) + '</div>'
+          + '<div style="flex:1;position:relative;height:1px;background:' + lineColor + ';margin:0 16px;display:flex;align-items:center;justify-content:center">'
+          + '<span style="background:#fff;padding:0 4px;display:inline-flex">' + pill + '</span></div></div>';
+      }
+      function aaPage() {
+        var agents = aaAgents();
+        if (!AA.agent || !agents.some(function (p) { return p.dataset.id === AA.agent })) {
+          var m = me(); AA.agent = (m && agents.indexOf(m) > -1) ? m.dataset.id : (agents[0] ? agents[0].dataset.id : '');
+        }
+        var agent = personById(AA.agent);
+        var railHtml = '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>';
+        if (!agent) return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">' + railHtml + monEmpty('No agents to show', 'Add people to the directory to see their activity here.') + '</div>';
+        var selStyle = 'box-sizing:border-box;height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:13px;background:#fff';
+        var agentSel = '<select data-aaagent style="' + selStyle + ';font-weight:700;color:#0f172a;max-width:180px">' + agents.map(function (p) { return '<option value="' + esc(p.dataset.id) + '"' + (p.dataset.id === AA.agent ? ' selected' : '') + '>' + esc(p.dataset.name) + '</option>' }).join('') + '</select>';
+        var rangeSel = '<select data-aarange style="' + selStyle + '">' + ['Today', 'Yesterday', 'This week'].map(function (o) { return '<option' + (o === AA.range ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>';
+        var typeSel = '<select data-aatype style="' + selStyle + '">' + ['All'].concat(AA_TYPES.map(function (x) { return x.t })).map(function (o) { return '<option' + (o === AA.type ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>';
+        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
+          + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + agentSel + '</div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' + rangeSel
+          + '<input data-aastart value="' + esc(AA.start) + '" placeholder="12:00 AM" style="' + selStyle + ';width:96px">'
+          + '<span style="color:#94a3b8">-</span>'
+          + '<input data-aaend value="' + esc(AA.end) + '" placeholder="11:00 PM" style="' + selStyle + ';width:96px">'
+          + typeSel
+          + '<button data-aasubmit style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Submit</button>'
+          + '<button data-aaback style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Back</button>'
+          + '</div></div>';
+        var loc = locByName(agent.dataset.loc), tz = loc ? loc.tz : 'Asia/Kolkata';
+        var tzLine = '<div style="text-align:center;font-size:12.5px;color:#64748b;margin-bottom:14px">Timezone - ' + esc(tz) + '</div>';
+        var ticks = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+        var axis = '<div style="display:flex;align-items:center;padding-bottom:10px;border-bottom:2px solid #2563eb;margin-bottom:6px">'
+          + '<div style="width:90px;flex-shrink:0"><span style="background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:13px;border-radius:8px;padding:6px 14px;display:inline-block">' + esc(AA.range) + '</span></div>'
+          + '<div style="flex:1;display:flex;justify-content:space-between;padding:0 16px;color:#94a3b8;font-size:12px">' + ticks.map(function (n) { return '<span>' + n + '</span>' }).join('') + '</div>'
+          + '<button data-aacollapse title="' + (AA.hideEmpty ? 'Show hours with no action' : 'Hide hours with no action') + '" style="width:28px;height:28px;flex-shrink:0;border:0;background:none;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center;transition:transform .15s;transform:rotate(' + (AA.hideEmpty ? '180' : '0') + 'deg)">' + ixSvg('<path d="M6 15l6-6 6 6"/>', 15, '#64748b') + '</button>'
+          + '</div>';
+        var startH = aaParseHour(AA.start); if (startH == null) startH = 0;
+        var endH = aaParseHour(AA.end); if (endH == null) endH = 23;
+        if (endH < startH) endH = startH;
+        var rowsHtml = '';
+        for (var h = startH; h <= endH; h++) {
+          var act = aaHourActivity(agent, h);
+          if (AA.type !== 'All' && (!act || act.type !== AA.type)) act = null;
+          if (!act && AA.hideEmpty) continue;
+          rowsHtml += aaRow(h, act);
+        }
+        if (!rowsHtml) rowsHtml = monEmpty('No hours to show', 'Try a wider time range or a different status filter.');
+        return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">' + railHtml
+          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">' + toolbar + tzLine + axis + rowsHtml + '</div></div>';
+      }
       function anPage() {
         if (anState.sel === 'Monitoring') return monPage();
         if (anState.sel === 'Queues') return qPage();
+        if (anState.sel === 'Agent Activity') return aaPage();
         var r = AN_RANGE[anState.range], tabBtn = function (t) { var on = anState.tab === t; return '<button data-antab="' + t + '" style="box-sizing:border-box;font:inherit;font-size:13px;border:0;cursor:pointer;padding:7px 14px;border-radius:8px;background:' + (on ? '#fff' : 'none') + ';color:' + (on ? '#0f172a' : '#64748b') + ';font-weight:' + (on ? '600' : '500') + ';box-shadow:' + (on ? '0 1px 2px rgba(15,23,42,.08)' : 'none') + '">' + t + '</button>' };
         var rangeOpts = Object.keys(AN_RANGE).map(function (k) { return '<option' + (k === anState.range ? ' selected' : '') + '>' + k + '</option>' }).join('');
         var rail = AN_RAIL.map(function (x) {
@@ -7730,9 +7820,11 @@
           var online = mem.filter(function (p) { return p.dataset.presence === 'Available' }).length;
           var busy = mem.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
           var offered = n ? 6 + seed * 2 : 0, answered = n ? Math.max(0, offered - (seed % 4)) : 0;
-          return { name: g.name, members: mem, online: online, busy: busy, offered: offered, answered: answered, abandoned: offered - answered,
+          return {
+            name: g.name, members: mem, online: online, busy: busy, offered: offered, answered: answered, abandoned: offered - answered,
             sl: offered ? Math.round(answered / offered * 100) : null, waiting: n ? seed % 3 : 0, longest: n && seed % 3 ? '00:' + (20 + seed * 4 % 40) : '—',
-            avg: n ? '00:' + (40 + seed * 7 % 50) : '—' };
+            avg: n ? '00:' + (40 + seed * 7 % 50) : '—'
+          };
         }).filter(function (q) { return q.members.length });
         queues.forEach(function (q) { q.members.forEach(function (p) { seen[p.dataset.id] = 1 }) });
         var all = []; queues.forEach(function (q) { q.members.forEach(function (p) { if (all.indexOf(p) < 0) all.push(p) }) });
@@ -7767,9 +7859,9 @@
         var pct = d.members.length ? Math.round(d.busy / d.members.length * 100) : 0;
         return '<div style="display:flex;align-items:center;gap:12px;margin:20px 0 10px;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:#64748b;font-weight:600">Right now<span style="flex:1;height:1px;background:#e3e8f1"></span></div>'
           + qCard('display:flex', qCell('users', 'orange', 'Waiting', String(d.waiting), 'across ' + d.queues.length + ' queue' + (d.queues.length === 1 ? '' : 's'), 'callers')
-          + qCell('clock', 'orange', 'Longest wait', d.longest, d.longest === '—' ? 'nobody waiting' : 'longest current wait', '')
-          + qCell('user', 'blue', 'Online now', String(d.online), d.busy + ' on a call · ' + d.online + ' free', 'of ' + d.members.length)
-          + qCell('phone', 'green', 'On a call now', pct + '%', d.busy + ' of ' + d.members.length + ' online', ''));
+            + qCell('clock', 'orange', 'Longest wait', d.longest, d.longest === '—' ? 'nobody waiting' : 'longest current wait', '')
+            + qCell('user', 'blue', 'Online now', String(d.online), d.busy + ' on a call · ' + d.online + ' free', 'of ' + d.members.length)
+            + qCell('phone', 'green', 'On a call now', pct + '%', d.busy + ' of ' + d.members.length + ' online', ''));
       }
       /* dummy hourly series for the chart, scaled to the day's totals */
       function qSeries(d) {
@@ -7891,7 +7983,7 @@
         var t;
         if ((t = e.target.closest('[data-qrail]'))) {
           var n = t.dataset.qrail;
-          if (n === 'Callbacks' || n === 'Monitoring') anState.sel = n;
+          if (n === 'Callbacks' || n === 'Monitoring' || n === 'Agent Activity') anState.sel = n;
           else if (n === 'Boards') QS.mode = 'Boards';
           else if (n === 'Live') QS.mode = 'Live';
           else if (n === 'Queues') QS.mode = 'Live';
@@ -7940,12 +8032,16 @@
         var pick = function (i) { return people.length ? people[i % people.length] : null };
         var base = IX_CALLS.slice(0, 4).map(function (c, i) {
           var p = pick(i);
-          return { from: c.n, did: c.num && c.num.length > 4 ? c.num : '+1 646 555 0' + (100 + i), dur: c.dur, status: c.status === 'Missed' ? 'Missed' : 'Completed', dir: c.dir,
-            to: c.internal ? 'Ext ' + c.num : (p ? p.dataset.name : '—'), path: (c.dir === 'in' ? 'Inbound › Main IVR › ' : 'Outbound › ') + (p ? (p.dataset.group || 'Direct') : 'Direct'), src: c };
+          return {
+            from: c.n, did: c.num && c.num.length > 4 ? c.num : '+1 646 555 0' + (100 + i), dur: c.dur, status: c.status === 'Missed' ? 'Missed' : 'Completed', dir: c.dir,
+            to: c.internal ? 'Ext ' + c.num : (p ? p.dataset.name : '—'), path: (c.dir === 'in' ? 'Inbound › Main IVR › ' : 'Outbound › ') + (p ? (p.dataset.group || 'Direct') : 'Direct'), src: c
+          };
         });
         var extra = people.slice(0, 2).map(function (p, j) {
-          return { from: '+1 555 01' + (10 + j), did: '+1 646 555 02' + (10 + j), dur: '00:' + (10 + (j * 13) % 50), status: j % 3 === 0 ? 'Missed' : 'Completed', dir: j % 2 ? 'in' : 'out',
-            to: p.dataset.name, path: 'Inbound › ' + (p.dataset.group || 'Direct') + ' › ' + p.dataset.name, src: null };
+          return {
+            from: '+1 555 01' + (10 + j), did: '+1 646 555 02' + (10 + j), dur: '00:' + (10 + (j * 13) % 50), status: j % 3 === 0 ? 'Missed' : 'Completed', dir: j % 2 ? 'in' : 'out',
+            to: p.dataset.name, path: 'Inbound › ' + (p.dataset.group || 'Direct') + ' › ' + p.dataset.name, src: null
+          };
         });
         return base.concat(extra);
       }
@@ -8011,7 +8107,7 @@
           var call = onCall ? { contact: '+1 646 934 8292', did: '+1 646 555 0' + (101 + i), dur: '00:0' + (2 + i % 7), dir: 'Inbound', path: 'Inbound › ' + (p.dataset.group || 'Direct') } : null;
           var pill = onCall ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309">On call</span>'
             : st === 'Available' ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#dcfce7;color:#15803d">Available</span>'
-            : '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#f1f5f9;color:#475569">' + esc(st || 'Offline') + '</span>';
+              : '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#f1f5f9;color:#475569">' + esc(st || 'Offline') + '</span>';
           return '<tr><td style="' + td + '">' + name + '</td><td style="' + td + '">' + ext + '</td><td style="' + td + '">' + esc(p.dataset.group || '—') + '</td><td style="' + td + '">' + (onCall ? esc(call.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.did) : dash) + '</td>'
             + '<td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.dur) : '00:00') + '</td><td style="' + td + '">' + pill + '</td><td style="' + td + '">' + (onCall ? esc(call.dir) : dash) + '</td>'
             + '<td style="' + td + '">' + (onCall ? monListenBtn(p.dataset.id) : dash) + '</td></tr>';
@@ -8271,10 +8367,10 @@
         var sumBtn = MS.sub === 'All Extensions' ? '<label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;color:#0f172a"><span>Summary</span><button data-monsum role="switch" aria-checked="' + MS.summary + '" style="box-sizing:border-box;width:42px;height:24px;border:0;border-radius:999px;background:' + (MS.summary ? '#2563eb' : '#cbd5e1') + ';position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:' + (MS.summary ? '21px' : '3px') + ';width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s"></span></button></label>' : '';
         var side = '<aside id="monSide" style="box-sizing:border-box;width:' + (MS.collapsed ? '0' : '220px') + ';flex-shrink:0;border-right:' + (MS.collapsed ? '0' : '1px solid #e8ecf3') + ';background:#fff;position:relative;overflow:visible">'
           + (MS.collapsed ? '' : '<div style="padding:18px 20px 10px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#64748b;font-weight:700">Monitoring</div>'
-          + MON_SUB.map(function (x) {
-            var on = MS.sub === x[0];
-            return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;border:0;border-bottom:1px solid #f1f5f9;background:none;font:inherit;font-size:14px;color:' + (on ? '#2563eb' : '#334155') + ';font-weight:' + (on ? '600' : '500') + ';cursor:pointer;text-align:left">' + ixSvg(MON_ICON[x[1]], 17, 'currentColor') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
-          }).join(''))
+            + MON_SUB.map(function (x) {
+              var on = MS.sub === x[0];
+              return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;border:0;border-bottom:1px solid #f1f5f9;background:none;font:inherit;font-size:14px;color:' + (on ? '#2563eb' : '#334155') + ';font-weight:' + (on ? '600' : '500') + ';cursor:pointer;text-align:left">' + ixSvg(MON_ICON[x[1]], 17, 'currentColor') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+            }).join(''))
           + '<button data-moncollapse aria-label="Toggle sidebar" style="position:absolute;top:50%;right:-12px;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:0;background:#2563eb;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px rgba(37,99,235,.35);z-index:2">' + ixSvg(MS.collapsed ? MON_ICON.chevR : MON_ICON.chev, 13, '#fff') + '</button></aside>';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid #e8ecf3;background:#fff">' + crumb + (select || sumBtn) + '</div>'
@@ -8363,10 +8459,13 @@
         if (anState.sel === 'Queues' && qClick(e)) return;
         if (anState.sel === 'Monitoring' && monClick(e)) return;
         var t;
-        if ((t = e.target.closest('[data-anrail]'))) { var rn = t.dataset.anrail; if (rn === 'Callbacks' || rn === 'Monitoring') { anState.sel = rn; return anRepaint() } if (rn === 'Queues' || rn === 'Boards' || rn === 'Live') { anState.sel = 'Queues'; QS.mode = rn === 'Boards' ? 'Boards' : 'Live'; return anRepaint() } return note(rn + ' is not part of this preview') }
+        if ((t = e.target.closest('[data-anrail]'))) { var rn = t.dataset.anrail; if (rn === 'Callbacks' || rn === 'Monitoring' || rn === 'Agent Activity') { anState.sel = rn; return anRepaint() } if (rn === 'Queues' || rn === 'Boards' || rn === 'Live') { anState.sel = 'Queues'; QS.mode = rn === 'Boards' ? 'Boards' : 'Live'; return anRepaint() } return note(rn + ' is not part of this preview') }
         if ((t = e.target.closest('[data-antab]'))) { anState.tab = t.dataset.antab; anState.board = false; return anRepaint() }
         if (e.target.closest('[data-anboard]')) { anState.board = !anState.board; return anRepaint() }
         if ((t = e.target.closest('[data-anstatus]'))) { var x = anState.tasks[+t.dataset.anstatus]; x.s = x.s === 'New' ? 'Completed' : 'New'; return anRepaint() }
+        if (e.target.closest('[data-aasubmit]')) { var sEl = $('[data-aastart]'), eEl = $('[data-aaend]'); if (sEl) AA.start = sEl.value; if (eEl) AA.end = eEl.value; return anRepaint() }
+        if (e.target.closest('[data-aaback]')) { anState.sel = 'Monitoring'; MS.sub = 'All Extensions'; return anRepaint() }
+        if (e.target.closest('[data-aacollapse]')) { AA.hideEmpty = !AA.hideEmpty; return anRepaint() }
       }
       function anChange(e) {
         if (e.target.hasAttribute('data-monqsel')) { MS.queue = e.target.value; anRepaint(); return }
@@ -8376,6 +8475,9 @@
         if (e.target.hasAttribute('data-moncamp')) { MS.campaign = e.target.value; anRepaint(); return }
         if (e.target.hasAttribute('data-anrange')) { anState.range = e.target.value; anRepaint() }
         if (e.target.hasAttribute('data-qrange')) { QS.range = e.target.value; anRepaint() }
+        if (e.target.hasAttribute('data-aaagent')) { AA.agent = e.target.value; anRepaint(); return }
+        if (e.target.hasAttribute('data-aarange')) { AA.range = e.target.value; anRepaint(); return }
+        if (e.target.hasAttribute('data-aatype')) { AA.type = e.target.value; anRepaint(); return }
       }
       /* buildAn() itself moved to the very end of the script (just before the initial navigation) — it used to
          run here, eagerly, which is before `groups`/`CGROUPS`/etc. (declared further down) exist; anything that
