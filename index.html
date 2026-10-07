@@ -7000,7 +7000,11 @@
         var mgrHtml = h.mgr ? '<button data-openperson="' + esc(h.mgr.dataset.id) + '" style="border:0;background:none;padding:0;font:inherit;font-weight:600;color:#2563eb;cursor:pointer">' + esc(h.mgr.dataset.name) + '</button>' : '<span style="color:#94a3b8">No manager set</span>';
         var repHtml = h.reports.length ? h.reports.map(function (p) { return '<button data-openperson="' + esc(p.dataset.id) + '" style="display:flex;justify-content:space-between;width:100%;border:0;background:none;padding:6px 0;font:inherit;color:#0f172a;cursor:pointer;text-align:left"><span style="font-weight:600;color:#2563eb">' + esc(p.dataset.name) + '</span><span style="color:#64748b;font-size:12.5px">' + esc(p.dataset.role) + '</span></button>' }).join('') : '<span style="color:#94a3b8">No direct reports</span>';
         var noteHtml = '<textarea data-note placeholder="Private notes for this person (only on this browser)" style="box-sizing:border-box;width:100%;height:84px;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical;outline:0">' + esc(notes[id] || '') + '</textarea>';
-        $('#dExtra').innerHTML =
+        var activeCall = personActiveCall(r);
+        var callCard = activeCall ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-bottom:14px">'
+          + '<div style="font-size:12.5px;color:#92400e;min-width:0"><b>On a call</b><br>' + esc(activeCall.contact) + ' · ' + esc(activeCall.dur) + ' · ' + esc(activeCall.path) + '</div>'
+          + monListenBtn(id) + '</div>' : '';
+        $('#dExtra').innerHTML = callCard +
           '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;font-size:13px">'
           + '<span style="color:#475569">' + (loc ? 'Local time <b style="color:#0f172a">' + tzClock(loc.tz) + '</b> · ' + esc(loc.tz) : 'Time zone not set') + '</span>'
           + '<span id="dExtraPres" style="display:inline-flex;align-items:center;gap:6px;font-weight:600"></span></div>'
@@ -7630,7 +7634,9 @@
         var rangeOpts = Object.keys(AN_RANGE).map(function (k) { return '<option' + (k === anState.range ? ' selected' : '') + '>' + k + '</option>' }).join('');
         var rail = AN_RAIL.map(function (x) {
           var on = x[0] === anState.sel;
-          return '<button data-anrail="' + x[0] + '" style="box-sizing:border-box;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+          /* badge belongs on 'Monitoring' (the rail item that leads to Call Queue), not literally 'Call Queue' —
+             no AN_RAIL entry is named that, so this previously never fired outside the Monitoring page itself */
+          return '<button data-anrail="' + x[0] + '" style="box-sizing:border-box;position:relative;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Monitoring' && monAlerts().length ? '<span style="position:absolute;top:4px;right:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;border-radius:999px;min-width:16px;height:16px;padding:0 4px;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 0 0 2px #fff">' + monAlerts().length + '</span>' : '') + '</button>';
         }).join('');
         return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">'
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + rail + '</nav>'
@@ -7672,7 +7678,7 @@
       function qRailHtml() {
         return AN_RAIL.map(function (x) {
           var on = x[0] === 'Boards' ? QS.mode === 'Boards' : x[0] === 'Queues' ? QS.mode !== 'Boards' : x[0] === anState.sel;
-          return '<button data-qrail="' + x[0] + '" style="box-sizing:border-box;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+          return '<button data-qrail="' + x[0] + '" style="box-sizing:border-box;position:relative;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Monitoring' && monAlerts().length ? '<span style="position:absolute;top:4px;right:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;border-radius:999px;min-width:16px;height:16px;padding:0 4px;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 0 0 2px #fff">' + monAlerts().length + '</span>' : '') + '</button>';
         }).join('');
       }
       /* Queues and Boards: queues are the directory groups; members and presence come from the directory, the call figures are dummy values */
@@ -7704,7 +7710,11 @@
       /* Monitoring visibility: anyone whose role has the Monitoring permission (Roles > Monitoring > Live dashboard)
          sees every agent, group and queue. Anyone without it is blocked from the page entirely (see monLocked). */
       function monFull() { return can('monitoring') }
-      function monScopeGroups() { return groups.filter(function (g) { return g && g.name }) }
+      /* `groups` is declared later in the script (its directory data block). buildAn() renders the Analytics
+         view once, eagerly, during bootstrap — before that point `groups` is hoisted but still undefined, so
+         this guards against that instead of relying on nothing ever calling it before `groups` exists (which
+         broke once before, when a dead condition elsewhere stopped calling monAlerts() this same way). */
+      function monScopeGroups() { return (typeof groups === 'undefined' ? [] : groups).filter(function (g) { return g && g.name }) }
       function monScopePeople() { return rows().filter(function (p) { return p.dataset.removed !== '1' }) }
       function monLocked() {
         return '<div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;background:#f4f6fb">'
@@ -7913,7 +7923,7 @@
       function anRailHtml() {
         return AN_RAIL.map(function (x) {
           var on = x[0] === anState.sel;
-          return '<button data-anrail="' + x[0] + '" style="box-sizing:border-box;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+          return '<button data-anrail="' + x[0] + '" style="box-sizing:border-box;position:relative;width:76px;padding:8px 2px 6px;border:0;border-radius:10px;background:' + (on ? '#eef2f7' : 'none') + ';box-shadow:' + (on ? 'inset 0 -2px 0 #2563eb' : 'none') + ';color:' + (on ? '#2563eb' : '#334155') + ';font:inherit;font-size:10.5px;line-height:1.2;text-align:center;font-weight:' + (on ? '600' : '500') + ';cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">' + anIcon(x[1]) + esc(x[0]) + (x[0] === 'Monitoring' && monAlerts().length ? '<span style="position:absolute;top:4px;right:8px;background:#dc2626;color:#fff;font-size:10px;font-weight:700;border-radius:999px;min-width:16px;height:16px;padding:0 4px;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 0 0 2px #fff">' + monAlerts().length + '</span>' : '') + '</button>';
         }).join('');
       }
       function monTable(head, rows, empty) {
@@ -7970,7 +7980,6 @@
         return '<div>' + toolbar + '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' + head + '<tbody id="monCallsBody">' + rowsHtml + '</tbody></table></div>';
       }
       function monAct(a, i) {
-        if (a === 'listen') return note('Live listen needs your phone system connected');
         var c = MS.list[i]; if (!c) return;
         if (a === 'play') return c.src ? ixPlay(c.src) : note('No recording for this call');
         if (a === 'download') return c.src ? ixDownload(c.src) : note('No transcript to download for this call');
@@ -8005,7 +8014,7 @@
             : '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#f1f5f9;color:#475569">' + esc(st || 'Offline') + '</span>';
           return '<tr><td style="' + td + '">' + name + '</td><td style="' + td + '">' + ext + '</td><td style="' + td + '">' + esc(p.dataset.group || '—') + '</td><td style="' + td + '">' + (onCall ? esc(call.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.did) : dash) + '</td>'
             + '<td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.dur) : '00:00') + '</td><td style="' + td + '">' + pill + '</td><td style="' + td + '">' + (onCall ? esc(call.dir) : dash) + '</td>'
-            + '<td style="' + td + '">' + (onCall ? '<button data-monact="listen" data-monidx="' + i + '" style="box-sizing:border-box;height:28px;padding:0 10px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#334155;font:inherit;font-size:12px;cursor:pointer">Listen</button>' : dash) + '</td></tr>';
+            + '<td style="' + td + '">' + (onCall ? monListenBtn(p.dataset.id) : dash) + '</td></tr>';
         }).join('');
       }
       function monExtCountText() { return 'Showing ' + monExtList().length + ' of ' + monScopePeople().length + ' extensions' }
@@ -8087,6 +8096,50 @@
       }
       /* Monitoring: Department (groups, expandable) and Call Queue (agents and waiting callers), from the directory and the queues */
       MS.open = {}; MS.queue = '';
+      /* Listen / Whisper / Barge: an escalating 3-step monitoring cycle on a live call, gated by the matching
+         Roles > Monitoring sub-permission. State is kept per agent id, in-memory only (it's a simulated phone
+         system — there's nothing real to stay connected to across a reload). */
+      var MON_MODE = {};
+      function monListenBtn(id) {
+        var canL = can('listenCall'), canW = can('whisperCall'), canB = can('bargeCall');
+        if (!canL && !canW && !canB) return '<span style="color:#94a3b8;font-size:11.5px">No access</span>';
+        var mode = MON_MODE[id] || 'off';
+        var theme = {
+          off: { bg: '#fff', bd: '#94a3b8', fg: '#334155' },
+          listen: { bg: '#eff6ff', bd: '#bfdbfe', fg: '#1d4ed8' },
+          whisper: { bg: '#fffbeb', bd: '#fde68a', fg: '#b45309' },
+          barge: { bg: '#fef2f2', bd: '#fecaca', fg: '#b91c1c' }
+        }[mode];
+        /* a dropdown, not a click-to-cycle button — it lets a supervisor jump straight to any mode they're
+           allowed to use (e.g. Barge without passing through Listen first), and the available modes are self-
+           explanatory from the option list instead of needing a tooltip to explain what the next click does */
+        var opts = '<option value="off"' + (mode === 'off' ? ' selected' : '') + '>Off</option>'
+          + (canL ? '<option value="listen"' + (mode === 'listen' ? ' selected' : '') + '>Listen</option>' : '')
+          + (canW ? '<option value="whisper"' + (mode === 'whisper' ? ' selected' : '') + '>Whisper</option>' : '')
+          + (canB ? '<option value="barge"' + (mode === 'barge' ? ' selected' : '') + '>Barge</option>' : '');
+        return '<select data-monlisten="' + esc(id) + '" title="Listen in, whisper to the agent, or barge into the call" style="box-sizing:border-box;height:28px;padding:0 8px;border:1px solid ' + theme.bd + ';border-radius:8px;background:' + theme.bg + ';color:' + theme.fg + ';font:inherit;font-size:12px;font-weight:600;cursor:pointer">' + opts + '</select>';
+      }
+      function monSetListen(id, mode) {
+        var p = personById(id), pname = p ? p.dataset.name : 'agent';
+        var allowed = mode === 'off' || (mode === 'listen' && can('listenCall')) || (mode === 'whisper' && can('whisperCall')) || (mode === 'barge' && can('bargeCall'));
+        if (!allowed) return; /* shouldn't happen — the option wouldn't be in the list — but don't trust the DOM blindly */
+        if (mode === 'off') { if (MON_MODE[id]) note('Stopped monitoring ' + pname); delete MON_MODE[id] }
+        else { MON_MODE[id] = mode; note((mode === 'listen' ? 'Listening in on ' : mode === 'whisper' ? 'Whispering to ' : 'Barged into the call with ') + pname + ' — simulated, no phone system connected') }
+        /* this control can be changed from two different places — the Monitoring tables (inside #viewAnalytics)
+           or the profile drawer (global, opens from any page) — so refresh whichever of those is actually showing */
+        if ($('#viewAnalytics').style.display !== 'none') anRepaint();
+        if (drawer.style.display === 'flex' && ctx && ctx.dataset.id === id) paintDrawerExtra(ctx);
+      }
+      /* the Listen/Whisper/Barge dropdown also appears in the profile drawer's "currently on a call" card, which
+         can be open while on any page, not just Monitoring — so it needs its own always-on change handler */
+      document.addEventListener('change', function (e) { var t = e.target.closest('[data-monlisten]'); if (t) monSetListen(t.dataset.monlisten, t.value) });
+      /* a lightweight, deterministic stand-in for "what is this person on a call with right now" — seeded by
+         their id so it stays stable across re-renders instead of jumping around every repaint */
+      function personActiveCall(r) {
+        if (r.dataset.presence !== 'Busy') return null;
+        var seed = (r.dataset.id || '').length * 7 + (r.dataset.name || '').length;
+        return { contact: '+1 646 934 82' + (90 + seed % 10), dur: '00:0' + (2 + seed % 7), dir: 'Inbound', path: 'Inbound › ' + (r.dataset.group || 'Direct') };
+      }
       function monAgentRow(p, i) {
         var av = AVS[(+p.dataset.av) % AVS.length], st = p.dataset.presence, onCall = st === 'Busy';
         var role = p.dataset.role === 'Account owner' ? 'ADMIN' : (p.dataset.role || '').toUpperCase();
@@ -8102,7 +8155,7 @@
           + '<td style="' + td + ';font-family:monospace">' + (c ? esc(c.dur) : '00:00') + '</td>'
           + '<td style="' + td + '">' + (c ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309">On call</span>' : dash) + '</td>'
           + '<td style="' + td + '">' + (c ? esc(c.dir) : dash) + '</td><td style="' + td + ';color:#64748b;font-size:12px">' + (c ? esc(c.path) : dash) + '</td>'
-          + '<td style="' + td + '">' + (c ? '<button data-monact="listen" data-monidx="' + i + '" style="box-sizing:border-box;height:28px;padding:0 10px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#334155;font:inherit;font-size:12px;cursor:pointer">Listen</button>' : dash) + '</td></tr>';
+          + '<td style="' + td + '">' + (c ? monListenBtn(p.dataset.id) : dash) + '</td></tr>';
       }
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
@@ -8174,6 +8227,16 @@
         });
         return monTable(['Contact', 'Number', 'Status'], campRows, 'No contacts in this campaign.');
       }
+      /* "My queues": a supervisor can pin the queues they personally watch; pinned ones float to the top of
+         the queue picker with a star, so a long queue list doesn't bury the handful you actually care about. */
+      var PINQ_KEY = 'ucaas.monPinnedQueues';
+      function monPinned() { try { return JSON.parse(localStorage.getItem(PINQ_KEY)) || [] } catch (e) { return [] } }
+      function monIsPinned(name) { return monPinned().indexOf(name) > -1 }
+      function monTogglePin(name) {
+        var p = monPinned(), i = p.indexOf(name);
+        if (i > -1) p.splice(i, 1); else p.push(name);
+        try { localStorage.setItem(PINQ_KEY, JSON.stringify(p)) } catch (e) { }
+      }
       function monPage() {
         /* monBody() runs first because it can correct MS.queue (e.g. an empty or stale saved queue falls back
            to the first real one) — the breadcrumb below reads MS.queue after that correction, not before it */
@@ -8181,15 +8244,22 @@
         var crumb;
         if (MS.sub === 'Call Queue') {
           /* the last breadcrumb segment is an actual dropdown here — Monitoring › Call Queue › [queue ▾] —
-             instead of a separate picker control elsewhere on the page */
-          var qListC = qData().queues;
+             instead of a separate picker control elsewhere on the page. Pinned queues sort first, marked with a star. */
+          var qListC = qData().queues.slice().sort(function (a, b) { return (monIsPinned(b.name) ? 1 : 0) - (monIsPinned(a.name) ? 1 : 0) });
+          var curPinned = monIsPinned(MS.queue);
+          /* both the pin and the dropdown now sit inside one visibly-boxed chip (border + light fill), and the
+             dropdown text is link-blue — a plain bold label with no border looked identical to inert text, so
+             nothing here signalled "this is clickable" (reported as "I don't see it" / "gets lost in background") */
           crumb = '<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#64748b">'
             + '<span style="cursor:pointer" data-monsub="All Calls">Monitoring</span><span>›</span>'
             + '<span>Call Queue</span><span>›</span>'
+            + '<span style="display:inline-flex;align-items:center;gap:2px;border:1px solid #cbd5e1;border-radius:10px;padding:3px 10px 3px 4px;background:#f8fafc">'
+            + '<button data-monpin="' + esc(MS.queue) + '" title="' + (curPinned ? 'Unpin this queue' : 'Pin this queue to My queues') + '" style="box-sizing:border-box;width:24px;height:24px;border:0;background:none;padding:0;cursor:pointer;color:' + (curPinned ? '#f59e0b' : '#94a3b8') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">' + ixSvg('<path d="M12 2l2.6 6.9L22 9.8l-5.5 4.8L18 22l-6-4-6 4 1.5-7.4L2 9.8l7.4-.9z" fill="' + (curPinned ? 'currentColor' : 'none') + '"/>', 15, curPinned ? '#f59e0b' : '#94a3b8') + '</button>'
             + '<span style="position:relative;display:inline-flex;align-items:center">'
-            + '<select data-monqsel style="box-sizing:border-box;border:0;background:none;font:inherit;font-size:14px;font-weight:700;color:#0f172a;padding:2px 20px 2px 0;cursor:pointer;-webkit-appearance:none;appearance:none">'
-            + qListC.map(function (x) { return '<option' + (x.name === MS.queue ? ' selected' : '') + '>' + esc(x.name) + '</option>' }).join('') + '</select>'
-            + '<span style="position:absolute;right:0;top:50%;transform:translateY(-50%);pointer-events:none;color:#0f172a">' + ixSvg('<path d="M6 9l6 6 6-6"/>', 13, '#0f172a') + '</span>'
+            + '<select data-monqsel style="box-sizing:border-box;border:0;background:none;font:inherit;font-size:14px;font-weight:700;color:#1d4ed8;padding:2px 20px 2px 2px;cursor:pointer;-webkit-appearance:none;appearance:none">'
+            + qListC.map(function (x) { return '<option value="' + esc(x.name) + '"' + (x.name === MS.queue ? ' selected' : '') + '>' + (monIsPinned(x.name) ? '★ ' : '') + esc(x.name) + '</option>' }).join('') + '</select>'
+            + '<span style="position:absolute;right:2px;top:50%;transform:translateY(-50%);pointer-events:none;color:#1d4ed8">' + ixSvg('<path d="M6 9l6 6 6-6"/>', 13, '#1d4ed8') + '</span>'
+            + '</span>'
             + '</span></div>';
         } else {
           var crumbLabel = MS.sub === 'Groups' ? 'Department' : MS.sub === 'Campaign' && MS.campaign ? 'Campaign › ' + MS.campaign : MS.sub;
@@ -8222,6 +8292,7 @@
         if ((t = e.target.closest('[data-monexport]'))) { monExport(t.dataset.monexport); return true }
         if ((t = e.target.closest('[data-mongrp]'))) { var gn = t.dataset.mongrp; MS.open[gn] = !MS.open[gn]; anRepaint(); return true }
         if ((t = e.target.closest('[data-monact]'))) { monAct(t.dataset.monact, +t.dataset.monidx); return true }
+        if ((t = e.target.closest('[data-monpin]'))) { monTogglePin(t.dataset.monpin); anRepaint(); return true }
         if (e.target.closest('[data-monsum]')) { MS.summary = !MS.summary; localStorage.setItem('ucaas.monSummary', MS.summary ? 'on' : 'off'); anRepaint(); return true }
         if (e.target.closest('[data-monalerttoggle]')) { MS.alertsOn = !MS.alertsOn; localStorage.setItem('ucaas.monAlertsOn', MS.alertsOn ? 'on' : 'off'); anRepaint(); return true }
         if (e.target.closest('[data-monqwait]')) { MS.qWaitOpen = !MS.qWaitOpen; anRepaint(); return true }
@@ -8306,7 +8377,9 @@
         if (e.target.hasAttribute('data-anrange')) { anState.range = e.target.value; anRepaint() }
         if (e.target.hasAttribute('data-qrange')) { QS.range = e.target.value; anRepaint() }
       }
-      buildAn();
+      /* buildAn() itself moved to the very end of the script (just before the initial navigation) — it used to
+         run here, eagerly, which is before `groups`/`CGROUPS`/etc. (declared further down) exist; anything that
+         rendered the Monitoring/Queues page on this first pass crashed on those being undefined. */
       /* a location link opens the Locations page with a "Back to People" bar; it does not open the edit dialog */
       document.addEventListener('click', function (e) {
         if (e.target.closest('#viewGDetail')) return; /* the detail view has its own handler */
@@ -10968,7 +11041,7 @@
       syncRoleOptions();
 
       /* ---------- session: who is signed in, and what their role lets them do ---------- */
-      var NEED = { people: '8.x.0.2', roles: '8.x.2.2', locations: '8.x.3.2', locationsAdd: '8.x.3.1', locationsDel: '8.x.3.3', numbers: '14.x.0.2', fax: '14.x.0.1', export: '5.a.0', monitoring: '9.a.0' };
+      var NEED = { people: '8.x.0.2', roles: '8.x.2.2', locations: '8.x.3.2', locationsAdd: '8.x.3.1', locationsDel: '8.x.3.3', numbers: '14.x.0.2', fax: '14.x.0.1', export: '5.a.0', monitoring: '9.a.0', listenCall: '9.a.1', whisperCall: '9.a.2', bargeCall: '9.a.3' };
       function me() { return $('tr[data-self="1"]') }
       function can(k) { if (!ROLES) return true; var r = me(); if (!r) return false; var x = roleByName(r.dataset.role); return !!(x && x.perms[NEED[k] || k]) }
       function canSelect() { return can('people') || can('export') }
@@ -12525,6 +12598,7 @@
       rows().forEach(function (r) { var a = $('[data-f="initials"]', r); if (a) a.style.boxShadow = presRing(r.dataset.presence) });
       paintPagerBtns('pg', 1, 1); paintPagerBtns('gpg', 1, 1);
       apply(); initSession();
+      buildAn(); /* now that `groups`, `CGROUPS` and the rest of the directory data above exist, it's safe to build */
       if (location.hash && location.hash !== '#' && location.hash !== '#people') applyHash(location.hash); else restoreNav();
     })();
   </script>
