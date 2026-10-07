@@ -7629,49 +7629,80 @@
           + anState.tasks.map(function (x, i) { return '<tr><td style="' + td + '">' + esc(x.t) + '</td><td style="' + td + ';color:#334155">' + esc(x.c) + '</td><td style="' + td + ';color:#334155">' + esc(x.d) + '</td><td style="padding:14px 16px;border-bottom:1px solid #f1f5f9">' + anStatus(x.s, i) + '</td></tr>' }).join('')
           + '</tbody></table>';
       }
-      /* Agent Activity: a per-agent, hour-by-hour timeline (matches the reference "Activity" screen) — one row
-         per hour of the chosen window, each showing either a status pill (Login/Available/On call/Wrap-up/
-         Break/Logout) or "No action" when nothing happened that hour. Figures are dummy but deterministic,
-         seeded per agent+hour so the same agent always shows the same shift pattern across re-renders. */
-      var AA = { agent: '', range: 'Today', start: '12:00 AM', end: '11:00 PM', type: 'All', hideEmpty: false };
-      var AA_TYPES = [
-        { t: 'Login', c: '#1d4ed8', bg: '#eff6ff', bd: '#bfdbfe' },
-        { t: 'Available', c: '#15803d', bg: '#dcfce7', bd: '#bbf7d0' },
-        { t: 'On call', c: '#b45309', bg: '#fef3c7', bd: '#fde68a' },
-        { t: 'Wrap-up', c: '#6d28d9', bg: '#ede9fe', bd: '#ddd6fe' },
-        { t: 'Break', c: '#0369a1', bg: '#e0f2fe', bd: '#bae6fd' },
-        { t: 'Logout', c: '#475569', bg: '#f1f5f9', bd: '#e2e8f0' }
-      ];
+      /* Agent Activity: a per-agent, hour-by-hour timeline (matches the reference "Activity" screen) — each row
+         is an hour; a shift hour shows small Online/Offline session markers at their exact minute, hovering one
+         shows device/IP/browser/OS/time, same as the reference's tooltip. Hours with nothing logged show "No
+         action", same as the reference's empty hours. Figures are dummy but deterministic (seeded per agent). */
+      var AA = { agent: '', range: 'Today', start: '00:00', end: '17:00', type: 'All', hideEmpty: false };
+      var AA_STATUSES = ['Online', 'Offline'];
+      var AA_DEVICES = [['Browser', 'Chrome'], ['Browser', 'Edge'], ['Desktop app', 'Electron'], ['Mobile app', 'Safari']];
+      var AA_OS = ['Windows', 'Mac OS', 'Linux', 'iOS'];
       function aaAgents() { return monScopePeople() }
-      function aaParseHour(t) { var m = /^(\d+):(\d+)\s*(AM|PM)$/i.exec((t || '').trim()); if (!m) return null; var h = (+m[1]) % 12; if (/pm/i.test(m[3])) h += 12; return h }
+      /* AA.start/AA.end come straight from native <input type="time"> elements, which always report 24-hour
+         "HH:MM" regardless of the viewer's locale/AM-PM display — no text parsing or typed format to get wrong */
+      function aaParseHour(t) { var m = /^(\d+):/.exec((t || '').trim()); return m ? +m[1] : null }
       function aaFmtHour(h) { var ap = h < 12 ? 'AM' : 'PM', h12 = h % 12; if (h12 === 0) h12 = 12; return h12 + ':00 ' + ap }
-      /* the shift is fixed (9am-6pm) for every agent in this dummy dataset; outside it every hour is "No action",
-         matching the empty-state look the reference screenshot happens to show for its (presumably off-shift) window */
-      function aaHourActivity(agent, hour) {
+      /* a single 48-slot "every half hour" dropdown was tedious to scroll through for something that's only
+         ever filtered at hour resolution anyway (aaParseHour only reads the hour) — a 12-item hour + a 2-item
+         AM/PM dropdown gets to any hour in at most two short scans, and drops the fake minute-level precision */
+      function aaTo24(h12, ap) { var h = (+h12) % 12; if (ap === 'PM') h += 12; return (h < 10 ? '0' : '') + h + ':00' }
+      /* the shift is fixed (10am-4pm) for every agent in this dummy dataset; each shift hour gets 1-3 brief
+         online/offline blips (a heartbeat-style presence ping, not a single continuous session) */
+      function aaHourEvents(agent, hour) {
+        if (hour < 10 || hour > 16) return [];
         var pad = function (n) { return (n < 10 ? '0' : '') + n };
-        if (hour === 9) return { type: 'Login', from: '09:00', to: '09:0' + (2 + (agent.dataset.id || '').length % 7) };
-        if (hour === 18) return { type: 'Logout', from: '18:00', to: '18:00' };
-        if (hour > 9 && hour < 18) {
-          var seed = (agent.dataset.id || '').length * 11 + hour * 7 + (agent.dataset.name || '').length;
-          var pick = AA_TYPES[1 + seed % 4]; // Available / On call / Wrap-up / Break
-          var m1 = 5 + seed % 40, m2 = Math.min(59, m1 + 5 + seed % 10);
-          return { type: pick.t, from: pad(hour) + ':' + pad(m1), to: pad(hour) + ':' + pad(m2) };
+        var h12 = hour % 12 === 0 ? 12 : hour % 12, ap = hour < 12 ? 'AM' : 'PM';
+        var base = (agent.dataset.id || '').length * 13 + (agent.dataset.name || '').length * 3 + hour * 29;
+        var n = 1 + base % 3, out = [];
+        for (var i = 0; i < n; i++) {
+          var seed = base + i * 17;
+          var onMin = 2 + seed % 54, offMin = Math.min(59, onMin + 1 + seed % 3);
+          var dv = AA_DEVICES[seed % AA_DEVICES.length], os = AA_OS[seed % AA_OS.length], ver = 90 + seed % 60;
+          var common = { device: dv[0], ip: '49.200.' + (100 + seed % 155) + '.' + (10 + (seed * 7) % 240), browser: dv[1] + ' - ' + ver, os: os };
+          out.push(Object.assign({ minute: onMin, status: 'Online', time: h12 + ':' + pad(onMin) + ' ' + ap }, common));
+          out.push(Object.assign({ minute: offMin, status: 'Offline', time: h12 + ':' + pad(offMin) + ' ' + ap }, common));
         }
-        return null;
+        return out.sort(function (a, b) { return a.minute - b.minute });
       }
-      function aaRow(hour, act) {
-        var pill, lineColor;
-        if (!act) { pill = '<span style="border:1px solid #fecaca;color:#dc2626;background:#fff;border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">No action</span>'; lineColor = '#fecaca' }
-        else {
-          var ty = AA_TYPES.filter(function (x) { return x.t === act.type })[0] || AA_TYPES[1];
-          pill = '<span style="border:1px solid ' + ty.bd + ';color:' + ty.c + ';background:' + ty.bg + ';border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">' + esc(act.type) + ' · ' + esc(act.from) + '–' + esc(act.to) + '</span>';
-          lineColor = ty.bd;
+      var AA_TICKS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+      function aaRow(hour, events) {
+        var tickHtml = AA_TICKS.map(function (n) { return '<span style="position:absolute;left:' + (n / 60 * 100) + '%;top:-4px;width:1px;height:9px;background:#bfdbfe"></span>' }).join('');
+        var hourLabel = '<div style="width:90px;flex-shrink:0;font-size:13px;color:#334155;font-weight:600">' + aaFmtHour(hour) + '</div>';
+        if (!events.length) {
+          return '<div style="display:flex;align-items:center;padding:16px 0">' + hourLabel
+            + '<div style="flex:1;position:relative;height:1px;background:#fecaca;margin:0 16px;display:flex;align-items:center;justify-content:center">' + tickHtml
+            + '<span style="background:#fff;padding:0 4px;display:inline-flex;position:relative;z-index:1"><span style="border:1px solid #fecaca;color:#dc2626;background:#fff;border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">No action</span></span>'
+            + '</div></div>';
         }
-        return '<div style="display:flex;align-items:center;padding:16px 0">'
-          + '<div style="width:90px;flex-shrink:0;font-size:13px;color:#334155;font-weight:600">' + aaFmtHour(hour) + '</div>'
-          + '<div style="flex:1;position:relative;height:1px;background:' + lineColor + ';margin:0 16px;display:flex;align-items:center;justify-content:center">'
-          + '<span style="background:#fff;padding:0 4px;display:inline-flex">' + pill + '</span></div></div>';
+        var markers = events.map(function (ev) {
+          var on = ev.status === 'Online', color = on ? '#16a34a' : '#dc2626';
+          return '<span data-aaevt="' + esc(JSON.stringify(ev)) + '" style="position:absolute;left:' + (ev.minute / 60 * 100) + '%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid ' + color + ';display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2">'
+            + ixSvg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 4 9 14 14 0 0 1-4 9 14 14 0 0 1-4-9 14 14 0 0 1 4-9z"/>', 10, color) + '</span>';
+        }).join('');
+        return '<div style="display:flex;align-items:center;padding:16px 0">' + hourLabel
+          + '<div style="flex:1;position:relative;height:1px;background:#bfdbfe;margin:0 16px">' + tickHtml + markers + '</div></div>';
       }
+      /* a single shared tooltip element, repositioned over whichever marker is hovered — see the mouseover/
+         mouseout wiring in buildAn() */
+      function aaTipHtml(ev) {
+        return '<div style="font-weight:700;margin-bottom:6px">' + esc(ev.status) + '</div>'
+          + '<div><b>Device:</b> ' + esc(ev.device) + '</div>'
+          + '<div><b>IP:</b> ' + esc(ev.ip) + '</div>'
+          + '<div><b>Browser:</b> ' + esc(ev.browser) + '</div>'
+          + '<div><b>OS:</b> ' + esc(ev.os) + '</div>'
+          + '<div><b>Time:</b> ' + esc(ev.time) + '</div>';
+      }
+      function aaShowTip(el) {
+        var ev; try { ev = JSON.parse(el.getAttribute('data-aaevt')) } catch (e) { return }
+        var tip = document.getElementById('aaTip');
+        if (!tip) { tip = document.createElement('div'); tip.id = 'aaTip'; tip.style.cssText = 'box-sizing:border-box;position:fixed;z-index:200;background:#0f172a;color:#fff;font-size:12.5px;line-height:1.7;border-radius:10px;padding:12px 14px;pointer-events:none;box-shadow:0 10px 24px rgba(15,23,42,.35);max-width:220px'; document.body.appendChild(tip) }
+        tip.innerHTML = aaTipHtml(ev);
+        tip.style.display = 'block';
+        var r = el.getBoundingClientRect();
+        tip.style.left = Math.max(8, Math.min(window.innerWidth - tip.offsetWidth - 8, r.left + r.width / 2 - tip.offsetWidth / 2)) + 'px';
+        tip.style.top = Math.max(8, r.top - tip.offsetHeight - 10) + 'px';
+      }
+      function aaHideTip() { var tip = document.getElementById('aaTip'); if (tip) tip.style.display = 'none' }
       function aaPage() {
         var agents = aaAgents();
         if (!AA.agent || !agents.some(function (p) { return p.dataset.id === AA.agent })) {
@@ -7683,13 +7714,20 @@
         var selStyle = 'box-sizing:border-box;height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:13px;background:#fff';
         var agentSel = '<select data-aaagent style="' + selStyle + ';font-weight:700;color:#0f172a;max-width:180px">' + agents.map(function (p) { return '<option value="' + esc(p.dataset.id) + '"' + (p.dataset.id === AA.agent ? ' selected' : '') + '>' + esc(p.dataset.name) + '</option>' }).join('') + '</select>';
         var rangeSel = '<select data-aarange style="' + selStyle + '">' + ['Today', 'Yesterday', 'This week'].map(function (o) { return '<option' + (o === AA.range ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>';
-        var typeSel = '<select data-aatype style="' + selStyle + '">' + ['All'].concat(AA_TYPES.map(function (x) { return x.t })).map(function (o) { return '<option' + (o === AA.type ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>';
+        var typeSel = '<select data-aatype style="' + selStyle + '">' + ['All'].concat(AA_STATUSES).map(function (o) { return '<option' + (o === AA.type ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>';
+        var hourOpts = []; for (var hh = 1; hh <= 12; hh++) hourOpts.push(hh);
+        var timeFields = function (hAttr, aAttr, val24) {
+          var h24 = aaParseHour(val24) || 0, ap = h24 < 12 ? 'AM' : 'PM', h12 = h24 % 12; if (h12 === 0) h12 = 12;
+          var hourSel = '<select ' + hAttr + ' style="' + selStyle + ';width:58px;padding:0 6px">' + hourOpts.map(function (h) { return '<option value="' + h + '"' + (h === h12 ? ' selected' : '') + '>' + h + '</option>' }).join('') + '</select>';
+          var apSel = '<select ' + aAttr + ' style="' + selStyle + ';width:64px;padding:0 6px">' + ['AM', 'PM'].map(function (a) { return '<option' + (a === ap ? ' selected' : '') + '>' + a + '</option>' }).join('') + '</select>';
+          return '<span style="display:inline-flex;gap:4px">' + hourSel + apSel + '</span>';
+        };
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
           + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + agentSel + '</div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' + rangeSel
-          + '<input data-aastart value="' + esc(AA.start) + '" placeholder="12:00 AM" style="' + selStyle + ';width:96px">'
+          + timeFields('data-aastarth', 'data-aastarta', AA.start)
           + '<span style="color:#94a3b8">-</span>'
-          + '<input data-aaend value="' + esc(AA.end) + '" placeholder="11:00 PM" style="' + selStyle + ';width:96px">'
+          + timeFields('data-aaendh', 'data-aaenda', AA.end)
           + typeSel
           + '<button data-aasubmit style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Submit</button>'
           + '<button data-aaback style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Back</button>'
@@ -7707,10 +7745,10 @@
         if (endH < startH) endH = startH;
         var rowsHtml = '';
         for (var h = startH; h <= endH; h++) {
-          var act = aaHourActivity(agent, h);
-          if (AA.type !== 'All' && (!act || act.type !== AA.type)) act = null;
-          if (!act && AA.hideEmpty) continue;
-          rowsHtml += aaRow(h, act);
+          var evs = aaHourEvents(agent, h);
+          if (AA.type !== 'All') evs = evs.filter(function (ev) { return ev.status === AA.type });
+          if (!evs.length && AA.hideEmpty) continue;
+          rowsHtml += aaRow(h, evs);
         }
         if (!rowsHtml) rowsHtml = monEmpty('No hours to show', 'Try a wider time range or a different status filter.');
         return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">' + railHtml
@@ -8417,6 +8455,8 @@
           eb.innerHTML = monExtRowsHtml(); document.getElementById('monExtCount').textContent = monExtCountText();
         });
         host.addEventListener('mousedown', function (e) { if (e.target.closest('[data-anrail],[data-qrail],[data-monsub],[data-qmode],[data-antab]')) e.preventDefault() });
+        host.addEventListener('mouseover', function (e) { var t = e.target.closest('[data-aaevt]'); if (t) aaShowTip(t) });
+        host.addEventListener('mouseout', function (e) { var t = e.target.closest('[data-aaevt]'); if (t && !t.contains(e.relatedTarget)) aaHideTip() });
         $('#viewAnalytics').addEventListener('click', anClick);
         $('#viewAnalytics').addEventListener('change', anChange);
       }
@@ -8463,7 +8503,19 @@
         if ((t = e.target.closest('[data-antab]'))) { anState.tab = t.dataset.antab; anState.board = false; return anRepaint() }
         if (e.target.closest('[data-anboard]')) { anState.board = !anState.board; return anRepaint() }
         if ((t = e.target.closest('[data-anstatus]'))) { var x = anState.tasks[+t.dataset.anstatus]; x.s = x.s === 'New' ? 'Completed' : 'New'; return anRepaint() }
-        if (e.target.closest('[data-aasubmit]')) { var sEl = $('[data-aastart]'), eEl = $('[data-aaend]'); if (sEl) AA.start = sEl.value; if (eEl) AA.end = eEl.value; return anRepaint() }
+        /* the whole toolbar (who, range, start, end, type) applies together on Submit, not field-by-field —
+           it used to be split (agent/range/type live, start/end only on Submit), which both made Submit feel
+           arbitrary (it only ever did something for two of the five fields) and had a real bug: changing one
+           live field re-rendered the whole toolbar from saved state, silently discarding an unsubmitted change
+           you'd just made to a different field */
+        if (e.target.closest('[data-aasubmit]')) {
+          var aEl = $('[data-aaagent]'), rEl = $('[data-aarange]'), tEl = $('[data-aatype]');
+          var sH = $('[data-aastarth]'), sA = $('[data-aastarta]'), eH = $('[data-aaendh]'), eA = $('[data-aaenda]');
+          if (aEl) AA.agent = aEl.value; if (rEl) AA.range = rEl.value; if (tEl) AA.type = tEl.value;
+          if (sH && sA) AA.start = aaTo24(sH.value, sA.value);
+          if (eH && eA) AA.end = aaTo24(eH.value, eA.value);
+          return anRepaint();
+        }
         if (e.target.closest('[data-aaback]')) { anState.sel = 'Monitoring'; MS.sub = 'All Extensions'; return anRepaint() }
         if (e.target.closest('[data-aacollapse]')) { AA.hideEmpty = !AA.hideEmpty; return anRepaint() }
       }
@@ -8475,9 +8527,6 @@
         if (e.target.hasAttribute('data-moncamp')) { MS.campaign = e.target.value; anRepaint(); return }
         if (e.target.hasAttribute('data-anrange')) { anState.range = e.target.value; anRepaint() }
         if (e.target.hasAttribute('data-qrange')) { QS.range = e.target.value; anRepaint() }
-        if (e.target.hasAttribute('data-aaagent')) { AA.agent = e.target.value; anRepaint(); return }
-        if (e.target.hasAttribute('data-aarange')) { AA.range = e.target.value; anRepaint(); return }
-        if (e.target.hasAttribute('data-aatype')) { AA.type = e.target.value; anRepaint(); return }
       }
       /* buildAn() itself moved to the very end of the script (just before the initial navigation) — it used to
          run here, eagerly, which is before `groups`/`CGROUPS`/etc. (declared further down) exist; anything that
