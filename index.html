@@ -9411,11 +9411,12 @@
       }
       $('#btnTheme').addEventListener('click', function () { setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark') });
       (function () {
+        /* always open in light mode by default — this used to follow the OS/browser's
+           prefers-color-scheme instead, which meant anyone on a dark-themed OS got dark mode
+           on first visit with nothing in the app actually switched. A saved choice from the
+           theme toggle (top-right sun/moon button) still wins and is remembered as before. */
         var saved = null; try { saved = localStorage.getItem('theme') } catch (e) { }
-        var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-        function osTheme() { return mq && mq.matches ? 'dark' : 'light' }
-        var t = saved || osTheme(); if (t === 'dark') setTheme('dark');
-        if (!saved && mq && mq.addEventListener) mq.addEventListener('change', function () { var s2 = null; try { s2 = localStorage.getItem('theme') } catch (e) { } if (!s2) setTheme(osTheme()) });
+        if (saved === 'dark') setTheme('dark');
       })();
 
       /* ---------- keyboard ---------- */
