@@ -8195,7 +8195,7 @@
           + '<button data-monexport="ext" style="box-sizing:border-box;height:38px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>' + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
         var table = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar + '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>'
-          + ['Name', 'Extension', 'Group', 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [20, 10, 11, 12, 11, 8, 10, 9, 9][k] + '%">' + h + '</th>' }).join('')
+          + ['Name', 'Extension', 'Group', 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [20, 10, 11, 8, 11, 8, 10, 9, 13][k] + '%">' + h + '</th>' }).join('')
           + '</tr></thead><tbody id="monExtBody">' + monExtRowsHtml() + '</tbody></table></div>';
         return cards + table;
       }
@@ -8267,19 +8267,42 @@
         }[mode];
         /* a dropdown, not a click-to-cycle button — it lets a supervisor jump straight to any mode they're
            allowed to use (e.g. Barge without passing through Listen first), and the available modes are self-
-           explanatory from the option list instead of needing a tooltip to explain what the next click does */
-        var opts = '<option value="off"' + (mode === 'off' ? ' selected' : '') + '>Off</option>'
-          + (canL ? '<option value="listen"' + (mode === 'listen' ? ' selected' : '') + '>Listen</option>' : '')
-          + (canW ? '<option value="whisper"' + (mode === 'whisper' ? ' selected' : '') + '>Whisper</option>' : '')
-          + (canB ? '<option value="barge"' + (mode === 'barge' ? ' selected' : '') + '>Barge</option>' : '');
-        return '<select data-monlisten="' + esc(id) + '" title="Listen in, whisper to the agent, or barge into the call" style="box-sizing:border-box;height:28px;padding:0 8px;border:1px solid ' + theme.bd + ';border-radius:8px;background:' + theme.bg + ';color:' + theme.fg + ';font:inherit;font-size:12px;font-weight:600;cursor:pointer">' + opts + '</select>';
+           explanatory from the option list instead of needing a tooltip to explain what the next click does.
+           Genesys rule, matched here: once barged in you can't jump straight back to Listen/Whisper — the only
+           way out is to stop barging first, then re-enter from Off like normal. */
+        var opts = mode === 'barge'
+          ? '<option value="barge" selected>Barge</option><option value="off">Stop Barging</option>'
+          : '<option value="off"' + (mode === 'off' ? ' selected' : '') + '>Off</option>'
+            + (canL ? '<option value="listen"' + (mode === 'listen' ? ' selected' : '') + '>Listen</option>' : '')
+            + (canW ? '<option value="whisper"' + (mode === 'whisper' ? ' selected' : '') + '>Whisper</option>' : '')
+            + (canB ? '<option value="barge">Barge</option>' : '');
+        /* kept deliberately compact (fixed width + small flex-shrink:0 history icon) — this sits in a narrow,
+           fixed-width "Actions" table column, and the first version overflowed past the table's own right edge
+           because nothing constrained its width, which only showed up once an agent actually had an active call */
+        var hist = '<button data-monhist="' + esc(id) + '" title="View monitoring history for this agent" style="box-sizing:border-box;width:24px;height:26px;flex-shrink:0;border:1px solid #e2e8f0;border-radius:7px;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:3px">' + ico2('history', '#64748b', 12) + '</button>';
+        return '<span style="display:inline-flex;align-items:center;max-width:100%">'
+          + '<select data-monlisten="' + esc(id) + '" title="Listen in, whisper to the agent, or barge into the call" style="box-sizing:border-box;width:84px;flex-shrink:1;min-width:0;height:26px;padding:0 4px;border:1px solid ' + theme.bd + ';border-radius:7px;background:' + theme.bg + ';color:' + theme.fg + ';font:inherit;font-size:11px;font-weight:600;cursor:pointer">' + opts + '</select>' + hist + '</span>';
       }
       function monSetListen(id, mode) {
         var p = personById(id), pname = p ? p.dataset.name : 'agent';
+        var cur = MON_MODE[id] || 'off';
+        if (cur === mode) return; /* no-op: nothing actually changed, so no toast/re-render/audit entry */
+        /* mirrors the Genesys one-way-door rule — once barged in, the only legal next step is stopping,
+           never a direct jump to Listen/Whisper. Defense in depth: the dropdown already only offers Barge/Stop
+           Barging while barged in, but a client can't be trusted to only ever send what its own UI offered. */
+        if (cur === 'barge' && mode !== 'off') return;
         var allowed = mode === 'off' || (mode === 'listen' && can('listenCall')) || (mode === 'whisper' && can('whisperCall')) || (mode === 'barge' && can('bargeCall'));
         if (!allowed) return; /* shouldn't happen — the option wouldn't be in the list — but don't trust the DOM blindly */
-        if (mode === 'off') { if (MON_MODE[id]) note('Stopped monitoring ' + pname); delete MON_MODE[id] }
+        var modeWord = { listen: 'listening in on', whisper: 'whispering to', barge: 'barging into' };
+        if (mode === 'off') { note('Stopped monitoring ' + pname); delete MON_MODE[id] }
         else { MON_MODE[id] = mode; note((mode === 'listen' ? 'Listening in on ' : mode === 'whisper' ? 'Whispering to ' : 'Barged into the call with ') + pname + ' — simulated, no phone system connected') }
+        /* audit trail: reuses the same per-person Activity log the rest of the Directory already uses (the
+           "View activity" row action / the new history button right next to this control), rather than a
+           separate monitoring-only log nobody would think to check */
+        if (p) {
+          var sup = me(), supName = sup ? sup.dataset.name : 'A supervisor';
+          logAct(p, mode === 'off' ? supName + ' stopped ' + (modeWord[cur] || 'monitoring') + ' this call' : supName + ' started ' + modeWord[mode] + ' this call');
+        }
         /* this control can be changed from two different places — the Monitoring tables (inside #viewAnalytics)
            or the profile drawer (global, opens from any page) — so refresh whichever of those is actually showing */
         if ($('#viewAnalytics').style.display !== 'none') anRepaint();
@@ -8288,6 +8311,7 @@
       /* the Listen/Whisper/Barge dropdown also appears in the profile drawer's "currently on a call" card, which
          can be open while on any page, not just Monitoring — so it needs its own always-on change handler */
       document.addEventListener('change', function (e) { var t = e.target.closest('[data-monlisten]'); if (t) monSetListen(t.dataset.monlisten, t.value) });
+      document.addEventListener('click', function (e) { var t = e.target.closest('[data-monhist]'); if (t) { var p = personById(t.dataset.monhist); if (p) openActivity(p) } });
       /* a lightweight, deterministic stand-in for "what is this person on a call with right now" — seeded by
          their id so it stays stable across re-renders instead of jumping around every repaint */
       function personActiveCall(r) {
@@ -8315,7 +8339,7 @@
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
-        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [24, 11, 11, 9, 10, 10, 16, 9];
+        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [24, 11, 11, 9, 10, 10, 12, 13];
         return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
       }
       function monGroupsView() {
