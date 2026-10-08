@@ -7664,6 +7664,23 @@
         }
         return out.sort(function (a, b) { return a.minute - b.minute });
       }
+      /* a one-line rollup (doubles as the color legend) above the timeline: session counts, and total online
+         minutes when both statuses are in view — the pairs come out already sorted on/off/on/off, so adjacent
+         pairs are safe to diff directly for a duration */
+      function aaSummarize(agent, startH, endH, typeFilter) {
+        var onlineCount = 0, offlineCount = 0, onlineMinutes = 0;
+        for (var h = startH; h <= endH; h++) {
+          var full = aaHourEvents(agent, h);
+          if (typeFilter === 'All') {
+            for (var j = 0; j + 1 < full.length; j += 2) {
+              if (full[j].status === 'Online' && full[j + 1] && full[j + 1].status === 'Offline') onlineMinutes += full[j + 1].minute - full[j].minute;
+            }
+          }
+          var evs = typeFilter === 'All' ? full : full.filter(function (ev) { return ev.status === typeFilter });
+          evs.forEach(function (ev) { if (ev.status === 'Online') onlineCount++; else offlineCount++ });
+        }
+        return { onlineCount: onlineCount, offlineCount: offlineCount, onlineMinutes: onlineMinutes };
+      }
       var AA_TICKS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
       function aaRow(hour, events) {
         var tickHtml = AA_TICKS.map(function (n) { return '<span style="position:absolute;left:' + (n / 60 * 100) + '%;top:-4px;width:1px;height:9px;background:#bfdbfe"></span>' }).join('');
@@ -7733,16 +7750,20 @@
           + '<button data-aaback style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Back</button>'
           + '</div></div>';
         var loc = locByName(agent.dataset.loc), tz = loc ? loc.tz : 'Asia/Kolkata';
-        var tzLine = '<div style="text-align:center;font-size:12.5px;color:#64748b;margin-bottom:14px">Timezone - ' + esc(tz) + '</div>';
-        var ticks = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-        var axis = '<div style="display:flex;align-items:center;padding-bottom:10px;border-bottom:2px solid #2563eb;margin-bottom:6px">'
-          + '<div style="width:90px;flex-shrink:0"><span style="background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:13px;border-radius:8px;padding:6px 14px;display:inline-block">' + esc(AA.range) + '</span></div>'
-          + '<div style="flex:1;display:flex;justify-content:space-between;padding:0 16px;color:#94a3b8;font-size:12px">' + ticks.map(function (n) { return '<span>' + n + '</span>' }).join('') + '</div>'
-          + '<button data-aacollapse title="' + (AA.hideEmpty ? 'Show hours with no action' : 'Hide hours with no action') + '" style="width:28px;height:28px;flex-shrink:0;border:0;background:none;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center;transition:transform .15s;transform:rotate(' + (AA.hideEmpty ? '180' : '0') + 'deg)">' + ixSvg('<path d="M6 15l6-6 6 6"/>', 15, '#64748b') + '</button>'
-          + '</div>';
+        var tzLine = '<div style="text-align:center;font-size:12.5px;color:#64748b;margin-bottom:10px">Timezone - ' + esc(tz) + '</div>';
         var startH = aaParseHour(AA.start); if (startH == null) startH = 0;
         var endH = aaParseHour(AA.end); if (endH == null) endH = 23;
         if (endH < startH) endH = startH;
+        var sum = aaSummarize(agent, startH, endH, AA.type);
+        var summaryLine = '<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:12.5px;color:#475569;margin-bottom:14px">'
+          + '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#16a34a;display:inline-block;flex-shrink:0"></span>Online — <b>' + sum.onlineCount + '</b> session' + (sum.onlineCount === 1 ? '' : 's') + (sum.onlineMinutes ? ' · ' + sum.onlineMinutes + ' min total' : '') + '</span>'
+          + '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#dc2626;display:inline-block;flex-shrink:0"></span>Offline — <b>' + sum.offlineCount + '</b></span>'
+          + '</div>';
+        var axis = '<div style="display:flex;align-items:center;padding-bottom:10px;border-bottom:2px solid #2563eb;margin-bottom:6px">'
+          + '<div style="width:90px;flex-shrink:0"><span style="background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:13px;border-radius:8px;padding:6px 14px;display:inline-block">' + esc(AA.range) + '</span></div>'
+          + '<div style="flex:1;display:flex;justify-content:space-between;padding:0 16px;color:#94a3b8;font-size:12px">' + AA_TICKS.map(function (n) { return '<span>' + n + '</span>' }).join('') + '</div>'
+          + '<button data-aacollapse title="' + (AA.hideEmpty ? 'Show hours with no action' : 'Hide hours with no action') + '" style="width:28px;height:28px;flex-shrink:0;border:0;background:none;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center;transition:transform .15s;transform:rotate(' + (AA.hideEmpty ? '180' : '0') + 'deg)">' + ixSvg('<path d="M6 15l6-6 6 6"/>', 15, '#64748b') + '</button>'
+          + '</div>';
         var rowsHtml = '';
         for (var h = startH; h <= endH; h++) {
           var evs = aaHourEvents(agent, h);
@@ -7752,7 +7773,7 @@
         }
         if (!rowsHtml) rowsHtml = monEmpty('No hours to show', 'Try a wider time range or a different status filter.');
         return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">' + railHtml
-          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">' + toolbar + tzLine + axis + rowsHtml + '</div></div>';
+          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">' + toolbar + tzLine + summaryLine + axis + rowsHtml + '</div></div>';
       }
       function anPage() {
         if (anState.sel === 'Monitoring') return monPage();
