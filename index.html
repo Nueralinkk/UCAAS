@@ -7879,9 +7879,15 @@
           var online = mem.filter(function (p) { return p.dataset.presence === 'Available' }).length;
           var busy = mem.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
           var offered = n ? 6 + seed * 2 : 0, answered = n ? Math.max(0, offered - (seed % 4)) : 0;
+          /* waiting used to come from a seed tied only to the group's name length — completely disconnected
+             from how many of its members were actually online, so a queue could show 5 callers waiting while
+             every agent in it read "On Schedule"/Available, which made no sense sitting next to each other on
+             the same page. It now scales down as the available ratio goes up, and hits 0 once most of the
+             group is actually online to take the call — the story the rest of the page is already telling. */
+          var availRatio = n ? online / n : 0, waiting = n ? Math.round((seed % 5) * (1 - availRatio)) : 0;
           return {
             name: g.name, members: mem, online: online, busy: busy, offered: offered, answered: answered, abandoned: offered - answered,
-            sl: offered ? Math.round(answered / offered * 100) : null, waiting: n ? seed % 3 : 0, longest: n && seed % 3 ? '00:' + (20 + seed * 4 % 40) : '—',
+            sl: offered ? Math.round(answered / offered * 100) : null, waiting: waiting, longest: waiting ? '00:' + (20 + seed * 4 % 40) : '—',
             avg: n ? '00:' + (40 + seed * 7 % 50) : '—'
           };
         }).filter(function (q) { return q.members.length });
@@ -8058,7 +8064,7 @@
         return false;
       }
       /* Monitoring: sub-menu (All Calls, All Extensions, Groups, Call Queue, Campaign) with the same layout as the reference */
-      var MS = { sub: 'Campaign', campaign: '', collapsed: false, qWaitOpen: false };
+      var MS = { sub: 'Campaign', campaign: '', collapsed: false, qWaitOpen: false, copilotTab: 'copilot', copilotHistOpen: false, copilotHistView: 'summary' };
       var MON_SUB = [
         ['All Calls', 'phone'], ['All Extensions', 'users'], ['Groups', 'tree'], ['Call Queue', 'queues'], ['Campaign', 'grid']
       ];
@@ -8153,9 +8159,9 @@
         });
       }
       function monExtRowsHtml() {
-        var list = monExtList(), td = 'padding:13px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;vertical-align:middle;overflow:hidden;text-overflow:ellipsis';
+        var list = monExtList(), td = 'padding:14px 10px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;vertical-align:middle;overflow:hidden;text-overflow:ellipsis';
         var dash = '<span style="color:#94a3b8">---</span>';
-        if (!list.length) return '<tr><td colspan="8" style="padding:30px;text-align:center;color:#64748b">No extensions match these filters.</td></tr>';
+        if (!list.length) return '<tr><td colspan="9" style="padding:30px;text-align:center;color:#64748b">No extensions match these filters.</td></tr>';
         return list.map(function (p, i) {
           var av = AVS[(+p.dataset.av) % AVS.length], st = p.dataset.presence, onCall = st === 'Busy';
           var role = p.dataset.role === 'Account owner' ? 'ADMIN' : (p.dataset.role || '').toUpperCase();
@@ -8163,13 +8169,16 @@
           var name = '<button data-monperson="' + esc(p.dataset.id) + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer"><span style="width:38px;height:38px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:13px;position:relative;flex-shrink:0">' + esc(ini(p.dataset.name)) + '<span style="position:absolute;right:0;bottom:0;width:9px;height:9px;border-radius:50%;border:2px solid #fff;background:' + (st === 'Available' ? '#10b981' : st === 'Busy' ? '#f59e0b' : '#cbd5e1') + '"></span></span>'
             + '<span style="min-width:0;display:block"><span style="display:block;font-weight:600;color:#0f172a">' + esc(p.dataset.name) + '</span><span style="display:block;font-size:10.5px;font-weight:700;color:#2563eb;letter-spacing:.4px">' + esc(role) + '</span><span style="display:block;font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis">' + esc(p.dataset.email || '') + '</span></span></button>';
           var ext = '<span style="display:inline-flex;align-items:center;gap:6px;font-weight:600">' + ixSvg(AN_PATH.grid, 13, '#334155') + esc(p.dataset.num || '—') + '</span>';
-          var call = onCall ? { contact: '+1 646 934 8292', did: '+1 646 555 0' + (101 + i), dur: '00:0' + (2 + i % 7), dir: 'Inbound', path: 'Inbound › ' + (p.dataset.group || 'Direct') } : null;
+          var call = onCall ? personActiveCall(p) : null;
           var pill = onCall ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309">On call</span>'
             : st === 'Available' ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#dcfce7;color:#15803d">Available</span>'
               : '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#f1f5f9;color:#475569">' + esc(st || 'Offline') + '</span>';
+          /* status cell now stacks presence + AI sentiment (same line, on-call only) above schedule adherence
+             (always shown, independent of call state) — see personAdherence/personSentiment */
+          var statusCell = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' + pill + (onCall ? monSentimentDot(p) : '') + '</div>' + monAdherenceBadge(p) + '</div>';
           return '<tr><td style="' + td + '">' + name + '</td><td style="' + td + '">' + ext + '</td><td style="' + td + '">' + esc(p.dataset.group || '—') + '</td><td style="' + td + '">' + (onCall ? esc(call.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.did) : dash) + '</td>'
-            + '<td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.dur) : '00:00') + '</td><td style="' + td + '">' + pill + '</td><td style="' + td + '">' + (onCall ? esc(call.dir) : dash) + '</td>'
-            + '<td style="' + td + '">' + (onCall ? monListenBtn(p.dataset.id) : dash) + '</td></tr>';
+            + '<td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.dur) : '00:00') + '</td><td style="' + td + '">' + statusCell + '</td><td style="' + td + '">' + (onCall ? esc(call.dir) : dash) + '</td>'
+            + '<td style="' + td + '">' + (onCall ? monListenBtn(p.dataset.id, true) : dash) + '</td></tr>';
         }).join('');
       }
       function monExtCountText() { return 'Showing ' + monExtList().length + ' of ' + monScopePeople().length + ' extensions' }
@@ -8195,14 +8204,14 @@
           + '<button data-monexport="ext" style="box-sizing:border-box;height:38px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>' + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
         var table = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar + '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>'
-          + ['Name', 'Extension', 'Group', 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [20, 10, 11, 8, 11, 8, 10, 9, 13][k] + '%">' + h + '</th>' }).join('')
+          + ['Name', 'Extension', 'Group', 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [19, 8, 8, 12, 12, 7, 14, 7, 13][k] + '%">' + h + '</th>' }).join('')
           + '</tr></thead><tbody id="monExtBody">' + monExtRowsHtml() + '</tbody></table></div>';
         return cards + table;
       }
       /* Monitoring quick wins: alert thresholds for queues and CSV export of the tables */
       function monLimits() {
         var v = {}; try { v = JSON.parse(localStorage.getItem('ucaas.monLimits')) || {} } catch (e) { }
-        return { waiting: v.waiting == null ? 3 : v.waiting, sl: v.sl == null ? 80 : v.sl };
+        return { waiting: v.waiting == null ? 3 : v.waiting, sl: v.sl == null ? 80 : v.sl, adh: v.adh == null ? 10 : v.adh };
       }
       function monAlerts() {
         var L = monLimits(), out = [];
@@ -8220,9 +8229,12 @@
         var inp = 'box-sizing:border-box;height:34px;width:72px;border:1px solid #cbd5e1;border-radius:8px;padding:0 10px;font:inherit;font-size:13px';
         var form = '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#334155;font-weight:600;white-space:nowrap">Max waiting<input type="number" min="0" data-monlim="waiting" value="' + L.waiting + '" style="' + inp + '"></label>'
           + '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#334155;font-weight:600;white-space:nowrap">Min SL %<input type="number" min="0" max="100" data-monlim="sl" value="' + L.sl + '" style="' + inp + '"></label>'
+          + '<label title="Minutes off schedule allowed before someone is flagged as non-adherent" style="display:flex;align-items:center;gap:7px;font-size:12px;color:#334155;font-weight:600;white-space:nowrap">Adherence threshold (min)<input type="number" min="0" data-monlim="adh" value="' + L.adh + '" style="' + inp + '"></label>'
           + '<button data-monlimsave style="box-sizing:border-box;height:34px;padding:0 14px;border:0;border-radius:8px;background:#2563eb;color:#fff;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">Save limits</button>';
+        /* a red chip means that queue needs attention right now — clicking one jumps straight to it instead
+           of making you go find it yourself in the queue picker */
         var chips = al.length ? al.map(function (a) {
-          return '<span style="display:inline-flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:999px;padding:5px 12px;font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:#dc2626;flex-shrink:0"></span><b>' + esc(a.q) + '</b>' + esc(a.t) + '</span>';
+          return '<button data-monalertgo="' + esc(a.q) + '" title="Go to ' + esc(a.q) + '" style="display:inline-flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:999px;padding:5px 12px;font-size:12px;font:inherit;cursor:pointer"><span style="width:7px;height:7px;border-radius:50%;background:#dc2626;flex-shrink:0"></span><b>' + esc(a.q) + '</b>' + esc(a.t) + '</button>';
         }).join('') : '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:999px;padding:5px 12px;font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0"></span>All queues are within their limits</span>';
         /* switched off: just the title and the toggle, nothing else — the limits form and alert chips disappear */
         return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;padding:14px 18px;margin-bottom:14px">'
@@ -8250,17 +8262,22 @@
         return monDownloadCsv('extensions.csv', monCsv(['Name', 'Extension', 'Group', 'Email', 'Presence'], e));
       }
       /* Monitoring: Department (groups, expandable) and Call Queue (agents and waiting callers), from the directory and the queues */
-      MS.open = {}; MS.queue = '';
+      MS.open = {}; MS.queue = ''; MS.aiDismissed = {};
       /* Listen / Whisper / Barge: an escalating 3-step monitoring cycle on a live call, gated by the matching
          Roles > Monitoring sub-permission. State is kept per agent id, in-memory only (it's a simulated phone
          system — there's nothing real to stay connected to across a reload). */
       var MON_MODE = {};
-      function monListenBtn(id) {
+      function monListenBtn(id, noHist) {
         var canL = can('listenCall'), canW = can('whisperCall'), canB = can('bargeCall');
         if (!canL && !canW && !canB) return '<span style="color:#94a3b8;font-size:11.5px">No access</span>';
         var mode = MON_MODE[id] || 'off';
+        var p = personById(id);
+        /* "danger" styling: nobody's intervening yet (mode is off) but the AI reads this call as frustrated —
+           same red as Barge, so a supervisor scanning the table sees which rows actually need attention
+           without having to open each one or wait for the AI alert banner to scroll past */
+        var danger = mode === 'off' && p && personSentiment(p) === 'frustrated';
         var theme = {
-          off: { bg: '#fff', bd: '#94a3b8', fg: '#334155' },
+          off: danger ? { bg: '#fef2f2', bd: '#fca5a5', fg: '#b91c1c' } : { bg: '#fff', bd: '#94a3b8', fg: '#334155' },
           listen: { bg: '#eff6ff', bd: '#bfdbfe', fg: '#1d4ed8' },
           whisper: { bg: '#fffbeb', bd: '#fde68a', fg: '#b45309' },
           barge: { bg: '#fef2f2', bd: '#fecaca', fg: '#b91c1c' }
@@ -8269,77 +8286,437 @@
            allowed to use (e.g. Barge without passing through Listen first), and the available modes are self-
            explanatory from the option list instead of needing a tooltip to explain what the next click does.
            Genesys rule, matched here: once barged in you can't jump straight back to Listen/Whisper — the only
-           way out is to stop barging first, then re-enter from Off like normal. */
+           way out is to stop barging first, then re-enter from Off like normal. While idle, the "Off" option
+           reads "Monitor" instead — there's nothing to turn off yet, and it reads as an invitation to act. */
         var opts = mode === 'barge'
           ? '<option value="barge" selected>Barge</option><option value="off">Stop Barging</option>'
-          : '<option value="off"' + (mode === 'off' ? ' selected' : '') + '>Off</option>'
+          : '<option value="off"' + (mode === 'off' ? ' selected' : '') + '>' + (mode === 'off' ? 'Monitor' : 'Off') + '</option>'
             + (canL ? '<option value="listen"' + (mode === 'listen' ? ' selected' : '') + '>Listen</option>' : '')
             + (canW ? '<option value="whisper"' + (mode === 'whisper' ? ' selected' : '') + '>Whisper</option>' : '')
             + (canB ? '<option value="barge">Barge</option>' : '');
         /* kept deliberately compact (fixed width + small flex-shrink:0 history icon) — this sits in a narrow,
            fixed-width "Actions" table column, and the first version overflowed past the table's own right edge
            because nothing constrained its width, which only showed up once an agent actually had an active call */
-        var hist = '<button data-monhist="' + esc(id) + '" title="View monitoring history for this agent" style="box-sizing:border-box;width:24px;height:26px;flex-shrink:0;border:1px solid #e2e8f0;border-radius:7px;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:3px">' + ico2('history', '#64748b', 12) + '</button>';
-        return '<span style="display:inline-flex;align-items:center;max-width:100%">'
-          + '<select data-monlisten="' + esc(id) + '" title="Listen in, whisper to the agent, or barge into the call" style="box-sizing:border-box;width:84px;flex-shrink:1;min-width:0;height:26px;padding:0 4px;border:1px solid ' + theme.bd + ';border-radius:7px;background:' + theme.bg + ';color:' + theme.fg + ';font:inherit;font-size:11px;font-weight:600;cursor:pointer">' + opts + '</select>' + hist + '</span>';
+        var hist = noHist ? '' : '<button data-monhist="' + esc(id) + '" title="View monitoring history for this agent" style="box-sizing:border-box;width:24px;height:26px;flex-shrink:0;border:1px solid #e2e8f0;border-radius:7px;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:3px">' + ico2('history', '#64748b', 12) + '</button>';
+        /* the select is a flex child (flex:1, not a fixed px width) so it actually fills whatever the table
+           column gives it instead of overflowing a narrow one — a fixed width was the original overflow bug
+           this control had before, and percentage table columns at common laptop widths hit the same wall */
+        return '<span style="display:flex;align-items:center;width:100%;max-width:100%">'
+          + '<select data-monlisten="' + esc(id) + '" title="Listen in, whisper to the agent, or barge into the call" style="box-sizing:border-box;flex:1;min-width:0;max-width:120px;height:28px;padding:0 4px;border:1px solid ' + theme.bd + ';border-radius:7px;background:' + theme.bg + ';color:' + theme.fg + ';font:inherit;font-size:11px;font-weight:700;cursor:pointer">' + opts + '</select>' + hist + '</span>';
       }
       function monSetListen(id, mode) {
         var p = personById(id), pname = p ? p.dataset.name : 'agent';
         var cur = MON_MODE[id] || 'off';
-        if (cur === mode) return; /* no-op: nothing actually changed, so no toast/re-render/audit entry */
-        /* mirrors the Genesys one-way-door rule — once barged in, the only legal next step is stopping,
-           never a direct jump to Listen/Whisper. Defense in depth: the dropdown already only offers Barge/Stop
-           Barging while barged in, but a client can't be trusted to only ever send what its own UI offered. */
-        if (cur === 'barge' && mode !== 'off') return;
-        var allowed = mode === 'off' || (mode === 'listen' && can('listenCall')) || (mode === 'whisper' && can('whisperCall')) || (mode === 'barge' && can('bargeCall'));
-        if (!allowed) return; /* shouldn't happen — the option wouldn't be in the list — but don't trust the DOM blindly */
-        var modeWord = { listen: 'listening in on', whisper: 'whispering to', barge: 'barging into' };
-        if (mode === 'off') { note('Stopped monitoring ' + pname); delete MON_MODE[id] }
-        else { MON_MODE[id] = mode; note((mode === 'listen' ? 'Listening in on ' : mode === 'whisper' ? 'Whispering to ' : 'Barged into the call with ') + pname + ' — simulated, no phone system connected') }
-        /* audit trail: reuses the same per-person Activity log the rest of the Directory already uses (the
-           "View activity" row action / the new history button right next to this control), rather than a
-           separate monitoring-only log nobody would think to check */
-        if (p) {
-          var sup = me(), supName = sup ? sup.dataset.name : 'A supervisor';
-          logAct(p, mode === 'off' ? supName + ' stopped ' + (modeWord[cur] || 'monitoring') + ' this call' : supName + ' started ' + modeWord[mode] + ' this call');
+        var changed = cur !== mode;
+        if (changed) {
+          /* mirrors the Genesys one-way-door rule — once barged in, the only legal next step is stopping,
+             never a direct jump to Listen/Whisper. Defense in depth: the dropdown already only offers Barge/
+             Stop Barging while barged in, but a client can't be trusted to only ever send what its own UI
+             offered. An invalid transition is rejected outright — no mode change, no dialog change either. */
+          if (cur === 'barge' && mode !== 'off') return;
+          var allowed = mode === 'off' || (mode === 'listen' && can('listenCall')) || (mode === 'whisper' && can('whisperCall')) || (mode === 'barge' && can('bargeCall'));
+          if (!allowed) return; /* shouldn't happen — the option wouldn't be in the list — but don't trust the DOM blindly */
+          var modeWord = { listen: 'listening in on', whisper: 'whispering to', barge: 'barging into' };
+          if (mode === 'off') { note('Stopped monitoring ' + pname); delete MON_MODE[id] }
+          else { MON_MODE[id] = mode; note((mode === 'listen' ? 'Listening in on ' : mode === 'whisper' ? 'Whispering to ' : 'Barged into the call with ') + pname + ' — simulated, no phone system connected') }
+          /* audit trail: reuses the same per-person Activity log the rest of the Directory already uses (the
+             "View activity" row action / the history button inside the Copilot dialog), rather than a
+             separate monitoring-only log nobody would think to check */
+          if (p) {
+            var sup = me(), supName = sup ? sup.dataset.name : 'A supervisor';
+            logAct(p, mode === 'off' ? supName + ' stopped ' + (modeWord[cur] || 'monitoring') + ' this call' : supName + ' started ' + modeWord[mode] + ' this call');
+          }
         }
-        /* this control can be changed from two different places — the Monitoring tables (inside #viewAnalytics)
-           or the profile drawer (global, opens from any page) — so refresh whichever of those is actually showing */
+        /* the Copilot dialog's visibility always mirrors the chosen mode — Whisper and Barge are active
+           interventions that need the caller info + chatbot in front of the supervisor; Listen is meant to be
+           unnoticed (by agent and caller alike) so it stays out of the way, same as Off. This runs even when
+           the mode doesn't actually change, so re-picking Whisper/Barge on a dropdown that's already set to
+           that value still re-opens a dialog the supervisor closed, without logging a duplicate audit entry. */
+        if (mode === 'whisper' || mode === 'barge') { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary' }
+        else if (MON_COPILOT_OPEN === id) { MON_COPILOT_OPEN = null }
+        /* this control can be changed from three different places — the Monitoring tables (inside
+           #viewAnalytics), the profile drawer (global, opens from any page), or the Copilot dialog's own
+           sidebar — so refresh whichever of those is actually showing */
         if ($('#viewAnalytics').style.display !== 'none') anRepaint();
         if (drawer.style.display === 'flex' && ctx && ctx.dataset.id === id) paintDrawerExtra(ctx);
       }
       /* the Listen/Whisper/Barge dropdown also appears in the profile drawer's "currently on a call" card, which
          can be open while on any page, not just Monitoring — so it needs its own always-on change handler */
       document.addEventListener('change', function (e) { var t = e.target.closest('[data-monlisten]'); if (t) monSetListen(t.dataset.monlisten, t.value) });
-      document.addEventListener('click', function (e) { var t = e.target.closest('[data-monhist]'); if (t) { var p = personById(t.dataset.monhist); if (p) openActivity(p) } });
+      /* native <select> elements don't fire 'change' when you pick the option that's already selected, so
+         re-selecting Whisper/Barge from a dropdown that's already on that value — the normal way to get the
+         Copilot dialog back after closing it without actually stopping — needs its own trigger. mousedown
+         fires before the browser's own option list opens, so this doesn't fight the native picker. */
+      document.addEventListener('mousedown', function (e) {
+        var t = e.target.closest && e.target.closest('[data-monlisten]'); if (!t) return;
+        var id = t.dataset.monlisten, mode = MON_MODE[id] || 'off';
+        if ((mode === 'whisper' || mode === 'barge') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
+      });
+      /* Notes tab: just updates the backing store, no re-render — repainting on every keystroke would blow
+         away the textarea's cursor position for no reason, since nothing else on screen depends on its value */
+      document.addEventListener('input', function (e) { var t = e.target.closest('[data-coprnotes]'); if (t) COPILOT_NOTES[t.dataset.coprnotes] = t.value });
+      /* Enter in the chat input sends, same as clicking the send button next to it */
+      document.addEventListener('keydown', function (e) {
+        var t = e.target.closest && e.target.closest('[data-coprchatin]');
+        if (t && e.key === 'Enter') { e.preventDefault(); monCopilotChatSend(t.dataset.coprchatin) }
+      });
+      /* if the AI Copilot dialog is open, its backdrop (z-index 150) sits above the Activity dialog (z-index
+         100), so opening history from inside it without closing it first left the Activity dialog rendering
+         invisibly underneath — the page just looked stuck/darker with nothing to click. Close the Copilot
+         dialog first so there's only ever one modal open at a time. */
+      document.addEventListener('click', function (e) {
+        var t = e.target.closest('[data-monhist]'); if (!t) return;
+        var p = personById(t.dataset.monhist); if (!p) return;
+        if (MON_COPILOT_OPEN) { MON_COPILOT_OPEN = null; anRepaint() }
+        openActivity(p);
+      });
       /* a lightweight, deterministic stand-in for "what is this person on a call with right now" — seeded by
          their id so it stays stable across re-renders instead of jumping around every repaint */
+      /* the one place a live call's details get made up — every table row, the Copilot dialog, and caller
+         history all read from this instead of each inventing their own numbers, so the same person shows the
+         same contact/DID/duration everywhere instead of a different fake call depending which page you're on */
       function personActiveCall(r) {
         if (r.dataset.presence !== 'Busy') return null;
         var seed = (r.dataset.id || '').length * 7 + (r.dataset.name || '').length;
-        return { contact: '+1 646 934 82' + (90 + seed % 10), dur: '00:0' + (2 + seed % 7), dir: 'Inbound', path: 'Inbound › ' + (r.dataset.group || 'Direct') };
+        return { contact: '+1 646 934 82' + (90 + seed % 10), did: '+1 646 555 0' + (100 + seed % 90), dur: '00:0' + (2 + seed % 7), dir: 'Inbound', path: 'Inbound › ' + (r.dataset.group || 'Direct') };
+      }
+      /* Schedule adherence: whether this person is doing what their shift says right now. This is a
+         deterministic stand-in (seeded per person, same shape as personActiveCall above) — a real version
+         needs an actual published-schedule data model to compare against, which is the single biggest gap
+         called out in GENESYS-RESEARCH.md. Every agent gets a raw "minutes off schedule" reading; the
+         Adherence threshold in Alerts (monLimits().adh) decides how much drift still counts as on-schedule
+         before someone is flagged — lower it to be stricter, raise it to be more forgiving. This is the
+         same role Genesys's adherence-mapping rules play for real: they decide which real-time states still
+         count as adherent for a given scheduled activity. */
+      function personAdherenceRaw(r) {
+        var seed = (r.dataset.id || '').length * 13 + (r.dataset.name || '').length * 3;
+        return seed % 20;
+      }
+      function personAdherence(r) {
+        var drift = personAdherenceRaw(r), limit = monLimits().adh;
+        return drift > limit ? { driftMin: drift } : null;
+      }
+      /* Live sentiment: a stand-in for AI speech/sentiment analysis run on a call's live audio — only
+         meaningful for someone actually on a call right now. */
+      function personSentiment(r) {
+        if (r.dataset.presence !== 'Busy') return null;
+        var seed = (r.dataset.id || '').length * 11 + (r.dataset.name || '').length * 5;
+        return ['positive', 'neutral', 'frustrated'][seed % 3];
+      }
+      function monAdherenceBadge(r) {
+        /* these badges sit in a narrow, fixed-width table column — white-space:normal (not nowrap) so a long
+           one wraps onto a second line instead of silently clipping past the column, the same overflow bug
+           the Listen/Whisper/Barge control had before it was fixed */
+        var adh = personAdherence(r);
+        if (!adh) return '<span style="display:inline-block;max-width:100%;font-size:10.5px;font-weight:700;line-height:1.3;border-radius:10px;padding:2px 8px;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;white-space:normal">On Schedule (100%)</span>';
+        return '<span style="display:inline-block;max-width:100%;font-size:10.5px;font-weight:700;line-height:1.3;border-radius:10px;padding:2px 8px;background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;white-space:normal;animation:monAdhFlash 1.4s ease-in-out infinite">Out of Adherence (&minus;' + adh.driftMin + 'm)</span>';
+      }
+      /* Genesys Cloud's real sentiment model: a numeric score from -100 to +100 (not an emoji), plus a trend
+         label — Improving above +55, No Change between -20 and +20, Declining below -55 (mirroring the
+         Improving threshold, since Genesys's own docs only state the positive side). Three categories here
+         map to one representative score + trend each, matching those real bands. */
+      var SENTIMENT_CFG = {
+        positive: { score: 78, trend: 'Improving', color: '#15803d', bg: '#dcfce7', bd: '#bbf7d0' },
+        neutral: { score: 8, trend: 'No change', color: '#b45309', bg: '#fef3c7', bd: '#fde68a' },
+        frustrated: { score: -62, trend: 'Declining', color: '#b91c1c', bg: '#fee2e2', bd: '#fecaca' }
+      };
+      function monSentimentBadge(r) {
+        var s = personSentiment(r);
+        if (!s) return '';
+        var c = SENTIMENT_CFG[s];
+        return '<span title="AI sentiment score: ' + c.score + ' (' + c.trend + ')" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:' + c.color + ';white-space:nowrap;font-variant-numeric:tabular-nums">' + (c.score > 0 ? '+' : '') + c.score + ' &middot; ' + c.trend + '</span>';
+      }
+      /* the table row only shows the score (title tooltip carries the trend) — the full score+trend badge
+         above moved into the AI Copilot dialog instead, so a busy row doesn't carry two text badges at once */
+      function monSentimentDot(r) {
+        var s = personSentiment(r);
+        if (!s) return '';
+        var c = SENTIMENT_CFG[s];
+        return '<span title="AI sentiment score: ' + c.score + ' (' + c.trend + ')" style="font-size:11px;font-weight:700;color:' + c.color + ';font-variant-numeric:tabular-nums">' + (c.score > 0 ? '+' : '') + c.score + '</span>';
+      }
+      /* which agent's AI Copilot monitoring dialog is open, if any — replaces the old inline
+         Listen/Whisper/Barge dropdown + history icon that used to live directly in every on-call row */
+      var MON_COPILOT_OPEN = null;
+      /* per-agent private supervisor notes typed into the Copilot dialog's Notes tab — in-memory only, same
+         caveat as MON_MODE/ACTLOG: nothing here survives a page reload, there's no real backend yet */
+      var COPILOT_NOTES = {};
+      /* per-agent chat transcript with the Copilot "chatbot" — in-memory only, same caveat as COPILOT_NOTES.
+         Seeded lazily the first time a given call's Copilot tab is rendered. */
+      var COPILOT_CHAT = {};
+      /* AI Copilot-style alert banner: surfaces when someone currently on a call reads as frustrated, with
+         a direct Barge-in action wired straight into the existing Listen/Whisper/Barge control. Dismissing
+         one hides it for the rest of this session; it doesn't come back on its own. */
+      function monAiAlert() {
+        var flagged = monScopePeople().filter(function (r) { return personSentiment(r) === 'frustrated' && !MS.aiDismissed[r.dataset.id] });
+        if (!flagged.length) return '';
+        var r = flagged[0];
+        return '<div style="display:flex;align-items:flex-start;gap:12px;background:#fee2e2;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:10px;padding:13px 16px;margin:14px 22px 0">'
+          + '<span style="width:30px;height:30px;border-radius:8px;background:#dc2626;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M12 2 2 21h20L12 2Zm0 8v4m0 3h.01"/>', 16, '#fff') + '</span>'
+          + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;color:#b91c1c">AI Copilot Alert</div>'
+          + '<div style="font-size:13px;color:#0f172a;margin-top:2px">High customer frustration detected on <b>' + esc(r.dataset.name) + '</b>’s call. Recommended action: instant barge-in.</div>'
+          + '<div style="display:flex;gap:8px;margin-top:10px"><button data-aibarge="' + esc(r.dataset.id) + '" style="box-sizing:border-box;height:32px;padding:0 14px;border:1px solid #dc2626;border-radius:8px;background:#dc2626;color:#fff;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer">Barge In Now</button></div></div>'
+          + '<button data-aidismiss="' + esc(r.dataset.id) + '" aria-label="Dismiss" style="width:26px;height:26px;border:0;background:none;color:#991b1b;cursor:pointer;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M6 6l12 12M18 6 6 18"/>', 14, '#991b1b') + '</button>'
+          + '</div>';
+      }
+      /* dummy transcript lines matching the seeded sentiment — stands in for what a real speech-to-text +
+         NLP pipeline would surface live, same caveat as personSentiment itself */
+      function monCopilotTranscript(sent) {
+        var lines = {
+          positive: ['Customer: Perfect, that solved it — thank you so much.', 'Agent: You’re very welcome. Anything else I can help with today?', 'Customer: No, that covers it. Have a good one.'],
+          neutral: ['Customer: Okay. And how long will that take to process?', 'Agent: Typically two to three business days.', 'Customer: Alright, I can work with that.'],
+          frustrated: ['Customer: This is the third time I’ve called about this exact issue!', 'Agent: I completely understand — let me pull up your case right now.', 'Customer: I don’t want another promise, I want it fixed today.']
+        };
+        return lines[sent] || ['No live transcript available for this call.'];
+      }
+      /* one or two sentences on what this call is actually about — the Summary tab's whole job is to spare a
+         supervisor from reading the transcript line by line. Derived from the same seeded sentiment. The
+         frustrated case names which contact number this is — kept in sync with monCopilotCallerHistory's
+         count below it, so "repeat contact" always matches however many prior calls are actually listed. */
+      function monCopilotIssueSummary(sent, priorCount) {
+        var nth = (priorCount || 0) + 1;
+        var ord = nth === 1 ? '1st' : nth === 2 ? '2nd' : nth === 3 ? '3rd' : nth + 'th';
+        var sums = {
+          positive: 'Issue is resolved. The customer confirmed the fix worked and had no further questions.',
+          neutral: 'Customer asked about processing time for an existing request; agent gave the standard 2–3 business day estimate.',
+          frustrated: 'Repeat contact — this is the ' + ord + ' call about the same unresolved issue. Customer is asking for same-day resolution, not another promise.'
+        };
+        return sums[sent] || 'Not enough signal yet to summarize this call.';
+      }
+      /* a deterministic, seeded stand-in for "has this caller contacted us before, and who did they reach" —
+         a real version needs a cross-channel interaction history keyed by the caller's ANI, which doesn't
+         exist yet. This is what backs up the issue summary's "repeat contact" claim with something concrete
+         to actually look at, instead of an unverifiable assertion. */
+      function monCopilotCallerHistory(r, call) {
+        var seed = (call.contact || '').replace(/\D/g, '').length * 5 + (r.dataset.id || '').length * 3;
+        if (seed % 4 === 0) return []; /* most callers are first-time contacts */
+        var n = 1 + seed % 3;
+        var reasons = ['Billing question — unresolved', 'Same issue reported — escalated', 'Follow-up on an open ticket', 'Technical issue — unresolved'];
+        var out = [];
+        for (var i = 0; i < n; i++) {
+          var daysAgo = (i + 1) * (2 + (seed + i) % 4);
+          out.push({
+            when: daysAgo + ' day' + (daysAgo > 1 ? 's' : '') + ' ago',
+            dur: (2 + (seed + i) % 6) + ' min',
+            outcome: reasons[(seed + i) % reasons.length]
+          });
+        }
+        return out;
+      }
+      function monCopilotCallerHistoryHtml(list, agentName) {
+        if (!list.length) return '<div style="text-align:center;padding:12px 10px;color:#94a3b8;font-size:12px">No prior contact found for this caller.</div>';
+        return list.map(function (h) {
+          return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9">'
+            + '<div style="min-width:0"><div style="font-size:12.5px;color:#1e293b">' + esc(h.outcome) + '</div><div style="font-size:11px;color:#94a3b8;margin-top:1px">with ' + esc(agentName) + ' · ' + esc(h.dur) + '</div></div>'
+            + '<div style="font-size:11px;color:#94a3b8;flex-shrink:0;white-space:nowrap">' + esc(h.when) + '</div></div>';
+        }).join('');
+      }
+      var MON_COPILOT_TABS = [['copilot', 'Copilot', 'star'], ['summary', 'Summary', 'list'], ['transcript', 'Transcript', 'msg'], ['notes', 'Notes', 'pencil'], ['contact', 'Contact', 'user']];
+      function monCopilotTabBar(active) {
+        return '<div style="display:flex;align-items:center;gap:4px;padding:0 20px;border-bottom:1px solid #eef1f5;flex-shrink:0;overflow-x:auto">'
+          + MON_COPILOT_TABS.map(function (tb) {
+            var on = active === tb[0];
+            return '<button data-copilottab="' + tb[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:5px;padding:12px 8px;border:0;border-bottom:2px solid ' + (on ? '#4f46e5' : 'transparent') + ';background:none;color:' + (on ? '#4f46e5' : '#64748b') + ';font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap">' + ico2(tb[2], on ? '#4f46e5' : '#94a3b8', 13) + tb[1] + '</button>';
+          }).join('') + '</div>';
+      }
+      /* the same per-person audit trail the rest of the Directory already uses (ACTLOG) — shown inline in the
+         left call panel's "Show history" drawer instead of ever opening the separate Activity dialog, which
+         used to stack a second modal on top of this one and look like the page had silently broken. */
+      function monCopilotHistoryDetail(id) {
+        var list = ACTLOG[id] || [];
+        if (!list.length) return '<div style="text-align:center;padding:16px 10px;color:#94a3b8;font-size:12.5px">No monitoring history yet for this call.</div>';
+        return list.slice().reverse().map(function (e) {
+          var type = /barging into/.test(e.text) ? 'barge' : /whispering to/.test(e.text) ? 'whisper' : /listening in on/.test(e.text) ? 'listen' : 'off';
+          var cfg = { listen: ['#eff6ff', '#1d4ed8'], whisper: ['#fffbeb', '#b45309'], barge: ['#fef2f2', '#b91c1c'], off: ['#f1f5f9', '#64748b'] }[type];
+          return '<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9">'
+            + '<span style="width:24px;height:24px;border-radius:50%;background:' + cfg[0] + ';display:grid;place-items:center;flex-shrink:0">' + ico2('history', cfg[1], 12) + '</span>'
+            + '<div style="flex:1;min-width:0"><div style="color:#1e293b;font-size:12.5px">' + esc(e.text) + '</div><div style="color:#94a3b8;font-size:11px;margin-top:1px">' + relTime(e.t) + '</div></div></div>';
+        }).join('');
+      }
+      /* the summarized counterpart — a one-line narrative instead of the itemized list, for a supervisor who
+         wants "has anyone been monitoring this agent" rather than a full timeline */
+      function monCopilotHistorySummary(id) {
+        var list = ACTLOG[id] || [];
+        if (!list.length) return 'No monitoring history yet for this call.';
+        var c = { listen: 0, whisper: 0, barge: 0 };
+        list.forEach(function (e) {
+          if (/barging into/.test(e.text)) c.barge++;
+          else if (/whispering to/.test(e.text)) c.whisper++;
+          else if (/listening in on/.test(e.text)) c.listen++;
+        });
+        var parts = [];
+        if (c.listen) parts.push(c.listen + ' listen-in' + (c.listen > 1 ? 's' : ''));
+        if (c.whisper) parts.push(c.whisper + ' whisper' + (c.whisper > 1 ? 's' : ''));
+        if (c.barge) parts.push(c.barge + ' barge-in' + (c.barge > 1 ? 's' : ''));
+        var lead = parts.length ? 'Monitored so far: ' + parts.join(', ') + '.' : (list.length + ' event' + (list.length > 1 ? 's' : '') + ' recorded.');
+        return lead + ' Most recent: ' + relTime(list[list.length - 1].t) + '.';
+      }
+      function monCopilotContactTab(r) {
+        var rows = [['Name', r.dataset.name], ['Role', r.dataset.role || '—'], ['Extension', r.dataset.num || '—'], ['Email', r.dataset.email || '—'], ['Group', r.dataset.group || '—']];
+        return '<div style="max-width:360px">' + rows.map(function (row) {
+          return '<div style="display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid #f1f5f9;font-size:13px"><span style="color:#64748b">' + row[0] + '</span><span style="color:#0f172a;font-weight:600;text-align:right">' + esc(row[1]) + '</span></div>';
+        }).join('') + '</div>';
+      }
+      /* who's calling whom — direction decides which side of the line is the "caller" vs the "callee", same
+         terms Genesys itself uses (Internal/External) when a supervisor looks at a live interaction */
+      function monCopilotParties(r, call) {
+        var customer = { label: 'Caller', name: call.contact, sub: 'Customer' };
+        var agent = { label: 'Callee', name: r.dataset.name, sub: r.dataset.role || 'Agent' };
+        return /outbound/i.test(call.dir || '') ? { caller: { label: 'Caller', name: r.dataset.name, sub: r.dataset.role || 'Agent' }, callee: { label: 'Callee', name: call.contact, sub: 'Customer' } } : { caller: customer, callee: agent };
+      }
+      function monCopilotChatSeed(r) {
+        return [{ who: 'ai', text: 'I’m listening in on this call with ' + r.dataset.name + '. Ask me anything about it — the issue, the customer, or what to do next.' }];
+      }
+      /* a deterministic, keyword-matched stand-in for a real LLM answering questions about the live call —
+         same caveat as everywhere else in this dialog: no real speech/NLP pipeline behind it yet */
+      function monCopilotChatReply(q, sent, r, adh) {
+        var s = (q || '').toLowerCase();
+        var cfg = SENTIMENT_CFG[sent];
+        var call = personActiveCall(r);
+        var priorCount = call ? monCopilotCallerHistory(r, call).length : 0;
+        if (/sentiment|feel|mood|frustrat|happy|upset/.test(s)) return 'Sentiment is currently ' + sent + ' (' + (cfg ? (cfg.score > 0 ? '+' : '') + cfg.score : 0) + ' on a -100 to +100 scale).';
+        if (/summar|gist|tl;?dr|what.*(going on|happening|issue)/.test(s)) return monCopilotIssueSummary(sent, priorCount);
+        if (/adher|schedule|on time|late/.test(s)) return adh ? r.dataset.name + ' is currently ' + adh.driftMin + ' minutes off their published schedule (threshold is ' + monLimits().adh + ' min).' : r.dataset.name + ' is on schedule right now.';
+        if (/recommend|advice|should i|what.*do/.test(s)) return sent === 'frustrated' ? 'Recommend barging in — this customer needs direct reassurance, not another hold.' : sent === 'neutral' ? 'No urgent action needed — listening in is enough for now.' : 'Call is going well — no action needed.';
+        if (/transcript|said|say/.test(s)) return 'Check the Transcript tab for the full exchange so far.';
+        return 'Based on the call so far: ' + monCopilotIssueSummary(sent, priorCount);
+      }
+      function monCopilotChatSend(id) {
+        var inp = document.querySelector('[data-coprchatin="' + id + '"]');
+        var q = inp && inp.value.trim();
+        if (!q) return;
+        var rr = personById(id); if (!rr) return;
+        if (!COPILOT_CHAT[id]) COPILOT_CHAT[id] = monCopilotChatSeed(rr);
+        COPILOT_CHAT[id].push({ who: 'sup', text: q });
+        COPILOT_CHAT[id].push({ who: 'ai', text: monCopilotChatReply(q, personSentiment(rr), rr, personAdherence(rr)) });
+        anRepaint();
+      }
+      /* The AI Copilot dialog: opened from a row's Monitor button, or straight from the alert banner's
+         Barge-in action. Two panels side by side — left is the call itself (who's on it, the quick issue
+         summary, a collapsible history), right is the Copilot chatbot (Copilot/Summary/Transcript/Notes/
+         Contact tabs) — so the facts about the call and the AI assistant never fight for the same space. */
+      function monCopilotDialog() {
+        var id = MON_COPILOT_OPEN;
+        if (!id) return '';
+        var r = personById(id);
+        var call = r && personActiveCall(r);
+        if (!r || !call) { MON_COPILOT_OPEN = null; return ''; } /* the call ended while the dialog was open */
+        var sent = personSentiment(r);
+        var sentCfg = SENTIMENT_CFG[sent] || { score: 0, trend: 'Unknown', color: '#64748b', bg: '#f1f5f9' };
+        var adh = personAdherence(r);
+        var recommend = sent === 'frustrated'
+          ? { text: 'High frustration detected — recommend an immediate Barge-in to assist directly.', tone: '#b91c1c', bg: '#fee2e2', bd: '#fecaca' }
+          : sent === 'neutral'
+            ? { text: 'Sentiment is neutral — consider Listening in to confirm call quality.', tone: '#b45309', bg: '#fef3c7', bd: '#fde68a' }
+            : { text: 'Call sentiment is positive — no action needed right now.', tone: '#15803d', bg: '#dcfce7', bd: '#bbf7d0' };
+        var parties = monCopilotParties(r, call);
+        var callerHist = monCopilotCallerHistory(r, call);
+        var partyCard = function (p) { return '<div style="flex:1;min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:9px 11px">' + '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:3px">' + p.label + '</div>' + '<div style="font-size:12.5px;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.name) + '</div>' + '<div style="font-size:11px;color:#64748b">' + esc(p.sub) + '</div></div>' };
+        var metaRow = function (label, value) { return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #eef1f5;font-size:12.5px"><span style="color:#64748b">' + label + '</span><span style="color:#0f172a;font-weight:600;text-align:right">' + value + '</span></div>' };
+        var histOpen = !!MS.copilotHistOpen, histView = MS.copilotHistView || 'summary';
+        var histToggle = function (key, label) { var on = histView === key; return '<button data-coprhistview="' + key + '" style="flex:1;box-sizing:border-box;height:25px;border:1px solid ' + (on ? '#4f46e5' : '#e2e8f0') + ';border-radius:7px;background:' + (on ? '#eef2ff' : '#fff') + ';color:' + (on ? '#4f46e5' : '#64748b') + ';font:inherit;font-size:11px;font-weight:600;cursor:pointer">' + label + '</button>' };
+        var historySection = '<button data-coprhisttoggle style="box-sizing:border-box;width:100%;height:32px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#334155;font:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">' + ico2('history', '#64748b', 13) + (histOpen ? 'Hide history' : 'Show history') + '</button>'
+          + (histOpen ? '<div style="margin-top:10px">'
+            + '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Caller history with ' + esc(r.dataset.name) + '</div>'
+            + '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:0 11px;margin-bottom:16px">' + monCopilotCallerHistoryHtml(callerHist, r.dataset.name) + '</div>'
+            + '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">Monitoring activity</div>'
+            + '<div style="display:flex;gap:4px;margin-bottom:8px">' + histToggle('summary', 'Summarized') + histToggle('detail', 'Detailed') + '</div>'
+            + (histView === 'detail'
+              ? '<div style="max-height:200px;overflow-y:auto">' + monCopilotHistoryDetail(id) + '</div>'
+              : '<div style="font-size:12px;color:#334155;line-height:1.6;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px">' + esc(monCopilotHistorySummary(id)) + '</div>')
+            + '</div>' : '');
+        var leftPanel = '<div style="width:300px;flex-shrink:0;border-right:1px solid #eef1f5;background:#f8fafc;padding:18px;overflow-y:auto">'
+          + '<div style="display:flex;gap:8px;margin-bottom:14px">' + partyCard(parties.caller) + partyCard(parties.callee) + '</div>'
+          + metaRow('Duration', esc(call.dur)) + metaRow('Direction', esc(call.dir)) + metaRow('Call path', esc(call.path))
+          + metaRow('Adherence', adh ? '<span style="color:#b91c1c">&minus;' + adh.driftMin + 'm</span>' : '<span style="color:#15803d">On schedule</span>')
+          + '<div style="margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0">'
+          + '<div style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">Monitoring action</div>'
+          + monListenBtn(id, true) + '</div>'
+          + '<div style="margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0">'
+          + '<div style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">What’s happening</div>'
+          + '<div style="font-size:12.5px;color:#0f172a;line-height:1.6;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 11px">' + esc(monCopilotIssueSummary(sent, callerHist.length)) + '</div></div>'
+          + '<div style="margin-top:16px;padding-top:16px;border-top:1px solid #e2e8f0">' + historySection + '</div>'
+          + '</div>';
+        var tab = MS.copilotTab || 'copilot';
+        var body;
+        if (tab === 'summary') {
+          body = '<div style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px">'
+            + '<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px">What’s happening on this call</div>'
+            + '<div style="font-size:14px;color:#0f172a;line-height:1.6;background:#f8fafc;border:1px solid #eef1f5;border-radius:10px;padding:16px">' + esc(monCopilotIssueSummary(sent, callerHist.length)) + '</div></div>';
+        } else if (tab === 'transcript') {
+          var transcript = monCopilotTranscript(sent).map(function (line) {
+            var agent = /^Agent:/.test(line);
+            return '<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9">'
+              + '<span style="width:26px;height:26px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:10px;font-weight:700;background:' + (agent ? '#eff6ff' : '#f8fafc') + ';color:' + (agent ? '#1d4ed8' : '#64748b') + '">' + (agent ? 'AG' : 'CX') + '</span>'
+              + '<span style="font-size:13px;color:#334155;flex:1;min-width:0">' + esc(line.replace(/^(Agent|Customer):\s*/, '')) + '</span></div>';
+          }).join('');
+          body = '<div style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px">'
+            + '<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px">Live transcript (simulated)</div>' + transcript + '</div>';
+        } else if (tab === 'notes') {
+          body = '<div style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px">'
+            + '<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px">Private notes — visible only to you</div>'
+            + '<textarea data-coprnotes="' + esc(id) + '" placeholder="Jot anything worth remembering about this call…" style="box-sizing:border-box;width:100%;min-height:160px;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;font:inherit;font-size:13px;color:#0f172a;resize:vertical">' + esc(COPILOT_NOTES[id] || '') + '</textarea></div>';
+        } else if (tab === 'contact') {
+          body = '<div style="flex:1;min-height:0;overflow-y:auto;padding:20px 22px">'
+            + '<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:10px">Contact details</div>' + monCopilotContactTab(r) + '</div>';
+        } else {
+          if (!COPILOT_CHAT[id]) COPILOT_CHAT[id] = monCopilotChatSeed(r);
+          var msgs = COPILOT_CHAT[id].map(function (m) {
+            var ai = m.who === 'ai';
+            return '<div style="display:flex;' + (ai ? '' : 'flex-direction:row-reverse;') + 'gap:8px;margin-bottom:12px">'
+              + '<span style="width:24px;height:24px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;background:' + (ai ? '#eef2ff' : '#eff6ff') + '">' + (ai ? ico2('star', '#4f46e5', 12) : ico2('user', '#1d4ed8', 12)) + '</span>'
+              + '<span style="font-size:13px;color:#0f172a;background:' + (ai ? '#f8fafc' : '#eff6ff') + ';border:1px solid ' + (ai ? '#eef1f5' : '#dbeafe') + ';border-radius:10px;padding:8px 12px;max-width:80%;line-height:1.5">' + esc(m.text) + '</span></div>';
+          }).join('');
+          body = '<div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:20px 22px 16px">'
+            + '<div style="display:flex;gap:10px;align-items:flex-start;background:' + recommend.bg + ';border:1px solid ' + recommend.bd + ';border-radius:10px;padding:12px 14px;margin-bottom:16px;flex-shrink:0">'
+            + '<span style="flex-shrink:0;margin-top:1px">' + ixSvg('<path d="M12 2 2 21h20L12 2Zm0 8v4m0 3h.01"/>', 15, recommend.tone) + '</span>'
+            + '<div style="font-size:12.5px;color:' + recommend.tone + ';font-weight:600">' + recommend.text + '</div></div>'
+            + '<div style="flex:1;min-height:0;overflow-y:auto;padding-right:2px">' + msgs + '</div>'
+            + '<div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0">'
+            + '<input data-coprchatin="' + esc(id) + '" type="text" placeholder="Ask Copilot about this call…" style="flex:1;box-sizing:border-box;height:38px;border:1px solid #e2e8f0;border-radius:9px;padding:0 12px;font:inherit;font-size:13px;color:#0f172a">'
+            + '<button data-coprchatsend="' + esc(id) + '" aria-label="Send" style="flex-shrink:0;width:38px;height:38px;border:0;border-radius:9px;background:#4f46e5;color:#fff;cursor:pointer;display:grid;place-items:center">' + ixSvg('<path d="M3 12l18-9-5 9 5 9z"/>', 16, '#fff') + '</button>'
+            + '</div></div>';
+        }
+        var header = '<div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid #eef1f5;flex-shrink:0">'
+          + '<span style="width:32px;height:32px;border-radius:9px;background:#eef2ff;display:grid;place-items:center;flex-shrink:0">' + ixSvg('<path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/>', 17, '#4f46e5') + '</span>'
+          + '<div style="font-weight:700;font-size:15.5px;color:#0f172a">AI Copilot</div>'
+          + '<span title="Sentiment score, -100 to +100" style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:' + sentCfg.bg + ';color:' + sentCfg.color + ';font-variant-numeric:tabular-nums">' + (sentCfg.score > 0 ? '+' : '') + sentCfg.score + ' &middot; ' + sentCfg.trend + '</span>'
+          /* no manual close button or backdrop-click-to-dismiss on purpose — while actively Whispering or
+             Barging, this dialog is where the real Listen/Whisper/Barge control lives, so dismissing it with
+             the mode still active would hide the one place that control is reachable. The only way out is
+             the Monitoring action control below switching back to Off/"Monitor", which closes it automatically. */
+          + '<span style="margin-left:auto;font-size:11.5px;color:#94a3b8;white-space:nowrap">Closes when you stop monitoring</span>'
+          + '</div>';
+        var rightPanel = '<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden">' + monCopilotTabBar(tab) + body + '</div>';
+        return '<div data-moncopilotbackdrop style="position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:150;display:flex;align-items:center;justify-content:center;padding:24px">'
+          + '<div style="box-sizing:border-box;width:min(900px,100%);max-height:min(640px,90vh);background:#fff;border-radius:16px;box-shadow:0 30px 70px -20px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column">'
+          + header + '<div style="flex:1;min-height:0;display:flex">' + leftPanel + rightPanel + '</div>'
+          + '</div></div>';
       }
       function monAgentRow(p, i) {
         var av = AVS[(+p.dataset.av) % AVS.length], st = p.dataset.presence, onCall = st === 'Busy';
         var role = p.dataset.role === 'Account owner' ? 'ADMIN' : (p.dataset.role || '').toUpperCase();
-        var td = 'padding:14px 14px;font-size:13px;color:#0f172a;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        var td = 'padding:14px 10px;font-size:13px;color:#0f172a;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
         var dash = '<span style="color:#94a3b8">---</span>';
         /* the whole avatar+name block is one button, like All Extensions — clicking the avatar opens the
            profile drawer just as well as clicking the name does */
         var who = '<button data-monperson="' + esc(p.dataset.id) + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer"><span style="width:38px;height:38px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:13px;position:relative;flex-shrink:0">' + esc(ini(p.dataset.name)) + '<span style="position:absolute;right:0;bottom:0;width:9px;height:9px;border-radius:50%;border:2px solid #fff;background:' + (st === 'Available' ? '#10b981' : st === 'Busy' ? '#f59e0b' : '#cbd5e1') + '"></span></span>'
           + '<span style="min-width:0;display:block"><span style="display:block;font-weight:600;color:#0f172a">' + esc(p.dataset.name) + '</span><span style="display:block;font-size:10.5px;font-weight:700;color:#2563eb;letter-spacing:.4px">' + esc(role) + '</span><span style="display:block;font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis">' + esc(p.dataset.email || '') + '</span></span></button>';
         var ext = '<span style="display:flex;align-items:center;gap:6px;font-weight:600;margin-left:50px;font-size:13px;color:#0f172a;margin-top:2px">' + ixSvg(AN_PATH.grid, 13, '#334155') + esc(p.dataset.num || '—') + '</span>';
-        var c = onCall ? { contact: '+1 646 934 8292', did: '+1 646 555 0' + (101 + i), dur: '00:0' + (2 + i % 7), dir: 'Inbound', path: 'Inbound › ' + (p.dataset.group || 'Direct') } : null;
+        var c = onCall ? personActiveCall(p) : null;
+        /* status cell stacks presence + AI sentiment (on-call only) above schedule adherence (always shown) —
+           see personAdherence/personSentiment; white-space:normal on the badges so the column wraps instead
+           of clipping, since this td inherits white-space:nowrap otherwise */
+        var statusCell = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;white-space:normal"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' + (c ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309;white-space:nowrap">On call</span>' + monSentimentDot(p) : dash) + '</div>' + monAdherenceBadge(p) + '</div>';
         return '<tr><td style="' + td + '"><div style="display:flex;flex-direction:column;gap:4px;min-width:0">' + who + ext + '</div></td><td style="' + td + '">' + (c ? esc(c.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (c ? esc(c.did) : dash) + '</td>'
           + '<td style="' + td + ';font-family:monospace">' + (c ? esc(c.dur) : '00:00') + '</td>'
-          + '<td style="' + td + '">' + (c ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309">On call</span>' : dash) + '</td>'
+          + '<td style="' + td + '">' + statusCell + '</td>'
           + '<td style="' + td + '">' + (c ? esc(c.dir) : dash) + '</td><td style="' + td + ';color:#64748b;font-size:12px">' + (c ? esc(c.path) : dash) + '</td>'
-          + '<td style="' + td + '">' + (c ? monListenBtn(p.dataset.id) : dash) + '</td></tr>';
+          + '<td style="' + td + '">' + (c ? monListenBtn(p.dataset.id, true) : dash) + '</td></tr>';
       }
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
-        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [24, 11, 11, 9, 10, 10, 12, 13];
+        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [22, 12, 12, 7, 14, 7, 13, 13];
         return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
       }
       function monGroupsView() {
@@ -8457,21 +8834,29 @@
           + '<button data-moncollapse aria-label="Toggle sidebar" style="position:absolute;top:50%;right:-12px;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:0;background:#2563eb;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px rgba(37,99,235,.35);z-index:2">' + ixSvg(MS.collapsed ? MON_ICON.chevR : MON_ICON.chev, 13, '#fff') + '</button></aside>';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid #e8ecf3;background:#fff">' + crumb + (select || sumBtn) + '</div>'
+          + monAiAlert()
           + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#eef2fa;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '18px 22px') + '">'
           + (['All Extensions', 'Groups', 'Call Queue'].indexOf(MS.sub) > -1 ? '<div>' : '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;min-height:' + (MS.sub === 'Campaign' && !MS.campaign ? '100%' : 'auto') + ';overflow:hidden">') + bodyHtml + '</div></div></div>';
         if (!can('monitoring')) return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">'
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>' + monLocked() + '</div>';
         return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">'
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>'
-          + side + content + '</div>';
+          + side + content + '</div>' + monCopilotDialog();
       }
       function monClick(e) {
         var t;
-        if (e.target.closest('[data-monlimsave]')) { var wv = document.querySelector('[data-monlim="waiting"]'), sv = document.querySelector('[data-monlim="sl"]'); localStorage.setItem('ucaas.monLimits', JSON.stringify({ waiting: Math.max(0, +wv.value || 0), sl: Math.min(100, Math.max(0, +sv.value || 0)) })); note('Alert limits saved'); anRepaint(); return true }
+        if (e.target.closest('[data-monlimsave]')) { var wv = document.querySelector('[data-monlim="waiting"]'), sv = document.querySelector('[data-monlim="sl"]'), av = document.querySelector('[data-monlim="adh"]'); localStorage.setItem('ucaas.monLimits', JSON.stringify({ waiting: Math.max(0, +wv.value || 0), sl: Math.min(100, Math.max(0, +sv.value || 0)), adh: Math.max(0, +av.value || 0) })); note('Alert limits saved'); anRepaint(); return true }
         if ((t = e.target.closest('[data-monexport]'))) { monExport(t.dataset.monexport); return true }
         if ((t = e.target.closest('[data-mongrp]'))) { var gn = t.dataset.mongrp; MS.open[gn] = !MS.open[gn]; anRepaint(); return true }
         if ((t = e.target.closest('[data-monact]'))) { monAct(t.dataset.monact, +t.dataset.monidx); return true }
         if ((t = e.target.closest('[data-monpin]'))) { monTogglePin(t.dataset.monpin); anRepaint(); return true }
+        if ((t = e.target.closest('[data-aidismiss]'))) { MS.aiDismissed[t.dataset.aidismiss] = true; anRepaint(); return true }
+        if ((t = e.target.closest('[data-aibarge]'))) { monSetListen(t.dataset.aibarge, 'barge'); MS.aiDismissed[t.dataset.aibarge] = true; anRepaint(); return true }
+        if ((t = e.target.closest('[data-monalertgo]'))) { MS.sub = 'Call Queue'; MS.queue = t.dataset.monalertgo; anRepaint(); return true }
+        if ((t = e.target.closest('[data-copilottab]'))) { MS.copilotTab = t.dataset.copilottab; anRepaint(); return true }
+        if (e.target.closest('[data-coprhisttoggle]')) { MS.copilotHistOpen = !MS.copilotHistOpen; anRepaint(); return true }
+        if ((t = e.target.closest('[data-coprhistview]'))) { MS.copilotHistView = t.dataset.coprhistview; anRepaint(); return true }
+        if ((t = e.target.closest('[data-coprchatsend]'))) { monCopilotChatSend(t.dataset.coprchatsend); return true }
         if (e.target.closest('[data-monsum]')) { MS.summary = !MS.summary; localStorage.setItem('ucaas.monSummary', MS.summary ? 'on' : 'off'); anRepaint(); return true }
         if (e.target.closest('[data-monalerttoggle]')) { MS.alertsOn = !MS.alertsOn; localStorage.setItem('ucaas.monAlertsOn', MS.alertsOn ? 'on' : 'off'); anRepaint(); return true }
         if (e.target.closest('[data-monqwait]')) { MS.qWaitOpen = !MS.qWaitOpen; anRepaint(); return true }
@@ -8484,7 +8869,8 @@
         var host = $('#viewAnalytics'); if (!host) return;
         if (!document.getElementById('anStyle')) {
           var st = document.createElement('style'); st.id = 'anStyle';
-          st.textContent = '.an-rail{scrollbar-width:none;-ms-overflow-style:none}.an-rail::-webkit-scrollbar{display:none}';
+          st.textContent = '.an-rail{scrollbar-width:none;-ms-overflow-style:none}.an-rail::-webkit-scrollbar{display:none}'
+            + '@keyframes monAdhFlash{0%,100%{box-shadow:0 0 0 0 rgba(185,28,28,0)}50%{box-shadow:0 0 0 3px rgba(185,28,28,.18)}}';
           document.head.appendChild(st);
         }
         host.style.margin = '-32px -38px -52px';
@@ -10771,7 +11157,12 @@
       var P_AGENT = ['0.a.0', '0.a.2', '1.a.0', '1.a.2', '1.x.0.0', '2.a.0', '2.a.1', '2.a.3', '2.a.8', '2.x.0.0', '4.a.*', '4.x.0.0', '4.x.0.1', '4.x.0.2', '5.x.0.0', '5.x.1.0', '7.a.0', '7.x.0.0', '7.x.0.1', '8.a.0', '11.a.0', '11.a.1', '14.a.0', '16.a.*', '16.x.0.0', '18.a.*', '18.x.0.0'];
       var P_SUP = P_AGENT.concat(['0.a.1', '1.a.1', '1.x.0.*', '1.x.1.0', '2.a.*', '2.x.0.*', '5.a.0', '5.x.0.*', '5.x.1.*', '5.x.2.0', '6.x.0.0', '7.x.1.0', '9.a.*', '11.a.2', '11.x.0.0', '15.a.*', '15.x.0.0', '17.a.0', '17.x.0.0']);
       var P_LADM = P_SUP.concat(['0.a.*', '0.x.0.0', '0.x.1.0', '0.x.2.0', '1.*', '4.*', '5.*', '6.*', '7.*', '8.x.0.*', '8.x.1.*', '8.x.2.0', '8.x.3.0', '8.x.3.2', '9.a.*', '10.a.0', '10.x.0.0', '11.*', '12.a.0', '14.a.0', '14.x.0.0', '14.x.0.2', '15.*', '16.*', '17.*', '18.*']);
-      var P_GADM = P_AGENT.concat(['8.x.0.*', '8.x.1.*', '14.x.0.*']);
+      /* Group admin "looks after one group of people" day to day — that's supervisory in practice, so it
+         gets the same full Monitoring action set (Live dashboard + Listen + Whisper + Barge) the Group
+         supervisor template already models, instead of none at all. Before this, only Account owner and
+         Location admin could open Monitoring or use Listen/Whisper/Barge — Agent and Group admin both got
+         "No access" everywhere, which is why barging only ever worked for the one owner account being tested. */
+      var P_GADM = P_AGENT.concat(['8.x.0.*', '8.x.1.*', '14.x.0.*', '9.a.*']);
       var ROLES = [
         { id: 'owner', name: 'Account owner', desc: 'Runs the whole account. Everything the company has, including billing.', builtin: true, owner: true, perms: permsOf(PERMS.map(function (_, c) { return c + '.*' })) },
         { id: 'ladmin', name: 'Location admin', desc: 'Runs a location day to day: its people, numbers and call handling.', builtin: true, perms: permsOf(P_LADM) },

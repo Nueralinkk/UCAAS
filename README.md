@@ -38,9 +38,20 @@ auto-reloads on save.
 - **Queues** — a live-style queue performance dashboard (chart, right-now tiles, per-queue table)
 - **Monitoring** — supervisor tools:
   - All Calls / All Extensions / Groups / Call Queue / Campaign sub-views
-  - Live Listen → Whisper → Barge controls on any on-call agent, gated by the matching
+  - An **AI Copilot dialog** for any on-call agent — replaces the old inline
+    Listen/Whisper/Barge dropdown with a two-panel view: call details, issue summary,
+    caller history, and schedule adherence on the left; a Copilot/Summary/Transcript/
+    Notes/Contact tabbed assistant (with a simulated chat you can ask about sentiment,
+    adherence, or next steps) on the right
+  - Live Listen → Whisper → Barge controls inside that dialog, gated by the matching
     Roles → Monitoring sub-permissions
-  - Configurable waiting-caller / service-level alerts, with a cross-page badge
+  - Simulated **AI sentiment** per live call (positive/neutral/frustrated, scored
+    -100 to +100) and a **schedule adherence** badge per agent, with a configurable
+    adherence threshold in Alerts
+  - An AI Copilot alert banner that surfaces when a live call reads as frustrated, with
+    a one-click Barge-in action
+  - Configurable waiting-caller / service-level / adherence alerts, with a cross-page
+    badge and clickable chips that jump straight to the affected queue
   - "My queues" pinning on the Call Queue picker
   - Click an agent's avatar or name anywhere to open their profile drawer (with a quick
     edit shortcut into the Directory edit page)
