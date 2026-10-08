@@ -7635,6 +7635,10 @@
          action", same as the reference's empty hours. Figures are dummy but deterministic (seeded per agent). */
       var AA = { agent: '', range: 'Today', start: '00:00', end: '17:00', type: 'All', hideEmpty: false };
       var AA_STATUSES = ['Online', 'Offline'];
+      /* the fixed dummy shift (10am-4pm) that aaHourEvents seeds data for — pulled out of the magic numbers
+         there so the row renderer below can tell "no action during the shift" (a real gap) apart from
+         "no action outside the shift" (expected — nobody's scheduled to be online at 2am) */
+      var AA_SHIFT = { start: 10, end: 16 };
       var AA_DEVICES = [['Browser', 'Chrome'], ['Browser', 'Edge'], ['Desktop app', 'Electron'], ['Mobile app', 'Safari']];
       var AA_OS = ['Windows', 'Mac OS', 'Linux', 'iOS'];
       function aaAgents() { return monScopePeople() }
@@ -7649,7 +7653,7 @@
       /* the shift is fixed (10am-4pm) for every agent in this dummy dataset; each shift hour gets 1-3 brief
          online/offline blips (a heartbeat-style presence ping, not a single continuous session) */
       function aaHourEvents(agent, hour) {
-        if (hour < 10 || hour > 16) return [];
+        if (hour < AA_SHIFT.start || hour > AA_SHIFT.end) return [];
         var pad = function (n) { return (n < 10 ? '0' : '') + n };
         var h12 = hour % 12 === 0 ? 12 : hour % 12, ap = hour < 12 ? 'AM' : 'PM';
         var base = (agent.dataset.id || '').length * 13 + (agent.dataset.name || '').length * 3 + hour * 29;
@@ -7668,9 +7672,10 @@
          minutes when both statuses are in view — the pairs come out already sorted on/off/on/off, so adjacent
          pairs are safe to diff directly for a duration */
       function aaSummarize(agent, startH, endH, typeFilter) {
-        var onlineCount = 0, offlineCount = 0, onlineMinutes = 0;
+        var onlineCount = 0, offlineCount = 0, onlineMinutes = 0, shiftHours = 0;
         for (var h = startH; h <= endH; h++) {
           var full = aaHourEvents(agent, h);
+          if (full.length) shiftHours++;
           if (typeFilter === 'All') {
             for (var j = 0; j + 1 < full.length; j += 2) {
               if (full[j].status === 'Online' && full[j + 1] && full[j + 1].status === 'Offline') onlineMinutes += full[j + 1].minute - full[j].minute;
@@ -7679,16 +7684,56 @@
           var evs = typeFilter === 'All' ? full : full.filter(function (ev) { return ev.status === typeFilter });
           evs.forEach(function (ev) { if (ev.status === 'Online') onlineCount++; else offlineCount++ });
         }
-        return { onlineCount: onlineCount, offlineCount: offlineCount, onlineMinutes: onlineMinutes };
+        /* offline minutes isn't logged per-event like online is (a session has a clear start/end, idle time
+           doesn't) — it's derived as "the rest of the shift hours that were in range", which is only a
+           meaningful number when both statuses are being looked at together */
+        var offlineMinutes = typeFilter === 'All' ? Math.max(0, shiftHours * 60 - onlineMinutes) : 0;
+        return { onlineCount: onlineCount, offlineCount: offlineCount, onlineMinutes: onlineMinutes, offlineMinutes: offlineMinutes, shiftHours: shiftHours };
+      }
+      /* per-status totals below the timeline — the legend line above answers "what happened", this answers
+         "how much", in the same session-count + minutes shape as Monitoring's own Adherence numbers */
+      function aaTotalsHtml(sum) {
+        var row = function (label, color, count, minutes) {
+          return '<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #f1f5f9">'
+            + '<span style="width:9px;height:9px;border-radius:50%;background:' + color + ';flex-shrink:0"></span>'
+            + '<span style="flex:1;font-size:13px;font-weight:600;color:#334155">' + label + '</span>'
+            + '<span style="font-size:12.5px;color:#64748b">' + count + ' session' + (count === 1 ? '' : 's') + '</span>'
+            + '<span style="width:90px;text-align:right;font-size:13px;font-weight:700;color:#0f172a;font-variant-numeric:tabular-nums">' + minutes + ' min</span>'
+            + '</div>';
+        };
+        return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:12px;overflow:hidden;margin-top:18px">'
+          + '<div style="padding:10px 16px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;background:#f8fafc;border-bottom:1px solid #eef1f5">Totals for this range</div>'
+          + row('Online', '#16a34a', sum.onlineCount, sum.onlineMinutes)
+          + row('Offline', '#dc2626', sum.offlineCount, sum.offlineMinutes)
+          + '</div>';
+      }
+      /* CSV export, same monCsv/monDownloadCsv pair Monitoring's tables already use — one row per status
+         change in the selected range, with the same device/browser/OS/IP the hover tooltip shows */
+      function aaExport(agent, startH, endH, typeFilter) {
+        var out = [];
+        for (var h = startH; h <= endH; h++) {
+          var evs = aaHourEvents(agent, h);
+          if (typeFilter !== 'All') evs = evs.filter(function (ev) { return ev.status === typeFilter });
+          evs.forEach(function (ev) { out.push([aaFmtHour(h), ev.time, ev.status, ev.device, ev.browser, ev.os, ev.ip]) });
+        }
+        monDownloadCsv(agent.dataset.name.replace(/\s+/g, '-').toLowerCase() + '-activity.csv', monCsv(['Hour', 'Time', 'Status', 'Device', 'Browser', 'OS', 'IP'], out));
       }
       var AA_TICKS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
       function aaRow(hour, events) {
         var tickHtml = AA_TICKS.map(function (n) { return '<span style="position:absolute;left:' + (n / 60 * 100) + '%;top:-4px;width:1px;height:9px;background:#bfdbfe"></span>' }).join('');
         var hourLabel = '<div style="width:90px;flex-shrink:0;font-size:13px;color:#334155;font-weight:600">' + aaFmtHour(hour) + '</div>';
         if (!events.length) {
+          /* an empty hour means two very different things: inside the scheduled shift it's a real gap worth
+             flagging (red "No action"); outside it, it's expected — nobody's scheduled to be online at 2am,
+             so a neutral gray "Outside shift" reads as normal instead of alarming */
+          var inShift = hour >= AA_SHIFT.start && hour <= AA_SHIFT.end;
+          var lineColor = inShift ? '#fecaca' : '#e2e8f0';
+          var pill = inShift
+            ? '<span style="border:1px solid #fecaca;color:#dc2626;background:#fff;border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">No action</span>'
+            : '<span style="border:1px solid #e2e8f0;color:#94a3b8;background:#fff;border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">Outside shift</span>';
           return '<div style="display:flex;align-items:center;padding:16px 0">' + hourLabel
-            + '<div style="flex:1;position:relative;height:1px;background:#fecaca;margin:0 16px;display:flex;align-items:center;justify-content:center">' + tickHtml
-            + '<span style="background:#fff;padding:0 4px;display:inline-flex;position:relative;z-index:1"><span style="border:1px solid #fecaca;color:#dc2626;background:#fff;border-radius:999px;padding:5px 16px;font-size:12.5px;font-weight:600;white-space:nowrap">No action</span></span>'
+            + '<div style="flex:1;position:relative;height:1px;background:' + lineColor + ';margin:0 16px;display:flex;align-items:center;justify-content:center">' + tickHtml
+            + '<span style="background:#fff;padding:0 4px;display:inline-flex;position:relative;z-index:1">' + pill + '</span>'
             + '</div></div>';
         }
         var markers = events.map(function (ev) {
@@ -7740,13 +7785,14 @@
           return '<span style="display:inline-flex;gap:4px">' + hourSel + apSel + '</span>';
         };
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
-          + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + agentSel + '</div>'
+          + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + agentSel + monAdherenceBadge(agent) + '</div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' + rangeSel
           + timeFields('data-aastarth', 'data-aastarta', AA.start)
           + '<span style="color:#94a3b8">-</span>'
           + timeFields('data-aaendh', 'data-aaenda', AA.end)
           + typeSel
           + '<button data-aasubmit style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Submit</button>'
+          + '<button data-aaexport style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>'
           + '<button data-aaback style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Back</button>'
           + '</div></div>';
         var loc = locByName(agent.dataset.loc), tz = loc ? loc.tz : 'Asia/Kolkata';
@@ -7773,7 +7819,7 @@
         }
         if (!rowsHtml) rowsHtml = monEmpty('No hours to show', 'Try a wider time range or a different status filter.');
         return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">' + railHtml
-          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">' + toolbar + tzLine + summaryLine + axis + rowsHtml + '</div></div>';
+          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">' + toolbar + tzLine + summaryLine + axis + rowsHtml + aaTotalsHtml(sum) + '</div></div>';
       }
       function anPage() {
         if (anState.sel === 'Monitoring') return monPage();
@@ -8130,7 +8176,7 @@
       function monCountText() { return 'Showing ' + MS.list.length + ' of ' + monCallList().length + ' calls' }
       function monCallsView() {
         var rowsHtml = monCallRowsHtml();
-        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
         var sel = 'box-sizing:border-box;height:38px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13px;background:#fff';
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #eef1f5">'
           + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All calls</div><div id="monCallsCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monCountText()) + '</div></div>'
@@ -8202,7 +8248,7 @@
           + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All extensions</div><div id="monExtCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monExtCountText()) + '</div></div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monexq value="' + esc(MS.exq) + '" placeholder="Search name, extension or group" autocomplete="off" style="box-sizing:border-box;height:38px;width:230px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;outline:0">'
           + '<button data-monexport="ext" style="box-sizing:border-box;height:38px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>' + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
-        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
         var table = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar + '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>'
           + ['Name', 'Extension', 'Group', 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [19, 8, 8, 12, 12, 7, 14, 7, 13][k] + '%">' + h + '</th>' }).join('')
           + '</tr></thead><tbody id="monExtBody">' + monExtRowsHtml() + '</tbody></table></div>';
@@ -8291,9 +8337,9 @@
         var opts = mode === 'barge'
           ? '<option value="barge" selected>Barge</option><option value="off">Stop Barging</option>'
           : '<option value="off"' + (mode === 'off' ? ' selected' : '') + '>' + (mode === 'off' ? 'Monitor' : 'Off') + '</option>'
-            + (canL ? '<option value="listen"' + (mode === 'listen' ? ' selected' : '') + '>Listen</option>' : '')
-            + (canW ? '<option value="whisper"' + (mode === 'whisper' ? ' selected' : '') + '>Whisper</option>' : '')
-            + (canB ? '<option value="barge">Barge</option>' : '');
+          + (canL ? '<option value="listen"' + (mode === 'listen' ? ' selected' : '') + '>Listen</option>' : '')
+          + (canW ? '<option value="whisper"' + (mode === 'whisper' ? ' selected' : '') + '>Whisper</option>' : '')
+          + (canB ? '<option value="barge">Barge</option>' : '');
         /* kept deliberately compact (fixed width + small flex-shrink:0 history icon) — this sits in a narrow,
            fixed-width "Actions" table column, and the first version overflowed past the table's own right edge
            because nothing constrained its width, which only showed up once an agent actually had an active call */
@@ -8715,7 +8761,7 @@
       }
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
-        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
         var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [22, 12, 12, 7, 14, 7, 13, 13];
         return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
       }
@@ -8750,7 +8796,7 @@
         var callers = [];
         for (var k = 0; k < q.waiting; k++) callers.push({ n: 'Caller ' + (k + 1), p: '+1 646 555 07' + k, st: 'Waiting', t: q.longest, path: 'Inbound › ' + q.name });
         var td = 'padding:13px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 14px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
         var waitTable = '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + ['Name', 'Phone', 'State', 'Waiting time', 'Call path'].map(function (h, k2) { return '<th style="' + th + ';width:' + [22, 20, 16, 18, 24][k2] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>'
           + callers.map(function (c) { return '<tr><td style="' + td + '">' + esc(c.n) + '</td><td style="' + td + ';font-family:monospace">' + esc(c.p) + '</td><td style="' + td + '">' + esc(c.st) + '</td><td style="' + td + ';font-family:monospace">' + esc(c.t) + '</td><td style="' + td + ';color:#64748b">' + esc(c.path) + '</td></tr>' }).join('') + '</tbody></table>';
         var agents = card('Agents (' + q.members.length + ')', monAgentTable(q.members, 'Members'));
@@ -8949,6 +8995,13 @@
         }
         if (e.target.closest('[data-aaback]')) { anState.sel = 'Monitoring'; MS.sub = 'All Extensions'; return anRepaint() }
         if (e.target.closest('[data-aacollapse]')) { AA.hideEmpty = !AA.hideEmpty; return anRepaint() }
+        if (e.target.closest('[data-aaexport]')) {
+          var aaAgent = personById(AA.agent); if (!aaAgent) return;
+          var aSH = aaParseHour(AA.start); if (aSH == null) aSH = 0;
+          var aEH = aaParseHour(AA.end); if (aEH == null) aEH = 23;
+          if (aEH < aSH) aEH = aSH;
+          return aaExport(aaAgent, aSH, aEH, AA.type);
+        }
       }
       function anChange(e) {
         if (e.target.hasAttribute('data-monqsel')) { MS.queue = e.target.value; anRepaint(); return }

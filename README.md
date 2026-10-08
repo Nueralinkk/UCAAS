@@ -57,6 +57,11 @@ auto-reloads on save.
     edit shortcut into the Directory edit page)
 - **Agent Activity** — a per-agent, hour-by-hour Online/Offline session timeline with
   device/IP/browser/OS detail on hover, filterable by agent, time range, and status
+  - Distinguishes a real gap during the scheduled shift ("No action") from an empty
+    hour outside it ("Outside shift")
+  - A totals panel below the timeline (session counts + minutes per status) and a
+    CSV export of the events in the selected range
+  - Shows the agent's schedule adherence badge next to the agent picker
 
 ## Architecture notes
 
