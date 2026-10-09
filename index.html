@@ -7633,7 +7633,7 @@
          is an hour; a shift hour shows small Online/Offline session markers at their exact minute, hovering one
          shows device/IP/browser/OS/time, same as the reference's tooltip. Hours with nothing logged show "No
          action", same as the reference's empty hours. Figures are dummy but deterministic (seeded per agent). */
-      var AA = { agent: '', range: 'Today', start: '00:00', end: '17:00', type: 'All', hideEmpty: false };
+      var AA = { agent: '', range: 'Today', start: '00:00', end: '17:00', type: 'All', hideEmpty: false, mode: 'individual' };
       var AA_STATUSES = ['Online', 'Offline'];
       /* the fixed dummy shift (10am-4pm) that aaHourEvents seeds data for — pulled out of the magic numbers
          there so the row renderer below can tell "no action during the shift" (a real gap) apart from
@@ -7718,6 +7718,49 @@
         }
         monDownloadCsv(agent.dataset.name.replace(/\s+/g, '-').toLowerCase() + '-activity.csv', monCsv(['Hour', 'Time', 'Status', 'Device', 'Browser', 'OS', 'IP'], out));
       }
+      /* Individual vs Team is a plain two-button toggle, same visual pattern as the Summarized/Detailed
+         toggle already used in the Copilot dialog — reusing a pattern a user has already seen once is less
+         to learn than inventing a new control, which matters for someone who isn't comfortable with software */
+      function aaModeToggle() {
+        var tabs = [['individual', 'Individual'], ['team', 'Team']];
+        return '<div style="display:inline-flex;gap:3px;background:#eef2f7;border-radius:10px;padding:3px;flex-shrink:0">' + tabs.map(function (t) {
+          var on = (AA.mode || 'individual') === t[0];
+          return '<button data-aamode="' + t[0] + '" style="box-sizing:border-box;height:32px;padding:0 16px;border:0;border-radius:8px;background:' + (on ? '#fff' : 'none') + ';color:' + (on ? '#0f172a' : '#64748b') + ';font:inherit;font-size:13px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;box-shadow:' + (on ? '0 1px 2px rgba(15,23,42,.08)' : 'none') + '">' + t[1] + '</button>';
+        }).join('') + '</div>';
+      }
+      /* one row per agent, same totals aaTotalsHtml already shows for a single agent — the whole point of
+         Team mode is "the same numbers, just for everyone at once" rather than a different metric set to learn */
+      function aaTeamRow(p, startH, endH, typeFilter) {
+        var sum = aaSummarize(p, startH, endH, typeFilter);
+        var av = AVS[(+p.dataset.av) % AVS.length];
+        var td = 'padding:14px 16px;font-size:13px;color:#0f172a;vertical-align:middle;border-bottom:1px solid #f1f5f9';
+        return '<tr>'
+          + '<td style="' + td + '"><button data-aapick="' + esc(p.dataset.id) + '" title="View this agent\'s timeline" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer">'
+          + '<span style="width:34px;height:34px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:12px;flex-shrink:0">' + esc(ini(p.dataset.name)) + '</span>'
+          + '<span style="min-width:0"><span style="display:block;font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis">' + esc(p.dataset.name) + '</span><span style="display:block;font-size:11.5px;color:#64748b">' + esc(p.dataset.role || '') + '</span></span>'
+          + '</button></td>'
+          + '<td style="' + td + '">' + monAdherenceBadge(p) + '</td>'
+          + '<td style="' + td + ';text-align:right;font-variant-numeric:tabular-nums">' + sum.onlineCount + '</td>'
+          + '<td style="' + td + ';text-align:right;font-variant-numeric:tabular-nums">' + sum.onlineMinutes + ' min</td>'
+          + '<td style="' + td + ';text-align:right;font-variant-numeric:tabular-nums">' + sum.offlineCount + '</td>'
+          + '<td style="' + td + ';text-align:right;font-variant-numeric:tabular-nums">' + sum.offlineMinutes + ' min</td>'
+          + '</tr>';
+      }
+      function aaTeamTable(agents, startH, endH, typeFilter) {
+        if (!agents.length) return monEmpty('No agents to show', 'Add people to the directory to see their activity here.');
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:600;padding:12px 16px;border-bottom:1px solid #eef1f5;background:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        var heads = ['Agent', 'Adherence', 'Online sessions', 'Online time', 'Offline sessions', 'Offline time'], widths = [30, 18, 13, 13, 13, 13];
+        var rows = agents.map(function (p) { return aaTeamRow(p, startH, endH, typeFilter) }).join('');
+        return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">'
+          + '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+      }
+      function aaExportTeam(agents, startH, endH, typeFilter) {
+        var out = agents.map(function (p) {
+          var sum = aaSummarize(p, startH, endH, typeFilter);
+          return [p.dataset.name, p.dataset.role || '', sum.onlineCount, sum.onlineMinutes, sum.offlineCount, sum.offlineMinutes];
+        });
+        monDownloadCsv('team-activity.csv', monCsv(['Agent', 'Role', 'Online sessions', 'Online minutes', 'Offline sessions', 'Offline minutes'], out));
+      }
       var AA_TICKS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
       function aaRow(hour, events) {
         var tickHtml = AA_TICKS.map(function (n) { return '<span style="position:absolute;left:' + (n / 60 * 100) + '%;top:-4px;width:1px;height:9px;background:#bfdbfe"></span>' }).join('');
@@ -7784,8 +7827,9 @@
           var apSel = '<select ' + aAttr + ' style="' + selStyle + ';width:64px;padding:0 6px">' + ['AM', 'PM'].map(function (a) { return '<option' + (a === ap ? ' selected' : '') + '>' + a + '</option>' }).join('') + '</select>';
           return '<span style="display:inline-flex;gap:4px">' + hourSel + apSel + '</span>';
         };
+        var mode = AA.mode || 'individual';
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
-          + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + agentSel + monAdherenceBadge(agent) + '</div>'
+          + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + aaModeToggle() + (mode === 'individual' ? agentSel + monAdherenceBadge(agent) : '') + '</div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' + rangeSel
           + timeFields('data-aastarth', 'data-aastarta', AA.start)
           + '<span style="color:#94a3b8">-</span>'
@@ -7795,11 +7839,19 @@
           + '<button data-aaexport style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>'
           + '<button data-aaback style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Back</button>'
           + '</div></div>';
-        var loc = locByName(agent.dataset.loc), tz = loc ? loc.tz : 'Asia/Kolkata';
-        var tzLine = '<div style="text-align:center;font-size:12.5px;color:#64748b;margin-bottom:10px">Timezone - ' + esc(tz) + '</div>';
         var startH = aaParseHour(AA.start); if (startH == null) startH = 0;
         var endH = aaParseHour(AA.end); if (endH == null) endH = 23;
         if (endH < startH) endH = startH;
+        /* Team mode: one row per agent, reusing the exact same totals every individual view already shows —
+           the point is "everyone at once", not a different dashboard to learn. Clicking a name drops straight
+           into that person's own timeline, so there's always an obvious next click either way. */
+        if (mode === 'team') {
+          var teamHint = '<div style="font-size:12.5px;color:#64748b;margin:0 0 14px;text-align:center">Click any agent to see their timeline</div>';
+          return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">' + railHtml
+            + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:22px 26px;overflow-y:auto">' + toolbar + teamHint + aaTeamTable(agents, startH, endH, AA.type) + '</div></div>';
+        }
+        var loc = locByName(agent.dataset.loc), tz = loc ? loc.tz : 'Asia/Kolkata';
+        var tzLine = '<div style="text-align:center;font-size:12.5px;color:#64748b;margin-bottom:10px">Timezone - ' + esc(tz) + '</div>';
         var sum = aaSummarize(agent, startH, endH, AA.type);
         var summaryLine = '<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:12.5px;color:#475569;margin-bottom:14px">'
           + '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#16a34a;display:inline-block;flex-shrink:0"></span>Online — <b>' + sum.onlineCount + '</b> session' + (sum.onlineCount === 1 ? '' : 's') + (sum.onlineMinutes ? ' · ' + sum.onlineMinutes + ' min total' : '') + '</span>'
@@ -8995,11 +9047,14 @@
         }
         if (e.target.closest('[data-aaback]')) { anState.sel = 'Monitoring'; MS.sub = 'All Extensions'; return anRepaint() }
         if (e.target.closest('[data-aacollapse]')) { AA.hideEmpty = !AA.hideEmpty; return anRepaint() }
+        if ((t = e.target.closest('[data-aamode]'))) { AA.mode = t.dataset.aamode; return anRepaint() }
+        if ((t = e.target.closest('[data-aapick]'))) { AA.agent = t.dataset.aapick; AA.mode = 'individual'; return anRepaint() }
         if (e.target.closest('[data-aaexport]')) {
-          var aaAgent = personById(AA.agent); if (!aaAgent) return;
           var aSH = aaParseHour(AA.start); if (aSH == null) aSH = 0;
           var aEH = aaParseHour(AA.end); if (aEH == null) aEH = 23;
           if (aEH < aSH) aEH = aSH;
+          if ((AA.mode || 'individual') === 'team') return aaExportTeam(aaAgents(), aSH, aEH, AA.type);
+          var aaAgent = personById(AA.agent); if (!aaAgent) return;
           return aaExport(aaAgent, aSH, aEH, AA.type);
         }
       }
@@ -9011,6 +9066,19 @@
         if (e.target.hasAttribute('data-moncamp')) { MS.campaign = e.target.value; anRepaint(); return }
         if (e.target.hasAttribute('data-anrange')) { anState.range = e.target.value; anRepaint() }
         if (e.target.hasAttribute('data-qrange')) { QS.range = e.target.value; anRepaint() }
+        /* switching the agent is navigation, not a filter tweak — it should show that agent's data right away
+           instead of waiting for Submit. Captures every toolbar field's current DOM value first (not just the
+           agent), the same way Submit does, so this doesn't re-render from stale saved state and silently
+           discard an unsubmitted change you'd already made to range/start/end/type */
+        if (e.target.hasAttribute('data-aaagent')) {
+          var rEl = $('[data-aarange]'), tEl = $('[data-aatype]');
+          var sH = $('[data-aastarth]'), sA = $('[data-aastarta]'), eH = $('[data-aaendh]'), eA = $('[data-aaenda]');
+          AA.agent = e.target.value;
+          if (rEl) AA.range = rEl.value; if (tEl) AA.type = tEl.value;
+          if (sH && sA) AA.start = aaTo24(sH.value, sA.value);
+          if (eH && eA) AA.end = aaTo24(eH.value, eA.value);
+          anRepaint();
+        }
       }
       /* buildAn() itself moved to the very end of the script (just before the initial navigation) — it used to
          run here, eagerly, which is before `groups`/`CGROUPS`/etc. (declared further down) exist; anything that
