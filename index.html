@@ -3849,13 +3849,14 @@
         <span id="expCount" style="box-sizing: border-box; color: #334155; font-size: 13.5px; font-weight: 500;"></span>
         <div style="box-sizing: border-box; display: flex; gap: 10px;"><button id="expCancel"
             data-h="background:#f8fafc;border-color:#cbd5e1;"
-            style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; font-weight: 500; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s;">Cancel</button><button
-            id="expGo" data-h="background:#1d4ed8;border-color:#1d4ed8;"
-            style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s; background: #2563eb; border-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,.35);"><svg
-              viewBox="0 0 24 24"
-              style="stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; display: block; width: 17px; height: 17px;">
-              <path d="M12 4v11M7 10l5 5 5-5M4 20h16" />
-            </svg>Export CSV</button></div>
+            style="box-sizing: border-box; font: inherit; cursor: pointer; text-align: left; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; font-weight: 500; font-size: 14px; transition: background-color .12s,border-color .12s,box-shadow .12s;">Cancel</button><select
+            id="expGo"
+            style="box-sizing: border-box; font: inherit; cursor: pointer; height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid #2563eb; font-size: 14px; font-weight: 600; background: #2563eb; color: #fff; box-shadow: 0 1px 2px rgba(37,99,235,.35);">
+            <option value="" selected disabled>Export ▾</option>
+            <option value="csv">Export as CSV</option>
+            <option value="pdf">Export as PDF</option>
+            <option value="xlsx">Export as Excel</option>
+          </select></div>
       </div>
     </div>
   </div>
@@ -6778,7 +6779,7 @@
       tbody.addEventListener('change', function (e) { if (e.target.matches('[data-chk]')) syncSel() });
       $('#chkAll').addEventListener('change', function (e) { rows().filter(visible).forEach(function (r) { $('[data-chk]', r).checked = e.target.checked }); syncSel() });
       $('#bulkClear').addEventListener('click', function () { rows().forEach(function (r) { $('[data-chk]', r).checked = false }); syncSel() });
-      $('#bulkExport').addEventListener('click', function () { exportCSV(selected()) });
+      $('#bulkExport').addEventListener('click', function () { exportPeople('csv', selected()) });
       function bulkMenu(btn, kind) {
         var sel = selected(); if (!sel.length) return;
         var menu = $('[data-menu="' + (kind === 'group' ? 'bulkgrp' : 'bulkrole') + '"]');
@@ -7709,14 +7710,14 @@
       }
       /* CSV export, same monCsv/monDownloadCsv pair Monitoring's tables already use — one row per status
          change in the selected range, with the same device/browser/OS/IP the hover tooltip shows */
-      function aaExport(agent, startH, endH, typeFilter) {
+      function aaExport(agent, startH, endH, typeFilter, format) {
         var out = [];
         for (var h = startH; h <= endH; h++) {
           var evs = aaHourEvents(agent, h);
           if (typeFilter !== 'All') evs = evs.filter(function (ev) { return ev.status === typeFilter });
           evs.forEach(function (ev) { out.push([aaFmtHour(h), ev.time, ev.status, ev.device, ev.browser, ev.os, ev.ip]) });
         }
-        monDownloadCsv(agent.dataset.name.replace(/\s+/g, '-').toLowerCase() + '-activity.csv', monCsv(['Hour', 'Time', 'Status', 'Device', 'Browser', 'OS', 'IP'], out));
+        monExportAs(format, agent.dataset.name.replace(/\s+/g, '-').toLowerCase() + '-activity', ['Hour', 'Time', 'Status', 'Device', 'Browser', 'OS', 'IP'], out);
       }
       /* Individual vs Team is a plain two-button toggle, same visual pattern as the Summarized/Detailed
          toggle already used in the Copilot dialog — reusing a pattern a user has already seen once is less
@@ -7754,12 +7755,12 @@
         return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">'
           + '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
       }
-      function aaExportTeam(agents, startH, endH, typeFilter) {
+      function aaExportTeam(agents, startH, endH, typeFilter, format) {
         var out = agents.map(function (p) {
           var sum = aaSummarize(p, startH, endH, typeFilter);
           return [p.dataset.name, p.dataset.role || '', sum.onlineCount, sum.onlineMinutes, sum.offlineCount, sum.offlineMinutes];
         });
-        monDownloadCsv('team-activity.csv', monCsv(['Agent', 'Role', 'Online sessions', 'Online minutes', 'Offline sessions', 'Offline minutes'], out));
+        monExportAs(format, 'team-activity', ['Agent', 'Role', 'Online sessions', 'Online minutes', 'Offline sessions', 'Offline minutes'], out);
       }
       var AA_TICKS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
       function aaRow(hour, events) {
@@ -7842,7 +7843,7 @@
           + typeSel
           + '<div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">'
           + '<button data-aasubmit style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Submit</button>'
-          + '<button data-aaexport style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>'
+          + monExportSelect('data-aaexportsel')
           + '<button data-aaback style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Back</button>'
           + '</div></div>';
         var toolbar = headerRow + filterBar;
@@ -8091,7 +8092,7 @@
         var lrow = function (dot, label, v) { return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #f1f5f9;font-size:13.5px;color:#0f172a"><span style="display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:' + dot + '"></span>' + label + '</span><span style="font-family:monospace;color:#64748b">' + v + '</span></div>' };
         var n = d.members.length || 1, pctOn = Math.round(d.online / n * 100);
         var members = qCard('', '<div style="padding:18px 20px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:18px;font-weight:700;color:#0f172a">Members</div><button data-qopen="people" style="border:0;background:none;color:#2563eb;font:inherit;font-size:13px;cursor:pointer">Agents ›</button></div><div style="margin-top:12px;font-size:28px;font-weight:700;color:#0f172a">' + d.online + ' <span style="font-size:13px;font-weight:500;color:#64748b">of ' + d.members.length + ' member' + (d.members.length === 1 ? '' : 's') + ' online</span></div><div style="height:6px;background:#f1f5f9;border-radius:6px;margin:12px 0 4px;overflow:hidden"><div style="height:6px;width:' + pctOn + '%;background:#10b981"></div></div>'
-          + lrow('#f59e0b', 'On a call', d.busy) + lrow('#10b981', 'Available', d.online) + lrow('#cbd5e1', 'Offline', d.offline) + '</div>');
+          + lrow('#2563eb', 'On a call', d.busy) + lrow('#10b981', 'Available', d.online) + lrow('#cbd5e1', 'Offline', d.offline) + '</div>');
         var events = d.members.slice(0, 4).map(function (p) { var st = p.dataset.presence; return '<div style="padding:10px 0;border-top:1px solid #f1f5f9;font-size:13px;color:#334155"><b style="color:#0f172a">' + esc(p.dataset.name) + '</b> · ' + esc(st) + ' · ' + esc(p.dataset.group || 'no group') + '</div>' }).join('');
         var evCard = qCard('', '<div style="padding:18px 20px"><div style="display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:#0f172a">Queue events<span style="width:7px;height:7px;border-radius:50%;background:#10b981"></span></div><div style="margin-top:6px">' + (events || '<p style="font-size:13.5px;color:#475569">Nothing yet.</p>') + '</div></div>');
         return '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px">' + standouts + members + evCard + '</div>';
@@ -8240,7 +8241,7 @@
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #eef1f5">'
           + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All calls</div><div id="monCallsCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monCountText()) + '</div></div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monq value="' + esc(MS.q) + '" placeholder="Search number, name or path" autocomplete="off" style="box-sizing:border-box;height:38px;width:220px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;outline:0">'
-          + '<button data-monexport="calls" style="box-sizing:border-box;height:38px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>' + '<select data-monst style="' + sel + '">' + ['All', 'Completed', 'Missed'].map(function (o) { return '<option' + (o === MS.status ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>'
+          + monExportSelect('data-monexportsel="calls"') + '<select data-monst style="' + sel + '">' + ['All', 'Completed', 'Missed'].map(function (o) { return '<option' + (o === MS.status ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>'
           + '<select data-mondir style="' + sel + '">' + ['All', 'Inbound', 'Outbound'].map(function (o) { return '<option' + (o === MS.dir ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var head = '<thead><tr>' + ['From', 'DID', 'Duration', 'Status', 'Direction', 'To', 'Call path', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [15, 14, 9, 10, 10, 16, 16, 10][k] + '%">' + h + '</th>' }).join('') + '</tr></thead>';
         return '<div>' + toolbar + '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' + head + '<tbody id="monCallsBody">' + rowsHtml + '</tbody></table></div>';
@@ -8270,21 +8271,21 @@
         if (!list.length) return '<div style="grid-column:1/-1;padding:40px 16px;text-align:center;color:#64748b;font-size:13px">No extensions match these filters.</div>';
         return list.map(function (p) {
           var av = AVS[(+p.dataset.av) % AVS.length], st = p.dataset.presence, onCall = st === 'Busy';
-          var leftColor = onCall ? '#f59e0b' : st === 'Available' ? '#10b981' : '#cbd5e1';
-          var statusColor = onCall ? '#b45309' : st === 'Available' ? '#15803d' : '#64748b';
+          var leftColor = onCall ? '#2563eb' : st === 'Available' ? '#10b981' : '#cbd5e1';
+          var statusColor = onCall ? '#1d4ed8' : st === 'Available' ? '#15803d' : '#64748b';
           var statusText = onCall ? 'On call' : (st === 'Available' ? 'Available' : (st || 'Offline'));
           var call = onCall ? personActiveCall(p) : null;
-          var name = '<button data-monperson="' + esc(p.dataset.id) + '" style="box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer;min-width:0">'
-            + '<span style="width:26px;height:26px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:11px;flex-shrink:0">' + esc(ini(p.dataset.name)) + '</span>'
-            + '<span style="font-weight:700;font-size:13px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0">' + esc(p.dataset.name) + '</span>'
-            + '<span style="font-size:11.5px;color:#94a3b8;font-variant-numeric:tabular-nums;flex-shrink:0">' + esc(p.dataset.num || '—') + '</span>'
+          var name = '<button data-monperson="' + esc(p.dataset.id) + '" style="box-sizing:border-box;display:flex;align-items:center;gap:6px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer;min-width:0">'
+            + '<span style="width:21px;height:21px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:10px;flex-shrink:0">' + esc(ini(p.dataset.name)) + '</span>'
+            + '<span style="font-weight:700;font-size:12.5px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0">' + esc(p.dataset.name) + '</span>'
+            + '<span style="font-size:11px;color:#94a3b8;font-variant-numeric:tabular-nums;flex-shrink:0">' + esc(p.dataset.num || '—') + '</span>'
             + '</button>';
-          var statusRow = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
-            + '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:' + statusColor + '"><span style="width:7px;height:7px;border-radius:50%;background:' + statusColor + ';flex-shrink:0"></span>' + esc(statusText) + (onCall ? monSentimentDot(p) : '') + '</span>'
-            + '<span style="font-size:11.5px;color:#94a3b8;font-variant-numeric:tabular-nums;font-family:monospace">' + (onCall ? esc(call.dur) : '—') + '</span>'
+          var statusRow = '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px">'
+            + '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:' + statusColor + '"><span style="width:6px;height:6px;border-radius:50%;background:' + statusColor + ';flex-shrink:0"></span>' + esc(statusText) + (onCall ? monSentimentDot(p) : '') + '</span>'
+            + '<span style="font-size:11px;color:#94a3b8;font-variant-numeric:tabular-nums;font-family:monospace">' + (onCall ? esc(call.dur) : '—') + '</span>'
             + '</div>';
-          var metaRow = '<div style="font-size:11px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.dataset.group || 'No group') + '</div>';
-          return '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-left:3px solid ' + leftColor + ';border-radius:10px;padding:11px 13px;display:flex;flex-direction:column;gap:7px;min-width:0">'
+          var metaRow = '<div style="font-size:10.5px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.dataset.group || 'No group') + '</div>';
+          return '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-left:3px solid ' + leftColor + ';border-radius:9px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;min-width:0">'
             + name + statusRow + metaRow + monAdherenceBadge(p)
             + (onCall ? '<div style="margin-top:1px">' + monListenBtn(p.dataset.id, true) + '</div>' : '')
             + '</div>';
@@ -8310,9 +8311,9 @@
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #eef1f5">'
           + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All extensions</div><div id="monExtCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monExtCountText()) + '</div></div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monexq value="' + esc(MS.exq) + '" placeholder="Search name, extension or group" autocomplete="off" style="box-sizing:border-box;height:38px;width:230px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;outline:0">'
-          + '<button data-monexport="ext" style="box-sizing:border-box;height:38px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>' + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
+          + monExportSelect('data-monexportsel="ext"') + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var grid = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar
-          + '<div id="monExtBody" style="box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:14px 16px">' + monExtCardsHtml() + '</div></div>';
+          + '<div id="monExtBody" style="box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;padding:10px 12px">' + monExtCardsHtml() + '</div></div>';
         return cards + grid;
       }
       /* Monitoring quick wins: alert thresholds for queues and CSV export of the tables */
@@ -8360,13 +8361,50 @@
         document.body.appendChild(a); a.click(); a.remove();
         note('Exported ' + name);
       }
-      function monExport(kind) {
+      /* shared by every "Export" control in the app (Monitoring's All Calls/All Extensions, Agent Activity,
+         the People directory) — one place that knows how to turn a headers+rows table into each of the three
+         formats on offer, so a new export button only ever needs to supply its data, never reimplement this. */
+      function monExportAs(format, baseName, headers, rows) {
+        if (format === 'pdf') {
+          var w = window.open('', '_blank');
+          if (!w) { note('Allow pop-ups to export as PDF'); return }
+          var rowsHtml = rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c == null ? '' : String(c)) + '</td>' }).join('') + '</tr>' }).join('');
+          w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>' + esc(baseName) + '</title><style>body{font-family:Arial,Helvetica,sans-serif;padding:24px;color:#0f172a}h1{font-size:16px;margin:0 0 14px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #cbd5e1;padding:6px 10px;text-align:left}th{background:#eef2f7}</style></head><body><h1>' + esc(baseName) + '</h1><table><thead><tr>' + headers.map(function (h) { return '<th>' + esc(h) + '</th>' }).join('') + '</tr></thead><tbody>' + rowsHtml + '</tbody></table></body></html>');
+          w.document.close();
+          setTimeout(function () { w.focus(); w.print() }, 300);
+          return note('Opened ' + baseName + ' for printing — choose “Save as PDF” in the print dialog');
+        }
+        if (format === 'xlsx') {
+          var rowsHtml2 = rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c == null ? '' : String(c)) + '</td>' }).join('') + '</tr>' }).join('');
+          /* a plain HTML table saved with an .xls name + the Excel MIME type — Excel opens this natively,
+             no binary spreadsheet format (or a bundled library) required for a prototype like this one */
+          var html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body><table border="1"><thead><tr>' + headers.map(function (h) { return '<th>' + esc(h) + '</th>' }).join('') + '</tr></thead><tbody>' + rowsHtml2 + '</tbody></table></body></html>';
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([html], { type: 'application/vnd.ms-excel' })); a.download = baseName + '.xls';
+          document.body.appendChild(a); a.click(); a.remove();
+          return note('Exported ' + baseName + '.xls');
+        }
+        return monDownloadCsv(baseName + '.csv', monCsv(headers, rows));
+      }
+      /* a small <select> styled like a button — "Export ▾" sits as a disabled placeholder option, picking a
+         real option fires the export and the control snaps back to that placeholder on the next repaint, so
+         it reads as a one-shot action menu rather than a filter that stays set */
+      function monExportSelect(attr, label) {
+        label = label || 'Export';
+        return '<select ' + attr + ' style="box-sizing:border-box;height:38px;padding:0 30px 0 14px;border:1px solid #2563eb;border-radius:10px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer;-webkit-appearance:none;appearance:none">'
+          + '<option value="" selected disabled>' + esc(label) + ' ▾</option>'
+          + '<option value="csv">Export as CSV</option>'
+          + '<option value="pdf">Export as PDF</option>'
+          + '<option value="xlsx">Export as Excel</option>'
+          + '</select>';
+      }
+      function monExport(kind, format) {
         if (kind === 'calls') {
           var c = MS.list.map(function (x) { return [x.from, x.did, x.dur, x.status, x.dir === 'in' ? 'Inbound' : 'Outbound', x.to, x.path] });
-          return monDownloadCsv('all-calls.csv', monCsv(['From', 'DID', 'Duration', 'Status', 'Direction', 'To', 'Call path'], c));
+          return monExportAs(format, 'all-calls', ['From', 'DID', 'Duration', 'Status', 'Direction', 'To', 'Call path'], c);
         }
         var e = monExtList().map(function (p) { return [p.dataset.name, p.dataset.num, p.dataset.group, p.dataset.email, p.dataset.presence] });
-        return monDownloadCsv('extensions.csv', monCsv(['Name', 'Extension', 'Group', 'Email', 'Presence'], e));
+        return monExportAs(format, 'extensions', ['Name', 'Extension', 'Group', 'Email', 'Presence'], e);
       }
       /* Monitoring: Department (groups, expandable) and Call Queue (agents and waiting callers), from the directory and the queues */
       MS.open = {}; MS.queue = ''; MS.aiDismissed = {};
@@ -8550,22 +8588,20 @@
       /* per-agent chat transcript with the Copilot "chatbot" — in-memory only, same caveat as COPILOT_NOTES.
          Seeded lazily the first time a given call's Copilot tab is rendered. */
       var COPILOT_CHAT = {};
-      /* AI Copilot-style alert banner: surfaces when someone currently on a call reads as frustrated, with
-         a direct Barge-in action wired straight into the existing Listen/Whisper/Barge control. Dismissing
-         one hides it for the rest of this session; it doesn't come back on its own. */
-      function monAiAlert() {
+      /* AI Copilot alert: surfaces when someone currently on a call reads as frustrated. Used to be a full-width
+         banner repeated inside every Monitoring sub-tab's content (All Calls, All Extensions, Groups, Call
+         Queue, Campaign all showed the exact same notice, since monScopePeople() isn't scoped to the tab) — now
+         a single compact pill next to the "Monitoring" page title instead, so it appears once no matter which
+         tab is open. Clicking it barges straight in, same action the old "Barge In Now" button took; the small
+         x dismisses it for the rest of this session without barging. */
+      function monAiAlertBadge() {
         var flagged = monScopePeople().filter(function (r) { return personSentiment(r) === 'frustrated' && !MS.aiDismissed[r.dataset.id] });
         if (!flagged.length) return '';
         var r = flagged[0];
-        return '<div style="display:flex;align-items:center;gap:10px;background:#fee2e2;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:9px;padding:8px 12px;margin:12px 18px 0">'
-          + '<span style="width:22px;height:22px;border-radius:7px;background:#dc2626;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M12 2 2 21h20L12 2Zm0 8v4m0 3h.01"/>', 12, '#fff') + '</span>'
-          + '<div style="flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">'
-          + '<span style="font-weight:700;font-size:12.5px;color:#b91c1c;white-space:nowrap">AI Copilot Alert</span>'
-          + '<span style="font-size:12.5px;color:#0f172a">High customer frustration detected on <b>' + esc(r.dataset.name) + '</b>’s call — instant barge-in recommended.</span>'
-          + '</div>'
-          + '<button data-aibarge="' + esc(r.dataset.id) + '" style="box-sizing:border-box;height:28px;padding:0 12px;border:1px solid #dc2626;border-radius:7px;background:#dc2626;color:#fff;font:inherit;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;white-space:nowrap">Barge In Now</button>'
-          + '<button data-aidismiss="' + esc(r.dataset.id) + '" aria-label="Dismiss" style="width:22px;height:22px;border:0;background:none;color:#991b1b;cursor:pointer;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M6 6l12 12M18 6 6 18"/>', 13, '#991b1b') + '</button>'
-          + '</div>';
+        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-left:12px;background:#fee2e2;border:1px solid #fecaca;border-radius:999px;padding:3px 4px 3px 10px">'
+          + '<button data-aibarge="' + esc(r.dataset.id) + '" title="High customer frustration on ' + esc(r.dataset.name) + '’s call — click to barge in" style="display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;color:#b91c1c;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">' + ixSvg('<path d="M12 2 2 21h20L12 2Zm0 8v4m0 3h.01"/>', 13, '#dc2626') + 'AI Alert' + (flagged.length > 1 ? ' (' + flagged.length + ')' : '') + '</button>'
+          + '<button data-aidismiss="' + esc(r.dataset.id) + '" aria-label="Dismiss" style="width:18px;height:18px;border:0;background:none;color:#991b1b;cursor:pointer;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M6 6l12 12M18 6 6 18"/>', 11, '#991b1b') + '</button>'
+          + '</span>';
       }
       /* dummy transcript lines matching the seeded sentiment — stands in for what a real speech-to-text +
          NLP pipeline would surface live, same caveat as personSentiment itself */
@@ -8808,14 +8844,14 @@
         var dash = '<span style="color:#94a3b8">---</span>';
         /* the whole avatar+name block is one button, like All Extensions — clicking the avatar opens the
            profile drawer just as well as clicking the name does */
-        var who = '<button data-monperson="' + esc(p.dataset.id) + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer"><span style="width:38px;height:38px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:13px;position:relative;flex-shrink:0">' + esc(ini(p.dataset.name)) + '<span style="position:absolute;right:0;bottom:0;width:9px;height:9px;border-radius:50%;border:2px solid #fff;background:' + (st === 'Available' ? '#10b981' : st === 'Busy' ? '#f59e0b' : '#cbd5e1') + '"></span></span>'
+        var who = '<button data-monperson="' + esc(p.dataset.id) + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer"><span style="width:38px;height:38px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:13px;position:relative;flex-shrink:0">' + esc(ini(p.dataset.name)) + '<span style="position:absolute;right:0;bottom:0;width:9px;height:9px;border-radius:50%;border:2px solid #fff;background:' + (st === 'Available' ? '#10b981' : st === 'Busy' ? '#2563eb' : '#cbd5e1') + '"></span></span>'
           + '<span style="min-width:0;display:block"><span style="display:block;font-weight:600;color:#0f172a">' + esc(p.dataset.name) + '</span><span style="display:block;font-size:10.5px;font-weight:700;color:#2563eb;letter-spacing:.4px">' + esc(role) + '</span><span style="display:block;font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis">' + esc(p.dataset.email || '') + '</span></span></button>';
         var ext = '<span style="display:flex;align-items:center;gap:6px;font-weight:600;margin-left:50px;font-size:13px;color:#0f172a;margin-top:2px">' + ixSvg(AN_PATH.grid, 13, '#334155') + esc(p.dataset.num || '—') + '</span>';
         var c = onCall ? personActiveCall(p) : null;
         /* status cell stacks presence + AI sentiment (on-call only) above schedule adherence (always shown) —
            see personAdherence/personSentiment; white-space:normal on the badges so the column wraps instead
            of clipping, since this td inherits white-space:nowrap otherwise */
-        var statusCell = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;white-space:normal"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' + (c ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#fef3c7;color:#b45309;white-space:nowrap">On call</span>' + monSentimentDot(p) : dash) + '</div>' + monAdherenceBadge(p) + '</div>';
+        var statusCell = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;white-space:normal"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' + (c ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#eff6ff;color:#1d4ed8;white-space:nowrap">On call</span>' + monSentimentDot(p) : dash) + '</div>' + monAdherenceBadge(p) + '</div>';
         return '<tr><td style="' + td + '"><div style="display:flex;flex-direction:column;gap:4px;min-width:0">' + who + ext + '</div></td><td style="' + td + '">' + (c ? esc(c.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (c ? esc(c.did) : dash) + '</td>'
           + '<td style="' + td + ';font-family:monospace">' + (c ? esc(c.dur) : '00:00') + '</td>'
           + '<td style="' + td + '">' + statusCell + '</td>'
@@ -8943,7 +8979,8 @@
         /* the old sidebar's "MONITORING" label (a small caps heading sitting above the stacked list) dropped
            out when that list became a horizontal tab strip — restoring it as a real page title here, same
            treatment Agent Activity gives "Activity", so the page still says what it is at a glance. */
-        var pageTitle = '<div style="box-sizing:border-box;padding:14px 18px 0;background:#fff"><h2 style="margin:0;font-size:20px;color:#0f172a">Monitoring</h2></div>';
+        var pageTitle = '<div style="box-sizing:border-box;padding:14px 18px 0;background:#fff;display:flex;align-items:center">'
+          + '<h2 style="margin:0;font-size:20px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>';
         var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:4px;padding:8px 18px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
           var on = MS.sub === x[0];
           return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:0;border-radius:9px;background:' + (on ? '#eff6ff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#334155') + ';font:inherit;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 16, on ? '#1d4ed8' : '#64748b') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
@@ -8954,7 +8991,6 @@
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + pageTitle + subTabs
           + toolsBar
-          + monAiAlert()
           + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#f8fafc;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '14px 18px') + '">'
           /* All Calls and Campaign render their table/toolbar bare (no white background of their own), so
              this wrapper supplies the card chrome — and used to only grow to fit the rows inside it, leaving
@@ -8973,7 +9009,6 @@
       function monClick(e) {
         var t;
         if (e.target.closest('[data-monlimsave]')) { var wv = document.querySelector('[data-monlim="waiting"]'), sv = document.querySelector('[data-monlim="sl"]'), av = document.querySelector('[data-monlim="adh"]'); localStorage.setItem('ucaas.monLimits', JSON.stringify({ waiting: Math.max(0, +wv.value || 0), sl: Math.min(100, Math.max(0, +sv.value || 0)), adh: Math.max(0, +av.value || 0) })); note('Alert limits saved'); anRepaint(); return true }
-        if ((t = e.target.closest('[data-monexport]'))) { monExport(t.dataset.monexport); return true }
         if ((t = e.target.closest('[data-mongrp]'))) { var gn = t.dataset.mongrp; MS.open[gn] = !MS.open[gn]; anRepaint(); return true }
         if ((t = e.target.closest('[data-monact]'))) { monAct(t.dataset.monact, +t.dataset.monidx); return true }
         if ((t = e.target.closest('[data-monpin]'))) { monTogglePin(t.dataset.monpin); anRepaint(); return true }
@@ -9077,14 +9112,6 @@
         if (e.target.closest('[data-aacollapse]')) { AA.hideEmpty = !AA.hideEmpty; return anRepaint() }
         if ((t = e.target.closest('[data-aamode]'))) { AA.mode = t.dataset.aamode; return anRepaint() }
         if ((t = e.target.closest('[data-aapick]'))) { AA.agent = t.dataset.aapick; AA.mode = 'individual'; return anRepaint() }
-        if (e.target.closest('[data-aaexport]')) {
-          var aSH = aaParseHour(AA.start); if (aSH == null) aSH = 0;
-          var aEH = aaParseHour(AA.end); if (aEH == null) aEH = 23;
-          if (aEH < aSH) aEH = aSH;
-          if ((AA.mode || 'individual') === 'team') return aaExportTeam(aaAgents(), aSH, aEH, AA.type);
-          var aaAgent = personById(AA.agent); if (!aaAgent) return;
-          return aaExport(aaAgent, aSH, aEH, AA.type);
-        }
       }
       function anChange(e) {
         if (e.target.hasAttribute('data-monqsel')) { MS.queue = e.target.value; anRepaint(); return }
@@ -9106,6 +9133,16 @@
           if (sH && sA) AA.start = aaTo24(sH.value, sA.value);
           if (eH && eA) AA.end = aaTo24(eH.value, eA.value);
           anRepaint();
+        }
+        if (e.target.hasAttribute('data-monexportsel')) { var mFmt = e.target.value; e.target.value = ''; monExport(e.target.getAttribute('data-monexportsel'), mFmt); return }
+        if (e.target.hasAttribute('data-aaexportsel')) {
+          var aFmt = e.target.value; e.target.value = '';
+          var aSH = aaParseHour(AA.start); if (aSH == null) aSH = 0;
+          var aEH = aaParseHour(AA.end); if (aEH == null) aEH = 23;
+          if (aEH < aSH) aEH = aSH;
+          if ((AA.mode || 'individual') === 'team') return aaExportTeam(aaAgents(), aSH, aEH, AA.type, aFmt);
+          var aaAgent = personById(AA.agent); if (!aaAgent) return;
+          return aaExport(aaAgent, aSH, aEH, AA.type, aFmt);
         }
       }
       /* buildAn() itself moved to the very end of the script (just before the initial navigation) — it used to
@@ -9636,11 +9673,11 @@
         var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.map(function (l) { return l.map(esc).join(',') }).join('\n')], { type: 'text/csv' }));
         a.download = name; document.body.appendChild(a); a.click(); a.remove();
       }
-      function exportCSV(list) {
+      function exportPeople(format, list) {
         if (!list.length) { toast('Nothing to export'); return }
-        var lines = [['First name', 'Last name', 'Email', 'Phone', 'Role', 'Extension', 'Group', 'Caller ID', 'Status', 'Presence', 'Location']].concat(list.map(function (r) { var d = r.dataset, pp = d.name.trim().split(/\s+/); return [pp[0] || '', pp.slice(1).join(' '), d.email, d.phone || '', d.role, d.num, d.group, d.num2, d.status, d.presence, d.loc] }));
-        downloadCSV('people.csv', lines);
-        toast('Exported ' + list.length + (list.length === 1 ? ' person' : ' people'));
+        var headers = ['First name', 'Last name', 'Email', 'Phone', 'Role', 'Extension', 'Group', 'Caller ID', 'Status', 'Presence', 'Location'];
+        var rows = list.map(function (r) { var d = r.dataset, pp = d.name.trim().split(/\s+/); return [pp[0] || '', pp.slice(1).join(' '), d.email, d.phone || '', d.role, d.num, d.group, d.num2, d.status, d.presence, d.loc] });
+        monExportAs(format, 'people', headers, rows);
       }
       /* ---------- import people from CSV ---------- */
       IC_.upload = '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>'; IC_.download = '<path d="M12 4v12M7 11l5 5 5-5M4 20h16"/>'; IC_.file = '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/>';
@@ -9786,7 +9823,7 @@
         { label: 'Invite people', key: 'add new person invite', icon: 'plus', need: 'people', run: function () { openModal() } },
         { label: 'New group', key: 'create add department', icon: 'users', need: 'people', run: function () { openG(null) } },
         { label: 'Import people from CSV', key: 'upload bulk file', icon: 'upload', need: 'people', run: function () { openImp() } },
-        { label: 'Export people to CSV', key: 'download file', icon: 'download', need: 'export', run: function () { exportCSV(rows().filter(function (r) { return r.dataset.removed === '0' })) } },
+        { label: 'Export people to CSV', key: 'download file', icon: 'download', need: 'export', run: function () { exportPeople('csv', rows().filter(function (r) { return r.dataset.removed === '0' })) } },
         { label: 'New role', key: 'create add role permissions', icon: 'shield', need: 'roles', run: function () { openRoleEditor('new') } },
         { label: 'Go to Roles', key: 'roles permissions page', icon: 'shield', run: function () { showView('roles') } },
         { label: 'New location', key: 'create add site office location', icon: 'pin', need: 'locationsAdd', run: function () { openLocDialog('new') } },
@@ -9928,8 +9965,9 @@
       $('#expSearch').addEventListener('input', function (e) { EX.q = e.target.value; renderExp() });
       $('#expAll').addEventListener('change', function (e) { expFiltered().forEach(function (r) { EX.sel[r.dataset.id] = e.target.checked }); renderExp() });
       $('#expBody').addEventListener('change', function (e) { if (e.target.matches('[data-exid]')) { EX.sel[e.target.getAttribute('data-exid')] = e.target.checked; renderExp() } });
-      $('#expGo').addEventListener('click', function () {
-        var list = expAll().filter(function (r) { return EX.sel[r.dataset.id] }); closeExport(); exportCSV(list);
+      $('#expGo').addEventListener('change', function (e) {
+        var fmt = e.target.value; e.target.value = '';
+        var list = expAll().filter(function (r) { return EX.sel[r.dataset.id] }); closeExport(); exportPeople(fmt, list);
       });
       $('#btnRefresh').addEventListener('click', function () {
         var i = $('#btnRefresh svg'); i.style.transition = 'transform .6s'; i.style.transform = 'rotate(360deg)';
