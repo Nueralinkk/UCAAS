@@ -8287,7 +8287,7 @@
           var metaRow = '<div style="font-size:10.5px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.dataset.group || 'No group') + '</div>';
           return '<div style="box-sizing:border-box;background:#fff;border:1px solid #d7deea;border-left:3px solid ' + leftColor + ';border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.06);padding:9px 11px;display:flex;flex-direction:column;gap:6px;min-width:0">'
             + name + statusRow + metaRow + monAdherenceBadge(p)
-            + (onCall ? '<div style="margin-top:1px">' + monListenBtn(p.dataset.id, true) + '</div>' : '')
+            + '<div style="margin-top:1px">' + monListenBtn(p.dataset.id, true) + '</div>'
             + '</div>';
         }).join('');
       }
@@ -8314,7 +8314,7 @@
             + '<td style="' + td + '"><span style="display:inline-flex;align-items:center;gap:6px;font-weight:600;color:' + statusColor + '"><span style="width:7px;height:7px;border-radius:50%;background:' + statusColor + ';flex-shrink:0"></span>' + esc(statusText) + (onCall ? monSentimentDot(p) : '') + '</span></td>'
             + '<td style="' + td + ';white-space:normal">' + monAdherenceBadge(p) + '</td>'
             + '<td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.dur) : '—') + '</td>'
-            + '<td style="' + td + '">' + (onCall ? monListenBtn(p.dataset.id, true) : '<span style="color:#94a3b8">—</span>') + '</td></tr>';
+            + '<td style="' + td + '">' + monListenBtn(p.dataset.id, true) + '</td></tr>';
         }).join('');
         return '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + '">Name</th><th style="' + th + '">Extension</th><th style="' + th + '">Group</th><th style="' + th + '">Status</th><th style="' + th + '">Adherence</th><th style="' + th + '">Duration</th><th style="' + th + '">Actions</th></tr></thead><tbody>' + rows + '</tbody></table>';
       }
@@ -8930,12 +8930,12 @@
           + '<td style="' + td + ';font-family:monospace">' + (c ? esc(c.dur) : '00:00') + '</td>'
           + '<td style="' + td + '">' + statusCell + '</td>'
           + '<td style="' + td + '">' + (c ? esc(c.dir) : dash) + '</td><td style="' + td + ';color:#64748b;font-size:12px">' + (c ? esc(c.path) : dash) + '</td>'
-          + '<td style="' + td + '">' + (c ? monListenBtn(p.dataset.id, true) : dash) + '</td></tr>';
+          + '<td style="' + td + '">' + monListenBtn(p.dataset.id, true) + '</td></tr>';
       }
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:9px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [22, 12, 12, 7, 14, 7, 13, 13];
+        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [20, 11, 11, 7, 14, 5, 11, 21];
         return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
       }
       function monGroupsView() {
