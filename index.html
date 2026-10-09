@@ -9060,18 +9060,15 @@
            treatment Agent Activity gives "Activity", so the page still says what it is at a glance. */
         var pageTitle = '<div style="box-sizing:border-box;padding:14px 18px 0;background:#fff;display:flex;align-items:center">'
           + '<h2 style="margin:0;font-size:20px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>';
+        /* the Call Queue picker / Campaign select / Summary toggle used to sit in their own bordered bar below
+           this one — moved up into the same row as the tab buttons instead (one shared row, tabs on the left,
+           control pinned to the right via margin-left:auto) rather than a whole extra strip underneath them */
         var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:4px;padding:8px 18px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
           var on = MS.sub === x[0];
           return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:0;border-radius:9px;background:' + (on ? '#eff6ff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#334155') + ';font:inherit;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 16, on ? '#1d4ed8' : '#64748b') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
-        }).join('') + '</div>';
-        /* only render this bar when there's something in it (Call Queue's picker, Campaign's select, or All
-           Extensions' Summary toggle) — All Calls and Groups now have neither, so no empty bordered strip.
-           Every control in here — the Call Queue picker included — sits in one margin-left:auto group pinned
-           to the right edge, matching Campaign's select; there's nothing left-aligned in this bar any more. */
-        var toolsBar = (crumb || select || sumBtn) ? '<div style="box-sizing:border-box;display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid #e8ecf3;background:#fff"><div style="margin-left:auto;display:flex;align-items:center;gap:12px">' + crumb + select + sumBtn + '</div></div>' : '';
+        }).join('') + ((crumb || select || sumBtn) ? '<div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-left:12px">' + crumb + select + sumBtn + '</div>' : '') + '</div>';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + pageTitle + subTabs
-          + toolsBar
           + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#f8fafc;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '14px 18px') + '">'
           /* All Calls and Campaign render their table/toolbar bare (no white background of their own), so
              this wrapper supplies the card chrome — and used to only grow to fit the rows inside it, leaving
