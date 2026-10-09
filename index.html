@@ -8170,7 +8170,7 @@
         return false;
       }
       /* Monitoring: sub-menu (All Calls, All Extensions, Groups, Call Queue, Campaign) with the same layout as the reference */
-      var MS = { sub: 'Campaign', campaign: '', qWaitOpen: false, copilotTab: 'copilot', copilotHistOpen: false, copilotHistView: 'summary' };
+      var MS = { sub: 'Campaign', campaign: '', qWaitOpen: false, copilotTab: 'copilot', copilotHistOpen: false, copilotHistView: 'summary', aiAlertOpen: false };
       var MON_SUB = [
         ['All Calls', 'phone'], ['All Extensions', 'users'], ['Groups', 'tree'], ['Call Queue', 'queues'], ['Campaign', 'grid']
       ];
@@ -8592,16 +8592,43 @@
          banner repeated inside every Monitoring sub-tab's content (All Calls, All Extensions, Groups, Call
          Queue, Campaign all showed the exact same notice, since monScopePeople() isn't scoped to the tab) — now
          a single compact pill next to the "Monitoring" page title instead, so it appears once no matter which
-         tab is open. Clicking it barges straight in, same action the old "Barge In Now" button took; the small
-         x dismisses it for the rest of this session without barging. */
+         tab is open. With exactly one flagged call, the pill itself barges straight in on click — same action
+         the old "Barge In Now" button took — and its small x dismisses without barging. With more than one,
+         clicking can't silently pick one of them for you, so the pill instead opens a short dropdown listing
+         every flagged agent with its own Barge in / dismiss, plus a Dismiss all; barging or dismissing a row
+         shrinks the list live (same MS.aiDismissed bookkeeping either way), dropping back to the single-pill
+         form once only one is left. */
       function monAiAlertBadge() {
         var flagged = monScopePeople().filter(function (r) { return personSentiment(r) === 'frustrated' && !MS.aiDismissed[r.dataset.id] });
         if (!flagged.length) return '';
-        var r = flagged[0];
-        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-left:12px;background:#fee2e2;border:1px solid #fecaca;border-radius:999px;padding:3px 4px 3px 10px">'
-          + '<button data-aibarge="' + esc(r.dataset.id) + '" title="High customer frustration on ' + esc(r.dataset.name) + '’s call — click to barge in" style="display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;color:#b91c1c;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">' + ixSvg('<path d="M12 2 2 21h20L12 2Zm0 8v4m0 3h.01"/>', 13, '#dc2626') + 'AI Alert' + (flagged.length > 1 ? ' (' + flagged.length + ')' : '') + '</button>'
-          + '<button data-aidismiss="' + esc(r.dataset.id) + '" aria-label="Dismiss" style="width:18px;height:18px;border:0;background:none;color:#991b1b;cursor:pointer;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M6 6l12 12M18 6 6 18"/>', 11, '#991b1b') + '</button>'
+        if (flagged.length === 1) {
+          var r = flagged[0];
+          return '<span style="display:inline-flex;align-items:center;gap:6px;margin-left:12px;background:#fee2e2;border:1px solid #fecaca;border-radius:999px;padding:3px 4px 3px 10px">'
+            + '<button data-aibarge="' + esc(r.dataset.id) + '" title="High customer frustration on ' + esc(r.dataset.name) + '’s call — click to barge in" style="display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;color:#b91c1c;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">' + ixSvg('<path d="M12 2 2 21h20L12 2Zm0 8v4m0 3h.01"/>', 13, '#dc2626') + 'AI Alert</button>'
+            + '<button data-aidismiss="' + esc(r.dataset.id) + '" aria-label="Dismiss" style="width:18px;height:18px;border:0;background:none;color:#991b1b;cursor:pointer;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M6 6l12 12M18 6 6 18"/>', 11, '#991b1b') + '</button>'
+            + '</span>';
+        }
+        var open = !!MS.aiAlertOpen;
+        return '<span data-aialertwrap style="position:relative;display:inline-flex;margin-left:12px">'
+          + '<button data-aialerttoggle aria-expanded="' + open + '" style="display:inline-flex;align-items:center;gap:6px;background:#fee2e2;border:1px solid #fecaca;border-radius:999px;padding:4px 10px 4px 10px;color:#b91c1c;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">' + ixSvg('<path d="M12 2 2 21h20L12 2Zm0 8v4m0 3h.01"/>', 13, '#dc2626') + 'AI Alert (' + flagged.length + ')' + ixSvg('<path d="M6 9l6 6 6-6"/>', 13, '#b91c1c') + '</button>'
+          + (open ? monAiAlertPanel(flagged) : '')
           + '</span>';
+      }
+      /* the dropdown shown when more than one call is flagged — a short list so a supervisor can see who needs
+         attention and pick, rather than the pill guessing which one to barge into */
+      function monAiAlertPanel(flagged) {
+        var rows = flagged.map(function (r) {
+          return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid #f1f5f9">'
+            + '<span style="flex:1;min-width:0;font-size:12.5px;font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.dataset.name) + '</span>'
+            + '<button data-aibarge="' + esc(r.dataset.id) + '" style="box-sizing:border-box;height:24px;padding:0 10px;border:1px solid #dc2626;border-radius:6px;background:#dc2626;color:#fff;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;flex-shrink:0;white-space:nowrap">Barge in</button>'
+            + '<button data-aidismiss="' + esc(r.dataset.id) + '" aria-label="Dismiss" style="width:20px;height:20px;border:0;background:none;color:#94a3b8;cursor:pointer;flex-shrink:0;display:grid;place-items:center">' + ixSvg('<path d="M6 6l12 12M18 6 6 18"/>', 11, '#94a3b8') + '</button>'
+            + '</div>';
+        }).join('');
+        return '<div style="position:absolute;top:calc(100% + 6px);left:0;width:260px;background:#fff;border:1px solid #e3e8f1;border-radius:10px;box-shadow:0 10px 24px rgba(15,23,42,.18);z-index:50;overflow:hidden;text-align:left">'
+          + '<div style="padding:7px 10px;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#64748b;background:#f8fafc;border-bottom:1px solid #eef1f5">Needs attention (' + flagged.length + ')</div>'
+          + rows
+          + '<button data-aidismissall style="width:100%;text-align:center;padding:7px;border:0;background:none;color:#64748b;font:inherit;font-size:12px;cursor:pointer">Dismiss all</button>'
+          + '</div>';
       }
       /* dummy transcript lines matching the seeded sentiment — stands in for what a real speech-to-text +
          NLP pipeline would surface live, same caveat as personSentiment itself */
@@ -9014,6 +9041,11 @@
         if ((t = e.target.closest('[data-monpin]'))) { monTogglePin(t.dataset.monpin); anRepaint(); return true }
         if ((t = e.target.closest('[data-aidismiss]'))) { MS.aiDismissed[t.dataset.aidismiss] = true; anRepaint(); return true }
         if ((t = e.target.closest('[data-aibarge]'))) { monSetListen(t.dataset.aibarge, 'barge'); MS.aiDismissed[t.dataset.aibarge] = true; anRepaint(); return true }
+        if (e.target.closest('[data-aialerttoggle]')) { MS.aiAlertOpen = !MS.aiAlertOpen; anRepaint(); return true }
+        if (e.target.closest('[data-aidismissall]')) {
+          monScopePeople().forEach(function (r) { if (personSentiment(r) === 'frustrated') MS.aiDismissed[r.dataset.id] = true });
+          MS.aiAlertOpen = false; anRepaint(); return true;
+        }
         if ((t = e.target.closest('[data-monalertgo]'))) { MS.sub = 'Call Queue'; MS.queue = t.dataset.monalertgo; anRepaint(); return true }
         if ((t = e.target.closest('[data-copilottab]'))) { MS.copilotTab = t.dataset.copilottab; anRepaint(); return true }
         if (e.target.closest('[data-coprhisttoggle]')) { MS.copilotHistOpen = !MS.copilotHistOpen; anRepaint(); return true }
@@ -9026,6 +9058,11 @@
         if ((t = e.target.closest('[data-monsub]'))) { MS.sub = t.dataset.monsub; anRepaint(); return true }
         return false;
       }
+      /* closes the multi-alert dropdown on an outside click — it's an overlay, not an in-flow accordion like
+         Waiting Callers, so it needs the usual click-away dismissal or it'd just sit open over the page */
+      document.addEventListener('click', function (e) {
+        if (MS.aiAlertOpen && !e.target.closest('[data-aialertwrap]')) { MS.aiAlertOpen = false; anRepaint() }
+      });
       function buildAn() {
         var host = $('#viewAnalytics'); if (!host) return;
         if (!document.getElementById('anStyle')) {
