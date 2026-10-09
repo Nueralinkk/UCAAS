@@ -8467,6 +8467,13 @@
            same red as Barge, so a supervisor scanning the table sees which rows actually need attention
            without having to open each one or wait for the AI alert banner to scroll past */
         var danger = mode === 'off' && p && personSentiment(p) === 'frustrated';
+        /* Barge is the most invasive action, so it's reserved for agents who actually need it right now —
+           out of schedule adherence, or (so the AI Copilot Alert's own "Barge In Now" still has a matching
+           button to click) currently reading as frustrated — rather than offered on every single row. Listen
+           and Whisper stay available for everyone. An agent already barged into keeps their Barge button
+           regardless, same as the one-way-door rule below — recovering mid-call shouldn't strand the stop
+           control. */
+        var bargeWorthy = p && (personAdherence(p) || personSentiment(p) === 'frustrated');
         var THEME = {
           listen: { on: '#2563eb', fg: '#eff6ff', bg: '#eff6ff', bd: '#bfdbfe', tx: '#1d4ed8' },
           whisper: { on: '#d97706', fg: '#fffbeb', bg: '#fffbeb', bd: '#fde68a', tx: '#b45309' },
@@ -8481,7 +8488,7 @@
         /* the Genesys one-way-door rule — once barged in, the only legal next step is stopping, never a direct
            jump to Listen/Whisper — is enforced here at the UI level too (only Barge renders at all while
            barged in) as well as inside monSetListen itself, which doesn't trust the DOM blindly */
-        var modes = mode === 'barge' ? ['barge'] : ['listen', 'whisper', 'barge'].filter(function (m) { return { listen: canL, whisper: canW, barge: canB }[m] });
+        var modes = mode === 'barge' ? ['barge'] : ['listen', 'whisper', 'barge'].filter(function (m) { return { listen: canL, whisper: canW, barge: canB && bargeWorthy }[m] });
         var btns = modes.map(function (m) {
           var on = mode === m, t = THEME[m];
           return '<button data-monlistenbtn="' + esc(id) + '" data-monmode="' + m + '" title="' + (on ? 'Stop ' + LABEL[m].toLowerCase() + 'ing' : LABEL[m]) + '" style="box-sizing:border-box;flex:1;min-width:0;height:26px;padding:0 3px;border:1px solid ' + (on ? t.on : t.bd) + ';border-radius:6px;background:' + (on ? t.on : t.bg) + ';color:' + (on ? t.fg : t.tx) + ';font:inherit;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;overflow:hidden">' + ixSvg(ICON[m], 10, on ? t.fg : t.tx) + '<span style="overflow:hidden;text-overflow:ellipsis">' + (on ? 'Stop' : LABEL[m]) + '</span></button>';
