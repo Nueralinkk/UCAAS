@@ -8354,7 +8354,7 @@
           + monExtViewToggle() + monExportSelect('data-monexportsel="ext"') + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var bodyHtml = MS.extView === 'table'
           ? '<div id="monExtBody" style="box-sizing:border-box;overflow-x:auto">' + monExtTableHtml() + '</div>'
-          : '<div id="monExtBody" style="box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:12px;padding:12px">' + monExtCardsHtml() + '</div>';
+          : '<div id="monExtBody" style="box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:12px;padding:12px">' + monExtCardsHtml() + '</div>';
         var grid = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar + bodyHtml + '</div>';
         return cards + grid;
       }
@@ -8454,6 +8454,10 @@
          Roles > Monitoring sub-permission. State is kept per agent id, in-memory only (it's a simulated phone
          system — there's nothing real to stay connected to across a reload). */
       var MON_MODE = {};
+      /* was a single <select> with Off/Listen/Whisper/Barge as options — replaced with 3 small buttons (one
+         per mode a supervisor is permitted to use) so each action is a direct one-click target instead of a
+         dropdown to open first, and so the idle state doesn't need the dropdown's slightly odd "Off reads as
+         'Monitor'" relabeling trick: with buttons, idle just means none of the three are filled in. */
       function monListenBtn(id, noHist) {
         var canL = can('listenCall'), canW = can('whisperCall'), canB = can('bargeCall');
         if (!canL && !canW && !canB) return '<span style="color:#94a3b8;font-size:11.5px">No access</span>';
@@ -8463,33 +8467,30 @@
            same red as Barge, so a supervisor scanning the table sees which rows actually need attention
            without having to open each one or wait for the AI alert banner to scroll past */
         var danger = mode === 'off' && p && personSentiment(p) === 'frustrated';
-        var theme = {
-          off: danger ? { bg: '#fef2f2', bd: '#fca5a5', fg: '#b91c1c' } : { bg: '#fff', bd: '#94a3b8', fg: '#334155' },
-          listen: { bg: '#eff6ff', bd: '#bfdbfe', fg: '#1d4ed8' },
-          whisper: { bg: '#fffbeb', bd: '#fde68a', fg: '#b45309' },
-          barge: { bg: '#fef2f2', bd: '#fecaca', fg: '#b91c1c' }
-        }[mode];
-        /* a dropdown, not a click-to-cycle button — it lets a supervisor jump straight to any mode they're
-           allowed to use (e.g. Barge without passing through Listen first), and the available modes are self-
-           explanatory from the option list instead of needing a tooltip to explain what the next click does.
-           Genesys rule, matched here: once barged in you can't jump straight back to Listen/Whisper — the only
-           way out is to stop barging first, then re-enter from Off like normal. While idle, the "Off" option
-           reads "Monitor" instead — there's nothing to turn off yet, and it reads as an invitation to act. */
-        var opts = mode === 'barge'
-          ? '<option value="barge" selected>Barge</option><option value="off">Stop Barging</option>'
-          : '<option value="off"' + (mode === 'off' ? ' selected' : '') + '>' + (mode === 'off' ? 'Monitor' : 'Off') + '</option>'
-          + (canL ? '<option value="listen"' + (mode === 'listen' ? ' selected' : '') + '>Listen</option>' : '')
-          + (canW ? '<option value="whisper"' + (mode === 'whisper' ? ' selected' : '') + '>Whisper</option>' : '')
-          + (canB ? '<option value="barge">Barge</option>' : '');
+        var THEME = {
+          listen: { on: '#2563eb', fg: '#eff6ff', bg: '#eff6ff', bd: '#bfdbfe', tx: '#1d4ed8' },
+          whisper: { on: '#d97706', fg: '#fffbeb', bg: '#fffbeb', bd: '#fde68a', tx: '#b45309' },
+          barge: { on: '#dc2626', fg: '#fef2f2', bg: danger ? '#fef2f2' : '#fff', bd: danger ? '#fca5a5' : '#cbd5e1', tx: '#b91c1c' }
+        };
+        var ICON = {
+          listen: '<path d="M4 14v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+          whisper: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+          barge: IX_ICON.phone
+        };
+        var LABEL = { listen: 'Listen', whisper: 'Whisper', barge: 'Barge' };
+        /* the Genesys one-way-door rule — once barged in, the only legal next step is stopping, never a direct
+           jump to Listen/Whisper — is enforced here at the UI level too (only Barge renders at all while
+           barged in) as well as inside monSetListen itself, which doesn't trust the DOM blindly */
+        var modes = mode === 'barge' ? ['barge'] : ['listen', 'whisper', 'barge'].filter(function (m) { return { listen: canL, whisper: canW, barge: canB }[m] });
+        var btns = modes.map(function (m) {
+          var on = mode === m, t = THEME[m];
+          return '<button data-monlistenbtn="' + esc(id) + '" data-monmode="' + m + '" title="' + (on ? 'Stop ' + LABEL[m].toLowerCase() + 'ing' : LABEL[m]) + '" style="box-sizing:border-box;flex:1;min-width:0;height:26px;padding:0 3px;border:1px solid ' + (on ? t.on : t.bd) + ';border-radius:6px;background:' + (on ? t.on : t.bg) + ';color:' + (on ? t.fg : t.tx) + ';font:inherit;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;overflow:hidden">' + ixSvg(ICON[m], 10, on ? t.fg : t.tx) + '<span style="overflow:hidden;text-overflow:ellipsis">' + (on ? 'Stop' : LABEL[m]) + '</span></button>';
+        }).join('');
         /* kept deliberately compact (fixed width + small flex-shrink:0 history icon) — this sits in a narrow,
-           fixed-width "Actions" table column, and the first version overflowed past the table's own right edge
+           fixed-width "Actions" table column, and an earlier version overflowed past the table's own right edge
            because nothing constrained its width, which only showed up once an agent actually had an active call */
         var hist = noHist ? '' : '<button data-monhist="' + esc(id) + '" title="View monitoring history for this agent" style="box-sizing:border-box;width:24px;height:26px;flex-shrink:0;border:1px solid #e2e8f0;border-radius:7px;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:3px">' + ico2('history', '#64748b', 12) + '</button>';
-        /* the select is a flex child (flex:1, not a fixed px width) so it actually fills whatever the table
-           column gives it instead of overflowing a narrow one — a fixed width was the original overflow bug
-           this control had before, and percentage table columns at common laptop widths hit the same wall */
-        return '<span style="display:flex;align-items:center;width:100%;max-width:100%">'
-          + '<select data-monlisten="' + esc(id) + '" title="Listen in, whisper to the agent, or barge into the call" style="box-sizing:border-box;flex:1;min-width:0;max-width:120px;height:28px;padding:0 4px;border:1px solid ' + theme.bd + ';border-radius:7px;background:' + theme.bg + ';color:' + theme.fg + ';font:inherit;font-size:11px;font-weight:700;cursor:pointer">' + opts + '</select>' + hist + '</span>';
+        return '<span style="display:flex;align-items:center;gap:3px;width:100%;max-width:100%">' + btns + hist + '</span>';
       }
       function monSetListen(id, mode) {
         var p = personById(id), pname = p ? p.dataset.name : 'agent';
@@ -8527,17 +8528,21 @@
         if ($('#viewAnalytics').style.display !== 'none') anRepaint();
         if (drawer.style.display === 'flex' && ctx && ctx.dataset.id === id) paintDrawerExtra(ctx);
       }
-      /* the Listen/Whisper/Barge dropdown also appears in the profile drawer's "currently on a call" card, which
-         can be open while on any page, not just Monitoring — so it needs its own always-on change handler */
-      document.addEventListener('change', function (e) { var t = e.target.closest('[data-monlisten]'); if (t) monSetListen(t.dataset.monlisten, t.value) });
-      /* native <select> elements don't fire 'change' when you pick the option that's already selected, so
-         re-selecting Whisper/Barge from a dropdown that's already on that value — the normal way to get the
-         Copilot dialog back after closing it without actually stopping — needs its own trigger. mousedown
-         fires before the browser's own option list opens, so this doesn't fight the native picker. */
-      document.addEventListener('mousedown', function (e) {
-        var t = e.target.closest && e.target.closest('[data-monlisten]'); if (!t) return;
-        var id = t.dataset.monlisten, mode = MON_MODE[id] || 'off';
-        if ((mode === 'whisper' || mode === 'barge') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
+      /* the Listen/Whisper/Barge buttons also appear in the profile drawer's "currently on a call" card, which
+         can be open while on any page, not just Monitoring, so this is a global click handler rather than one
+         scoped to #viewAnalytics. Clicking any other permitted mode switches to it (monSetListen rejects
+         anything the one-way-door rule or role permissions don't allow, regardless of what's rendered).
+         Clicking the already-active mode's button normally stops it — except Whisper/Barge can lose their
+         Copilot dialog in the background (starting a different agent's call steals it, see MON_COPILOT_OPEN
+         below), and clicking the still-active button in that state brings the dialog back instead of stopping,
+         the same recovery path the old dropdown's "reselect the same value" trick gave re-selecting it. */
+      document.addEventListener('click', function (e) {
+        var t = e.target.closest('[data-monlistenbtn]'); if (!t) return;
+        var id = t.dataset.monlistenbtn, m = t.dataset.monmode, cur = MON_MODE[id] || 'off';
+        if (cur === m) {
+          if ((m === 'whisper' || m === 'barge') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
+          else monSetListen(id, 'off');
+        } else monSetListen(id, m);
       });
       /* Notes tab: just updates the backing store, no re-render — repainting on every keystroke would blow
          away the textarea's cursor position for no reason, since nothing else on screen depends on its value */
