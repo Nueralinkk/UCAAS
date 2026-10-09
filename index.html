@@ -7828,17 +7828,24 @@
           return '<span style="display:inline-flex;gap:4px">' + hourSel + apSel + '</span>';
         };
         var mode = AA.mode || 'individual';
-        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
-          + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + aaModeToggle() + (mode === 'individual' ? agentSel + monAdherenceBadge(agent) : '') + '</div>'
-          + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' + rangeSel
+        /* the title row (who/which mode) and the filter row (when/what, plus actions) used to compete for the
+           same line and wrap into a lopsided second row — hugging the left edge with empty space after Back.
+           Splitting them into their own rows, with the filter row as a full-width card (same pattern as the
+           Alerts card in Monitoring) and the action buttons pushed to the right via margin-left:auto, makes
+           it read as one deliberate bar spanning the page instead of two mismatched rows. */
+        var headerRow = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + aaModeToggle() + (mode === 'individual' ? agentSel + monAdherenceBadge(agent) : '') + '</div>';
+        var filterBar = '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+          + rangeSel
           + timeFields('data-aastarth', 'data-aastarta', AA.start)
           + '<span style="color:#94a3b8">-</span>'
           + timeFields('data-aaendh', 'data-aaenda', AA.end)
           + typeSel
+          + '<div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">'
           + '<button data-aasubmit style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Submit</button>'
           + '<button data-aaexport style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Export CSV</button>'
           + '<button data-aaback style="box-sizing:border-box;height:36px;padding:0 18px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;font:inherit;font-size:13px;font-weight:600;cursor:pointer">Back</button>'
           + '</div></div>';
+        var toolbar = headerRow + filterBar;
         var startH = aaParseHour(AA.start); if (startH == null) startH = 0;
         var endH = aaParseHour(AA.end); if (endH == null) endH = 23;
         if (endH < startH) endH = startH;
@@ -8162,7 +8169,7 @@
         return false;
       }
       /* Monitoring: sub-menu (All Calls, All Extensions, Groups, Call Queue, Campaign) with the same layout as the reference */
-      var MS = { sub: 'Campaign', campaign: '', collapsed: false, qWaitOpen: false, copilotTab: 'copilot', copilotHistOpen: false, copilotHistView: 'summary' };
+      var MS = { sub: 'Campaign', campaign: '', qWaitOpen: false, copilotTab: 'copilot', copilotHistOpen: false, copilotHistView: 'summary' };
       var MON_SUB = [
         ['All Calls', 'phone'], ['All Extensions', 'users'], ['Groups', 'tree'], ['Call Queue', 'queues'], ['Campaign', 'grid']
       ];
@@ -8901,37 +8908,48 @@
              instead of a separate picker control elsewhere on the page. Pinned queues sort first, marked with a star. */
           var qListC = qData().queues.slice().sort(function (a, b) { return (monIsPinned(b.name) ? 1 : 0) - (monIsPinned(a.name) ? 1 : 0) });
           var curPinned = monIsPinned(MS.queue);
-          /* both the pin and the dropdown now sit inside one visibly-boxed chip (border + light fill), and the
-             dropdown text is link-blue — a plain bold label with no border looked identical to inert text, so
-             nothing here signalled "this is clickable" (reported as "I don't see it" / "gets lost in background") */
-          crumb = '<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#64748b">'
-            + '<span style="cursor:pointer" data-monsub="All Calls">Monitoring</span><span>›</span>'
-            + '<span>Call Queue</span><span>›</span>'
-            + '<span style="display:inline-flex;align-items:center;gap:2px;border:1px solid #cbd5e1;border-radius:10px;padding:3px 10px 3px 4px;background:#f8fafc">'
+          /* the "Monitoring › Call Queue ›" text in front of this used to be the only way to tell which queue
+             you were on, back when the sidebar didn't show it either — now the tab strip + page title already
+             say "Monitoring" and "Call Queue", so only the actual picker (pin + dropdown) earns its place here.
+             Both still sit inside one visibly-boxed chip (border + light fill), dropdown text link-blue, so it
+             still reads as clickable on its own without the breadcrumb trail explaining it. */
+          crumb = '<span style="display:inline-flex;align-items:center;gap:2px;border:1px solid #cbd5e1;border-radius:10px;padding:3px 10px 3px 4px;background:#f8fafc">'
             + '<button data-monpin="' + esc(MS.queue) + '" title="' + (curPinned ? 'Unpin this queue' : 'Pin this queue to My queues') + '" style="box-sizing:border-box;width:24px;height:24px;border:0;background:none;padding:0;cursor:pointer;color:' + (curPinned ? '#f59e0b' : '#94a3b8') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">' + ixSvg('<path d="M12 2l2.6 6.9L22 9.8l-5.5 4.8L18 22l-6-4-6 4 1.5-7.4L2 9.8l7.4-.9z" fill="' + (curPinned ? 'currentColor' : 'none') + '"/>', 15, curPinned ? '#f59e0b' : '#94a3b8') + '</button>'
             + '<span style="position:relative;display:inline-flex;align-items:center">'
             + '<select data-monqsel style="box-sizing:border-box;border:0;background:none;font:inherit;font-size:14px;font-weight:700;color:#1d4ed8;padding:2px 20px 2px 2px;cursor:pointer;-webkit-appearance:none;appearance:none">'
             + qListC.map(function (x) { return '<option value="' + esc(x.name) + '"' + (x.name === MS.queue ? ' selected' : '') + '>' + (monIsPinned(x.name) ? '★ ' : '') + esc(x.name) + '</option>' }).join('') + '</select>'
             + '<span style="position:absolute;right:2px;top:50%;transform:translateY(-50%);pointer-events:none;color:#1d4ed8">' + ixSvg('<path d="M6 9l6 6 6-6"/>', 13, '#1d4ed8') + '</span>'
             + '</span>'
-            + '</span></div>';
+            + '</span>';
         } else {
-          var crumbLabel = MS.sub === 'Groups' ? 'Department' : MS.sub === 'Campaign' && MS.campaign ? 'Campaign › ' + MS.campaign : MS.sub;
-          crumb = '<div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#64748b"><span style="cursor:pointer" data-monsub="All Calls">Monitoring</span><span>›</span><b style="color:#0f172a;font-weight:600">' + esc(crumbLabel) + '</b></div>';
+          /* the plain "Monitoring › All Calls"-style trail is gone — the tab strip above already highlights
+             which of the five sections is active, and the page title already says "Monitoring", so this was
+             purely restating both in smaller, grayer text right below them. */
+          crumb = '';
         }
         var camps = CGROUPS.filter(function (g) { return g.kind === 'lead' });
         var select = MS.sub === 'Campaign' ? '<select data-moncamp style="box-sizing:border-box;height:38px;min-width:220px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13.5px;background:#fff">'
           + '<option value="">Select Campaign</option>' + camps.map(function (c) { return '<option' + (c.name === MS.campaign ? ' selected' : '') + '>' + esc(c.name) + '</option>' }).join('') + '</select>' : '';
         var sumBtn = MS.sub === 'All Extensions' ? '<label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;color:#0f172a"><span>Summary</span><button data-monsum role="switch" aria-checked="' + MS.summary + '" style="box-sizing:border-box;width:42px;height:24px;border:0;border-radius:999px;background:' + (MS.summary ? '#2563eb' : '#cbd5e1') + ';position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:' + (MS.summary ? '21px' : '3px') + ';width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s"></span></button></label>' : '';
-        var side = '<aside id="monSide" style="box-sizing:border-box;width:' + (MS.collapsed ? '0' : '220px') + ';flex-shrink:0;border-right:' + (MS.collapsed ? '0' : '1px solid #e8ecf3') + ';background:#fff;position:relative;overflow:visible">'
-          + (MS.collapsed ? '' : '<div style="padding:18px 20px 10px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#64748b;font-weight:700">Monitoring</div>'
-            + MON_SUB.map(function (x) {
-              var on = MS.sub === x[0];
-              return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:14px 18px;border:0;border-bottom:1px solid #f1f5f9;background:none;font:inherit;font-size:14px;color:' + (on ? '#2563eb' : '#334155') + ';font-weight:' + (on ? '600' : '500') + ';cursor:pointer;text-align:left">' + ixSvg(MON_ICON[x[1]], 17, 'currentColor') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
-            }).join(''))
-          + '<button data-moncollapse aria-label="Toggle sidebar" style="position:absolute;top:50%;right:-12px;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:0;background:#2563eb;color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px rgba(37,99,235,.35);z-index:2">' + ixSvg(MS.collapsed ? MON_ICON.chevR : MON_ICON.chev, 13, '#fff') + '</button></aside>';
+        /* was a 220px left sidebar (All Calls/All Extensions/Groups/Call Queue/Campaign stacked vertically) —
+           moved to a horizontal tab strip above the content instead. Two wins: it gives every table back that
+           220px of width (the exact margin the Monitor dropdown and Contact/DID columns were short on before),
+           and a left-to-right row of five tabs is a more familiar "which section am I on" pattern than a
+           collapsible sidebar, which also removes a whole affordance (collapse/expand) a new user had to learn. */
+        /* the old sidebar's "MONITORING" label (a small caps heading sitting above the stacked list) dropped
+           out when that list became a horizontal tab strip — restoring it as a real page title here, same
+           treatment Agent Activity gives "Activity", so the page still says what it is at a glance. */
+        var pageTitle = '<div style="box-sizing:border-box;padding:16px 22px 0;background:#fff"><h2 style="margin:0;font-size:20px;color:#0f172a">Monitoring</h2></div>';
+        var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:4px;padding:10px 22px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
+          var on = MS.sub === x[0];
+          return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:0;border-radius:9px;background:' + (on ? '#eff6ff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#334155') + ';font:inherit;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 16, on ? '#1d4ed8' : '#64748b') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+        }).join('') + '</div>';
+        /* only render this bar when there's something in it (Call Queue's picker, Campaign's select, or All
+           Extensions' Summary toggle) — All Calls and Groups now have neither, so no empty bordered strip */
+        var toolsBar = (crumb || select || sumBtn) ? '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid #e8ecf3;background:#fff">' + crumb + (select || sumBtn) + '</div>' : '';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
-          + '<div style="box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid #e8ecf3;background:#fff">' + crumb + (select || sumBtn) + '</div>'
+          + pageTitle + subTabs
+          + toolsBar
           + monAiAlert()
           + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#eef2fa;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '18px 22px') + '">'
           + (['All Extensions', 'Groups', 'Call Queue'].indexOf(MS.sub) > -1 ? '<div>' : '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;min-height:' + (MS.sub === 'Campaign' && !MS.campaign ? '100%' : 'auto') + ';overflow:hidden">') + bodyHtml + '</div></div></div>';
@@ -8939,7 +8957,7 @@
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>' + monLocked() + '</div>';
         return '<div style="box-sizing:border-box;display:flex;height:calc(100vh - 150px);min-height:460px;background:#f4f6fb;overflow:hidden">'
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>'
-          + side + content + '</div>' + monCopilotDialog();
+          + content + '</div>' + monCopilotDialog();
       }
       function monClick(e) {
         var t;
@@ -8960,7 +8978,6 @@
         if (e.target.closest('[data-monqwait]')) { MS.qWaitOpen = !MS.qWaitOpen; anRepaint(); return true }
         if ((t = e.target.closest('[data-monperson]'))) { var mp = personById(t.dataset.monperson); if (mp) openDrawer(mp); return true }
         if ((t = e.target.closest('[data-monsub]'))) { MS.sub = t.dataset.monsub; anRepaint(); return true }
-        if (e.target.closest('[data-moncollapse]')) { MS.collapsed = !MS.collapsed; anRepaint(); return true }
         return false;
       }
       function buildAn() {
