@@ -8236,11 +8236,11 @@
       function monCountText() { return 'Showing ' + MS.list.length + ' of ' + monCallList().length + ' calls' }
       function monCallsView() {
         var rowsHtml = monCallRowsHtml();
-        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:12px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-        var sel = 'box-sizing:border-box;height:38px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13px;background:#fff';
-        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #eef1f5">'
-          + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All calls</div><div id="monCallsCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monCountText()) + '</div></div>'
-          + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monq value="' + esc(MS.q) + '" placeholder="Search number, name or path" autocomplete="off" style="box-sizing:border-box;height:38px;width:220px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font:inherit;font-size:13px;outline:0">'
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:10px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        var sel = 'box-sizing:border-box;height:34px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:12.5px;background:#fff';
+        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #eef1f5">'
+          + '<div><div style="font-size:15px;font-weight:700;color:#0f172a">All calls</div><div id="monCallsCount" style="font-size:12px;color:#64748b;margin-top:1px">' + esc(monCountText()) + '</div></div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monq value="' + esc(MS.q) + '" placeholder="Search number, name or path" autocomplete="off" style="box-sizing:border-box;height:34px;width:220px;border:1px solid #cbd5e1;border-radius:9px;padding:0 12px;font:inherit;font-size:12.5px;outline:0">'
           + monExportSelect('data-monexportsel="calls"') + '<select data-monst style="' + sel + '">' + ['All', 'Completed', 'Missed'].map(function (o) { return '<option' + (o === MS.status ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>'
           + '<select data-mondir style="' + sel + '">' + ['All', 'Inbound', 'Outbound'].map(function (o) { return '<option' + (o === MS.dir ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var head = '<thead><tr>' + ['From', 'DID', 'Duration', 'Status', 'Direction', 'To', 'Call path', 'Actions'].map(function (h, k) { return '<th style="' + th + ';width:' + [15, 14, 9, 10, 10, 16, 16, 10][k] + '%">' + h + '</th>' }).join('') + '</tr></thead>';
@@ -8285,7 +8285,7 @@
             + '<span style="font-size:11px;color:#94a3b8;font-variant-numeric:tabular-nums;font-family:monospace">' + (onCall ? esc(call.dur) : '—') + '</span>'
             + '</div>';
           var metaRow = '<div style="font-size:10.5px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.dataset.group || 'No group') + '</div>';
-          return '<div style="box-sizing:border-box;background:#fff;border:1px solid #d7deea;border-left:3px solid ' + leftColor + ';border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.06);padding:12px 14px;display:flex;flex-direction:column;gap:7px;min-width:0">'
+          return '<div style="box-sizing:border-box;background:#fff;border:1px solid #d7deea;border-left:3px solid ' + leftColor + ';border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.06);padding:9px 11px;display:flex;flex-direction:column;gap:6px;min-width:0">'
             + name + statusRow + metaRow + monAdherenceBadge(p)
             + (onCall ? '<div style="margin-top:1px">' + monListenBtn(p.dataset.id, true) + '</div>' : '')
             + '</div>';
@@ -8340,21 +8340,21 @@
         var waiting = qData().waiting;
         var card = function (label, value, icon, tone) {
           var c = { grey: ['#eef2f7', '#334155'], green: ['#dcfce7', '#15803d'], amber: ['#fef3c7', '#b45309'], red: ['#fee2e2', '#b91c1c'] }[tone];
-          return '<div style="box-sizing:border-box;flex:1;min-width:0;background:#fff;border:1px solid #e3e8f1;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
-            + '<div><div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">' + label + '</div><div style="font-size:24px;font-weight:700;color:#0f172a;margin-top:6px">' + value + '</div></div>'
-            + '<span style="width:32px;height:32px;border-radius:50%;background:' + c[0] + ';color:' + c[1] + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(icon, 15, c[1]) + '</span></div>';
+          return '<div style="box-sizing:border-box;flex:1;min-width:0;background:#fff;border:1px solid #e3e8f1;border-radius:11px;padding:10px 13px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+            + '<div><div style="font-size:11.5px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">' + label + '</div><div style="font-size:21px;font-weight:700;color:#0f172a;margin-top:4px">' + value + '</div></div>'
+            + '<span style="width:28px;height:28px;border-radius:50%;background:' + c[0] + ';color:' + c[1] + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(icon, 14, c[1]) + '</span></div>';
         };
-        var cards = MS.summary ? '<div style="display:flex;gap:12px;margin-bottom:14px">'
+        var cards = MS.summary ? '<div style="display:flex;gap:10px;margin-bottom:10px">'
           + card('Calls waiting', String(waiting), MON_ICON.phone, 'grey') + card('Online users', String(online), MON_ICON.users, 'green')
           + card('Offline users', String(offline), MON_ICON.chev, 'red') + card('Users on call', String(busy), MON_ICON.phone, 'amber') + '</div>' : '';
         var sel = 'box-sizing:border-box;height:34px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:12.5px;background:#fff';
-        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #eef1f5">'
-          + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All extensions</div><div id="monExtCount" style="font-size:12.5px;color:#64748b;margin-top:2px">' + esc(monExtCountText()) + '</div></div>'
+        var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #eef1f5">'
+          + '<div><div style="font-size:15px;font-weight:700;color:#0f172a">All extensions</div><div id="monExtCount" style="font-size:12px;color:#64748b;margin-top:1px">' + esc(monExtCountText()) + '</div></div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monexq value="' + esc(MS.exq) + '" placeholder="Search name, extension or group" autocomplete="off" style="box-sizing:border-box;height:34px;width:220px;border:1px solid #cbd5e1;border-radius:9px;padding:0 12px;font:inherit;font-size:12.5px;outline:0">'
           + monExtViewToggle() + monExportSelect('data-monexportsel="ext"') + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var bodyHtml = MS.extView === 'table'
           ? '<div id="monExtBody" style="box-sizing:border-box;overflow-x:auto">' + monExtTableHtml() + '</div>'
-          : '<div id="monExtBody" style="box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px;padding:14px">' + monExtCardsHtml() + '</div>';
+          : '<div id="monExtBody" style="box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:12px;padding:12px">' + monExtCardsHtml() + '</div>';
         var grid = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar + bodyHtml + '</div>';
         return cards + grid;
       }
@@ -8387,7 +8387,7 @@
           return '<button data-monalertgo="' + esc(a.q) + '" title="Go to ' + esc(a.q) + '" style="display:inline-flex;align-items:center;gap:6px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:999px;padding:5px 12px;font-size:12px;font:inherit;cursor:pointer"><span style="width:7px;height:7px;border-radius:50%;background:#dc2626;flex-shrink:0"></span><b>' + esc(a.q) + '</b>' + esc(a.t) + '</button>';
         }).join('') : '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;border-radius:999px;padding:5px 12px;font-size:12px"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0"></span>All queues are within their limits</span>';
         /* switched off: just the title and the toggle, nothing else — the limits form and alert chips disappear */
-        return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;padding:14px 18px;margin-bottom:14px">'
+        return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:13px;padding:11px 14px;margin-bottom:10px">'
           + '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">'
           + '<div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#0f172a">Alerts' + (on && al.length ? '<span style="background:#dc2626;color:#fff;font-size:11px;border-radius:999px;padding:1px 8px">' + al.length + '</span>' : '') + '</div>'
           + '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">' + (on ? form : '') + toggle + '</div></div>'
@@ -8909,7 +8909,7 @@
       function monAgentRow(p, i) {
         var av = AVS[(+p.dataset.av) % AVS.length], st = p.dataset.presence, onCall = st === 'Busy';
         var role = p.dataset.role === 'Account owner' ? 'ADMIN' : (p.dataset.role || '').toUpperCase();
-        var td = 'padding:14px 10px;font-size:13px;color:#0f172a;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        var td = 'padding:10px 10px;font-size:13px;color:#0f172a;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
         var dash = '<span style="color:#94a3b8">---</span>';
         /* the whole avatar+name block is one button, like All Extensions — clicking the avatar opens the
            profile drawer just as well as clicking the name does */
@@ -8929,7 +8929,7 @@
       }
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
-        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:12px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:9px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
         var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [22, 12, 12, 7, 14, 7, 13, 13];
         return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
       }
@@ -8946,12 +8946,12 @@
             return '<span title="' + esc(p.dataset.name) + '" style="width:30px;height:30px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-size:11px;font-weight:700;border:2px solid #fff;margin-left:' + (k ? '-8px' : '0') + '">' + esc(ini(p.dataset.name)) + '</span>';
           }).join('') + (mem.length > 4 ? '<span style="width:30px;height:30px;border-radius:50%;background:#e2e8f0;color:#334155;display:grid;place-items:center;font-size:11px;font-weight:700;border:2px solid #fff;margin-left:-8px">+' + (mem.length - 4) + '</span>' : '');
           var arrow = '<span style="width:44px;height:44px;border-radius:50%;background:' + (open ? '#2563eb' : '#e0ebff') + ';color:' + (open ? '#fff' : '#1d4ed8') + ';display:grid;place-items:center;flex-shrink:0;transition:transform .2s;transform:rotate(' + (open ? '180' : '0') + 'deg);box-shadow:0 4px 10px rgba(37,99,235,.25)">' + ixSvg('M6 9l6 6 6-6', 22, open ? '#fff' : '#1d4ed8') + '</span>';
-          var head = '<button data-mongrp="' + esc(g.name) + '" aria-expanded="' + open + '" style="box-sizing:border-box;width:100%;display:flex;align-items:center;gap:14px;padding:18px 20px;border:0;background:' + (open ? '#f5f9ff' : '#fff') + ';font:inherit;text-align:left;cursor:pointer">'
-            + '<span style="width:44px;height:44px;border-radius:12px;background:' + av0[0] + ';color:' + accent + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(MON_ICON.tree, 20, accent) + '</span>'
-            + '<span style="flex:1;min-width:0"><span style="display:block;font-weight:700;color:#0f172a;font-size:16px">' + esc(g.name) + '</span><span style="display:block;font-size:12.5px;color:#64748b;margin-top:3px">' + esc(sub) + '</span></span>'
-            + '<span style="text-align:center;min-width:76px;padding:8px 12px;border-radius:12px;background:#eef4ff;flex-shrink:0"><span style="display:block;font-size:22px;font-weight:700;color:#2563eb;line-height:1.1">' + mem.length + '</span><span style="display:block;font-size:11px;color:#64748b;margin-top:2px">Total</span></span>' + ixSvg(open ? 'M6 9l6 6 6-6' : 'M9 6l6 6-6 6', 16, '#94a3b8') + '</button>';
-          var body = open ? '<div style="border-top:1px solid #e8eef6;background:#f8fafc;padding:12px 14px 14px">' + monAgentTable(mem, 'Agent') + '</div>' : '';
-          return '<div style="background:#fff;border:1px solid ' + (open ? '#bfdbfe' : '#e3e8f1') + ';border-left:5px solid ' + accent + ';border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:' + (open ? '0 10px 24px rgba(37,99,235,.12)' : '0 2px 8px rgba(15,23,42,.06)') + '">' + head + body + '</div>';
+          var head = '<button data-mongrp="' + esc(g.name) + '" aria-expanded="' + open + '" style="box-sizing:border-box;width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;border:0;background:' + (open ? '#f5f9ff' : '#fff') + ';font:inherit;text-align:left;cursor:pointer">'
+            + '<span style="width:38px;height:38px;border-radius:11px;background:' + av0[0] + ';color:' + accent + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(MON_ICON.tree, 18, accent) + '</span>'
+            + '<span style="flex:1;min-width:0"><span style="display:block;font-weight:700;color:#0f172a;font-size:15px">' + esc(g.name) + '</span><span style="display:block;font-size:12px;color:#64748b;margin-top:2px">' + esc(sub) + '</span></span>'
+            + '<span style="text-align:center;min-width:66px;padding:6px 10px;border-radius:11px;background:#eef4ff;flex-shrink:0"><span style="display:block;font-size:19px;font-weight:700;color:#2563eb;line-height:1.1">' + mem.length + '</span><span style="display:block;font-size:10.5px;color:#64748b;margin-top:1px">Total</span></span>' + ixSvg(open ? 'M6 9l6 6 6-6' : 'M9 6l6 6-6 6', 16, '#94a3b8') + '</button>';
+          var body = open ? '<div style="border-top:1px solid #e8eef6;background:#f8fafc;padding:10px 12px 12px">' + monAgentTable(mem, 'Agent') + '</div>' : '';
+          return '<div style="background:#fff;border:1px solid ' + (open ? '#bfdbfe' : '#e3e8f1') + ';border-left:5px solid ' + accent + ';border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:' + (open ? '0 10px 24px rgba(37,99,235,.12)' : '0 2px 8px rgba(15,23,42,.06)') + '">' + head + body + '</div>';
         }).join('');
       }
       function monQueueView() {
@@ -8969,21 +8969,21 @@
           MS.queue = q.name;
         }
         /* the queue picker now lives in the breadcrumb itself (Monitoring › Call Queue › [dropdown]), see monPage() */
-        var card = function (title, inner) { return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden;margin-bottom:14px"><div style="padding:14px 18px;font-size:15px;font-weight:700;color:#0f172a;border-bottom:1px solid #eef1f5">' + title + '</div>' + inner + '</div>' };
+        var card = function (title, inner) { return '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:13px;overflow:hidden;margin-bottom:10px"><div style="padding:10px 14px;font-size:14px;font-weight:700;color:#0f172a;border-bottom:1px solid #eef1f5">' + title + '</div>' + inner + '</div>' };
         var callers = [];
         for (var k = 0; k < q.waiting; k++) callers.push({ n: 'Caller ' + (k + 1), p: '+1 646 555 07' + k, st: 'Waiting', t: q.longest, path: 'Inbound › ' + q.name });
-        var td = 'padding:13px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:12px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        var td = 'padding:10px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:9px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
         var waitTable = '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + ['Name', 'Phone', 'State', 'Waiting time', 'Call path'].map(function (h, k2) { return '<th style="' + th + ';width:' + [22, 20, 16, 18, 24][k2] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>'
           + callers.map(function (c) { return '<tr><td style="' + td + '">' + esc(c.n) + '</td><td style="' + td + ';font-family:monospace">' + esc(c.p) + '</td><td style="' + td + '">' + esc(c.st) + '</td><td style="' + td + ';font-family:monospace">' + esc(c.t) + '</td><td style="' + td + ';color:#64748b">' + esc(c.path) + '</td></tr>' }).join('') + '</tbody></table>';
         var agents = card('Agents (' + q.members.length + ')', monAgentTable(q.members, 'Members'));
         /* Waiting Callers collapses under its own header, like the Groups accordion — closed by default,
            the count still shows in the header so you don't need to open it just to see how many are waiting */
         var waitOpen = !!MS.qWaitOpen;
-        var waitHead = '<button data-monqwait aria-expanded="' + waitOpen + '" style="box-sizing:border-box;width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border:0;background:none;font:inherit;font-size:15px;font-weight:700;color:#0f172a;cursor:pointer;text-align:left">'
+        var waitHead = '<button data-monqwait aria-expanded="' + waitOpen + '" style="box-sizing:border-box;width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:0;background:none;font:inherit;font-size:14px;font-weight:700;color:#0f172a;cursor:pointer;text-align:left">'
           + '<span>Waiting Callers (' + callers.length + ')</span>'
           + '<span style="transition:transform .2s;transform:rotate(' + (waitOpen ? '180' : '0') + 'deg);display:flex">' + ixSvg('<path d="M6 9l6 6 6-6"/>', 16, '#64748b') + '</span></button>';
-        var waiting = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden;margin-bottom:14px">' + waitHead
+        var waiting = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:13px;overflow:hidden;margin-bottom:10px">' + waitHead
           + (waitOpen ? '<div style="border-top:1px solid #eef1f5">' + (callers.length ? waitTable : monEmpty('No queue calls available', 'Calls routed through queues will appear here.')) + '</div>' : '') + '</div>';
         return monAlertsCard() + agents + waiting;
       }
@@ -9058,18 +9058,18 @@
         /* the old sidebar's "MONITORING" label (a small caps heading sitting above the stacked list) dropped
            out when that list became a horizontal tab strip — restoring it as a real page title here, same
            treatment Agent Activity gives "Activity", so the page still says what it is at a glance. */
-        var pageTitle = '<div style="box-sizing:border-box;padding:14px 18px 0;background:#fff;display:flex;align-items:center">'
-          + '<h2 style="margin:0;font-size:20px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>';
+        var pageTitle = '<div style="box-sizing:border-box;padding:11px 14px 0;background:#fff;display:flex;align-items:center">'
+          + '<h2 style="margin:0;font-size:18px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>';
         /* the Call Queue picker / Campaign select / Summary toggle used to sit in their own bordered bar below
            this one — moved up into the same row as the tab buttons instead (one shared row, tabs on the left,
            control pinned to the right via margin-left:auto) rather than a whole extra strip underneath them */
-        var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:4px;padding:8px 18px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
+        var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:4px;padding:6px 14px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
           var on = MS.sub === x[0];
-          return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:0;border-radius:9px;background:' + (on ? '#eff6ff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#334155') + ';font:inherit;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 16, on ? '#1d4ed8' : '#64748b') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+          return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:0;border-radius:8px;background:' + (on ? '#eff6ff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#334155') + ';font:inherit;font-size:13px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 15, on ? '#1d4ed8' : '#64748b') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
         }).join('') + ((crumb || select || sumBtn) ? '<div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-left:12px">' + crumb + select + sumBtn + '</div>' : '') + '</div>';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + pageTitle + subTabs
-          + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#f8fafc;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '14px 18px') + '">'
+          + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#f8fafc;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '10px 14px') + '">'
           /* All Calls and Campaign render their table/toolbar bare (no white background of their own), so
              this wrapper supplies the card chrome — and used to only grow to fit the rows inside it, leaving
              the gray scroll area exposed underneath on anything short of a full page (a 6-row call log
