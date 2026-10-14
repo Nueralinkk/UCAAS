@@ -7834,7 +7834,7 @@
            Splitting them into their own rows, with the filter row as a full-width card (same pattern as the
            Alerts card in Monitoring) and the action buttons pushed to the right via margin-left:auto, makes
            it read as one deliberate bar spanning the page instead of two mismatched rows. */
-        var headerRow = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><h2 style="margin:0;font-size:20px;color:#0f172a">Activity</h2>' + aaModeToggle() + (mode === 'individual' ? agentSel + monAdherenceBadge(agent) : '') + '</div>';
+        var headerRow = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><h2 style="margin:0;font-size:18px;color:#0f172a">Activity</h2>' + aaModeToggle() + (mode === 'individual' ? agentSel + monAdherenceBadge(agent) : '') + '</div>';
         var filterBar = '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
           + rangeSel
           + timeFields('data-aastarth', 'data-aastarta', AA.start)
@@ -7861,9 +7861,11 @@
         var loc = locByName(agent.dataset.loc), tz = loc ? loc.tz : 'Asia/Kolkata';
         var tzLine = '<div style="text-align:center;font-size:12.5px;color:#64748b;margin-bottom:10px">Timezone - ' + esc(tz) + '</div>';
         var sum = aaSummarize(agent, startH, endH, AA.type);
-        var summaryLine = '<div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:12.5px;color:#475569;margin-bottom:14px">'
-          + '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#16a34a;display:inline-block;flex-shrink:0"></span>Online — <b>' + sum.onlineCount + '</b> session' + (sum.onlineCount === 1 ? '' : 's') + (sum.onlineMinutes ? ' · ' + sum.onlineMinutes + ' min total' : '') + '</span>'
-          + '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:50%;background:#dc2626;display:inline-block;flex-shrink:0"></span>Offline — <b>' + sum.offlineCount + '</b></span>'
+        /* same plain-tile KPI style Monitoring's summary strip uses now, instead of a centered chip row — the
+           two Analytics sections read as one visual system rather than each inventing its own summary widget */
+        var summaryLine = '<div style="display:flex;gap:10px;margin-bottom:14px">'
+          + monKpiTile('Online', sum.onlineCount + ' session' + (sum.onlineCount === 1 ? '' : 's') + (sum.onlineMinutes ? ' · ' + sum.onlineMinutes + 'm' : ''), false)
+          + monKpiTile('Offline', String(sum.offlineCount), false)
           + '</div>';
         var axis = '<div style="display:flex;align-items:center;padding-bottom:10px;border-bottom:2px solid #2563eb;margin-bottom:6px">'
           + '<div style="width:90px;flex-shrink:0"><span style="background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:13px;border-radius:8px;padding:6px 14px;display:inline-block">' + esc(AA.range) + '</span></div>'
@@ -8317,7 +8319,7 @@
             + '<td style="' + td + ';font-family:monospace">' + (onCall ? esc(call.dur) : '—') + '</td>'
             + '<td style="' + td + '">' + monListenBtn(p.dataset.id, true) + '</td></tr>';
         }).join('');
-        return '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + '">Name</th><th style="' + th + '">Extension</th><th style="' + th + '">Group</th><th style="' + th + '">Status</th><th style="' + th + '">Adherence</th><th style="' + th + '">Duration</th><th style="' + th + '">Actions</th></tr></thead><tbody>' + rows + '</tbody></table>';
+        return '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + '">Name</th><th style="' + th + '">Extension</th><th style="' + th + '">Group</th><th style="' + th + '">Status</th><th style="' + th + '">Adherence</th><th style="' + th + '">Duration</th><th style="' + th + '">Supervise</th></tr></thead><tbody>' + rows + '</tbody></table>';
       }
       /* renders whichever of the two the toggle currently has selected, for both the first paint and the
          live-search input handler that patches #monExtBody in place */
@@ -8938,7 +8940,7 @@
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:9px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Actions'], widths = [19, 10, 10, 7, 14, 9, 11, 20];
+        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Supervise'], widths = [19, 10, 10, 7, 14, 9, 11, 20];
         return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
       }
       function monGroupsView() {
@@ -9038,20 +9040,24 @@
          it's one shared strip monPage() puts above every Monitoring sub-tab, so the org-wide snapshot is
          visible no matter which section a supervisor is looking at. The Summary toggle still hides it for
          anyone who'd rather not see it — same control, just no longer limited to a single tab. */
+      /* plain label + number, no icon badge — matches the reference site's own KPI tiles, which lead with the
+         number and only add color when a tile actually needs attention rather than tinting every tile
+         regardless of whether anything's wrong. Shared between Monitoring's KPI strip and Agent Activity's
+         online/offline summary so the two Analytics sections read as the same visual system. */
+      function monKpiTile(label, value, alert) {
+        return '<div style="box-sizing:border-box;flex:1;min-width:0;background:#fff;border:1px solid #e3e8f1;border-top:2px solid ' + (alert ? '#dc2626' : '#e3e8f1') + ';border-radius:10px;padding:10px 13px">'
+          + '<div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">' + label + '</div>'
+          + '<div style="font-size:22px;font-weight:700;color:' + (alert ? '#b91c1c' : '#0f172a') + ';margin-top:4px">' + value + '</div></div>';
+      }
       function monKpiStrip() {
         var people = monScopePeople(), waiting = qData().waiting;
         var online = people.filter(function (p) { return p.dataset.presence === 'Available' }).length;
         var busy = people.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
         var offline = people.length - online - busy;
-        var tile = function (label, value, icon, tone) {
-          var c = { grey: ['#eef2f7', '#334155'], green: ['#dcfce7', '#15803d'], amber: ['#fef3c7', '#b45309'], red: ['#fee2e2', '#b91c1c'] }[tone];
-          return '<div style="box-sizing:border-box;flex:1;min-width:0;background:#fff;border:1px solid #e3e8f1;border-radius:11px;padding:10px 13px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
-            + '<div><div style="font-size:11.5px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">' + label + '</div><div style="font-size:21px;font-weight:700;color:#0f172a;margin-top:4px">' + value + '</div></div>'
-            + '<span style="width:28px;height:28px;border-radius:50%;background:' + c[0] + ';color:' + c[1] + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(icon, 14, c[1]) + '</span></div>';
-        };
+        var tile = monKpiTile;
         return '<div style="box-sizing:border-box;display:flex;gap:10px;padding:10px 14px 0">'
-          + tile('Calls waiting', String(waiting), MON_ICON.phone, 'grey') + tile('Online users', String(online), MON_ICON.users, 'green')
-          + tile('Offline users', String(offline), MON_ICON.chev, 'red') + tile('Users on call', String(busy), MON_ICON.phone, 'amber') + '</div>';
+          + tile('Calls waiting', String(waiting), waiting > monLimits().waiting) + tile('Online users', String(online), false)
+          + tile('Offline users', String(offline), false) + tile('Users on call', String(busy), false) + '</div>';
       }
       function monEmpty(title, sub) {
         return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:24px">'
@@ -9125,14 +9131,19 @@
         /* the old sidebar's "MONITORING" label (a small caps heading sitting above the stacked list) dropped
            out when that list became a horizontal tab strip — restoring it as a real page title here, same
            treatment Agent Activity gives "Activity", so the page still says what it is at a glance. */
-        var pageTitle = '<div style="box-sizing:border-box;padding:11px 14px 0;background:#fff;display:flex;align-items:center">'
-          + '<h2 style="margin:0;font-size:18px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>';
-        /* the Call Queue picker / Campaign select / Summary toggle used to sit in their own bordered bar below
-           this one — moved up into the same row as the tab buttons instead (one shared row, tabs on the left,
-           control pinned to the right via margin-left:auto) rather than a whole extra strip underneath them */
-        var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:4px;padding:6px 14px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
+        /* the one-line legend explaining Listen/Whisper/Barge — same idea as the reference site putting this
+           directly under the page title instead of relying on a tooltip per row, since the control now shows
+           up on three different tabs (All Extensions, Groups, Call Queue) and is worth explaining exactly once */
+        var pageTitle = '<div style="box-sizing:border-box;padding:11px 14px 0;background:#fff">'
+          + '<div style="display:flex;align-items:center"><h2 style="margin:0;font-size:18px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>'
+          + '<div style="font-size:12px;color:#94a3b8;margin-top:2px">Listen is silent &middot; Whisper is heard only by the agent &middot; Barge joins the call &mdash; every action is logged.</div>'
+          + '</div>';
+        /* underline tabs (reference site's own style) instead of filled pill backgrounds — the active tab is
+           just bolder + blue with a bottom border, no background fill, which reads as a flatter, calmer strip
+           of five/six tabs than a row of blue pills did */
+        var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:18px;padding:0 14px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
           var on = MS.sub === x[0];
-          return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:0;border-radius:8px;background:' + (on ? '#eff6ff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#334155') + ';font:inherit;font-size:13px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 15, on ? '#1d4ed8' : '#64748b') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+          return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;padding:10px 2px;border:0;border-bottom:2px solid ' + (on ? '#2563eb' : 'transparent') + ';background:none;color:' + (on ? '#1d4ed8' : '#64748b') + ';font:inherit;font-size:13px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 15, on ? '#1d4ed8' : '#94a3b8') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
         }).join('') + ((crumb || select || sumBtn) ? '<div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-left:12px">' + crumb + select + sumBtn + '</div>' : '') + '</div>';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + pageTitle + subTabs
