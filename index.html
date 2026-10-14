@@ -8937,20 +8937,28 @@
           + '<span style="min-width:0;display:block"><span style="display:block;font-weight:600;color:#0f172a">' + esc(p.dataset.name) + '</span><span style="display:block;font-size:10.5px;font-weight:700;color:#2563eb;letter-spacing:.4px">' + esc(role) + '</span><span style="display:block;font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis">' + esc(p.dataset.email || '') + '</span></span></button>';
         var ext = '<span style="display:flex;align-items:center;gap:6px;font-weight:600;margin-left:50px;font-size:13px;color:#0f172a;margin-top:2px">' + ixSvg(AN_PATH.grid, 13, '#334155') + esc(p.dataset.num || '—') + '</span>';
         var c = onCall ? personActiveCall(p) : null;
-        /* status cell stacks presence + AI sentiment (on-call only) above schedule adherence (always shown) —
-           see personAdherence/personSentiment; white-space:normal on the badges so the column wraps instead
-           of clipping, since this td inherits white-space:nowrap otherwise */
-        var statusCell = '<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-start;white-space:normal"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' + (c ? '<span style="font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;background:#eff6ff;color:#1d4ed8;white-space:nowrap">On call</span>' + monSentimentDot(p) : dash) + '</div>' + monAdherenceBadge(p) + '</div>';
+        /* Status (are they on a call right now) and Adherence (are they keeping to schedule) are two different
+           facts, so each gets its own column now — matching All Extensions' table. They used to be stacked
+           together under one "Status" header, where the on-call indicator was a bare, unlabeled "---" for
+           anyone idle; that read as broken rather than intentional. */
+        var statusColor = onCall ? '#1d4ed8' : (st === 'Available' ? '#15803d' : '#64748b');
+        var statusText = onCall ? 'On call' : (st === 'Available' ? 'Available' : (st || 'Offline'));
+        var statusCell = '<span style="display:inline-flex;align-items:center;gap:7px;font-weight:600;color:' + statusColor + '"><span style="width:7px;height:7px;border-radius:50%;background:' + statusColor + ';flex-shrink:0"></span>' + esc(statusText) + (onCall ? monSentimentDot(p) : '') + '</span>';
         return '<tr><td style="' + td + '"><div style="display:flex;flex-direction:column;gap:4px;min-width:0">' + who + ext + '</div></td><td style="' + td + '">' + (c ? esc(c.contact) : dash) + '</td><td style="' + td + ';font-family:monospace">' + (c ? esc(c.did) : dash) + '</td>'
           + '<td style="' + td + ';font-family:monospace">' + (c ? esc(c.dur) : '00:00') + '</td>'
           + '<td style="' + td + '">' + statusCell + '</td>'
+          + '<td style="' + td + ';white-space:normal">' + monAdherenceBadge(p) + '</td>'
           + '<td style="' + td + '">' + (c ? esc(c.dir) : dash) + '</td><td style="' + td + ';color:#64748b;font-size:12px">' + (c ? esc(c.path) : dash) + '</td>'
           + '<td style="' + td + '">' + (c ? monListenBtn(p.dataset.id, true) : dash) + '</td></tr>';
       }
       function monAgentTable(members, firstHead) {
         if (!members.length) return '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No members yet.</div>';
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:9px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Direction', 'Call path', 'Supervise'], widths = [19, 10, 10, 7, 14, 9, 11, 20];
+        /* Supervise stays at 20% (unchanged) so the 3-button Listen/Whisper/Barge state never has to shrink or
+           wrap — the Adherence column's width comes out of Contact/DID/Direction/Call path instead, which are
+           mostly dashes for anyone not on a call, and out of Status, which only needs to fit a short word now
+           that it no longer also carries the adherence pill */
+        var heads = [firstHead, 'Contact', 'DID', 'Duration', 'Status', 'Adherence', 'Direction', 'Call path', 'Supervise'], widths = [17, 9, 9, 7, 10, 13, 7, 8, 20];
         return '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><thead><tr>' + heads.map(function (h, k) { return '<th style="' + th + ';width:' + widths[k] + '%">' + h + '</th>' }).join('') + '</tr></thead><tbody>' + members.map(monAgentRow).join('') + '</tbody></table>';
       }
       function monGroupsView() {
