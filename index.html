@@ -8172,13 +8172,14 @@
       /* Monitoring: sub-menu (All Calls, All Extensions, Groups, Call Queue, Campaign) with the same layout as the reference */
       var MS = { sub: 'Campaign', campaign: '', qWaitOpen: false, copilotTab: 'copilot', copilotHistOpen: false, copilotHistView: 'summary', aiAlertOpen: false, extView: 'card' };
       var MON_SUB = [
-        ['All Calls', 'phone'], ['All Extensions', 'users'], ['Groups', 'tree'], ['Call Queue', 'queues'], ['Campaign', 'grid']
+        ['All Calls', 'phone'], ['All Extensions', 'users'], ['Groups', 'tree'], ['Call Queue', 'queues'], ['Chat Queue', 'chat'], ['Campaign', 'grid']
       ];
       var MON_ICON = {
         phone: IX_ICON.phone,
         users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
         tree: '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v6h9"/>',
         queues: '<rect x="3" y="7" width="11" height="11" rx="2"/><rect x="10" y="3" width="11" height="11" rx="2"/>',
+        chat: IX_ICON.chat,
         grid: AN_PATH.grid,
         chev: '<path d="M15 6l-6 6 6 6"/>',
         chevR: '<path d="M9 6l6 6-6 6"/>'
@@ -8999,6 +9000,43 @@
           + (waitOpen ? '<div style="border-top:1px solid #eef1f5">' + (callers.length ? waitTable : monEmpty('No queue calls available', 'Calls routed through queues will appear here.')) + '</div>' : '') + '</div>';
         return monAlertsCard() + agents + waiting;
       }
+      /* Chat Queue: same idea as Call Queue (who's waiting, who can take it) for chat instead of voice — modeled
+         on the reference site's Monitoring > Chat Queue screen. There's no simulated chat traffic the way calls
+         have IX_CALLS, so Waiting chats stays an honest empty state rather than inventing fake conversations;
+         the Agents table is the real, useful part — who's taking chats right now and who a supervisor can
+         switch on/off. */
+      var CHAT_DUTY = {};
+      function monChatDuty(p) { var v = CHAT_DUTY[p.dataset.id]; return v == null ? (p.dataset.presence === 'Available') : v }
+      function monChatQueueView() {
+        var people = monScopePeople();
+        var header = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px">'
+          + '<div><div style="font-size:18px;font-weight:700;color:#0f172a">Chat Queues</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">Chats waiting for an agent, and who can take them.</div></div>'
+          + '<button data-monchatrefresh style="box-sizing:border-box;height:34px;padding:0 14px;border:1px solid #2563eb;border-radius:9px;background:#fff;color:#1d4ed8;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px">' + ixSvg('<path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/>', 14, '#1d4ed8') + 'Refresh</button>'
+          + '</div>';
+        var waiting = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:13px;overflow:hidden;margin-bottom:10px">'
+          + '<div style="padding:10px 14px;font-size:14px;font-weight:700;color:#0f172a;border-bottom:1px solid #eef1f5">Waiting chats</div>'
+          + '<div style="padding:22px;text-align:center;color:#94a3b8;font-size:13px">Nobody is waiting.</div>'
+          + '</div>';
+        var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:9px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap';
+        var td = 'padding:10px 14px;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;vertical-align:middle;white-space:nowrap';
+        var rows = people.map(function (p) {
+          var av = AVS[(+p.dataset.av) % AVS.length], isOnline = p.dataset.presence !== 'Offline', duty = monChatDuty(p);
+          var seed = (p.dataset.id || '').length * 7 + (p.dataset.name || '').length * 3, openChats = duty ? seed % 4 : 0;
+          var name = '<button data-monperson="' + esc(p.dataset.id) + '" style="box-sizing:border-box;display:flex;align-items:center;gap:8px;border:0;background:none;padding:0;font:inherit;text-align:left;cursor:pointer">'
+            + '<span style="width:26px;height:26px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:11px;flex-shrink:0">' + esc(ini(p.dataset.name)) + '</span>'
+            + '<span style="font-weight:600;color:#0f172a">' + esc(p.dataset.name) + '</span></button>';
+          var dutyToggle = '<button data-chatduty="' + esc(p.dataset.id) + '" role="switch" aria-checked="' + duty + '" title="' + (duty ? 'Taking chats' : 'Not taking chats') + '" style="box-sizing:border-box;width:38px;height:22px;border:0;border-radius:999px;background:' + (duty ? '#2563eb' : '#cbd5e1') + ';position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:2px;left:' + (duty ? '18px' : '2px') + ';width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s"></span></button>';
+          var onlineCell = '<span style="display:inline-flex;align-items:center;gap:6px;font-weight:600;color:' + (isOnline ? '#15803d' : '#64748b') + '"><span style="width:7px;height:7px;border-radius:50%;background:' + (isOnline ? '#10b981' : '#cbd5e1') + ';flex-shrink:0"></span>' + (isOnline ? 'Online' : 'Offline') + '</span>';
+          var overrideBtn = '<button data-chatoverride="' + esc(p.dataset.id) + '" style="box-sizing:border-box;height:28px;padding:0 10px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#334155;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap">' + (duty ? 'Set offline' : 'Set online') + '</button>';
+          return '<tr><td style="' + td + '">' + name + '</td><td style="' + td + '">' + dutyToggle + '</td><td style="' + td + '">' + onlineCell + '</td>'
+            + '<td style="' + td + ';font-variant-numeric:tabular-nums">' + openChats + '</td><td style="' + td + '">' + esc(p.dataset.group || 'No group') + '</td><td style="' + td + '">' + overrideBtn + '</td></tr>';
+        }).join('');
+        var agents = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:13px;overflow:hidden">'
+          + '<div style="padding:10px 14px;font-size:14px;font-weight:700;color:#0f172a;border-bottom:1px solid #eef1f5">Agents (' + people.length + ')</div>'
+          + (people.length ? '<table style="width:100%;border-collapse:collapse"><thead><tr><th style="' + th + '">Agent</th><th style="' + th + '">Chat duty</th><th style="' + th + '">Online</th><th style="' + th + '">Open chats</th><th style="' + th + '">Queues</th><th style="' + th + '">Override</th></tr></thead><tbody>' + rows + '</tbody></table>' : '<div style="padding:28px;text-align:center;color:#64748b;font-size:13px">No agents yet.</div>')
+          + '</div>';
+        return header + waiting + agents;
+      }
       function monEmpty(title, sub) {
         return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:24px">'
           + '<svg width="150" height="110" viewBox="0 0 150 110" style="display:block;margin-bottom:12px"><rect x="22" y="14" width="46" height="60" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2" transform="rotate(-8 45 44)"/><rect x="62" y="20" width="46" height="60" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2" transform="rotate(6 85 50)"/><circle cx="82" cy="72" r="14" fill="#fff" stroke="#64748b" stroke-width="3"/><path d="M92 82l12 12" stroke="#64748b" stroke-width="4" stroke-linecap="round"/><path d="M40 34h22M40 44h22M40 54h16" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/></svg>'
@@ -9009,6 +9047,7 @@
         if (MS.sub === 'All Extensions') { return monExtView() }
         if (MS.sub === 'Groups') { return monGroupsView() }
         if (MS.sub === 'Call Queue') { return monQueueView() }
+        if (MS.sub === 'Chat Queue') { return monChatQueueView() }
         /* Campaign: calls come from the contacts in the chosen lead list */
         var list = CGROUPS.filter(function (g) { return g.name === MS.campaign && g.kind === 'lead' })[0];
         if (!list) return monEmpty();
@@ -9089,7 +9128,7 @@
              of the room instead, the same fix Campaign's own empty state already used before a campaign is
              picked. All Extensions/Groups/Call Queue build their own white card(s) internally already, so
              they're left as a plain wrapper — boxing them again here would nest a card inside a card. */
-          + (['All Extensions', 'Groups', 'Call Queue'].indexOf(MS.sub) > -1 ? '<div>' : '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;min-height:100%;overflow:hidden">') + bodyHtml + '</div></div></div>';
+          + (['All Extensions', 'Groups', 'Call Queue', 'Chat Queue'].indexOf(MS.sub) > -1 ? '<div>' : '<div style="box-sizing:border-box;background:#fff;border:1px solid #e3e8f1;border-radius:14px;min-height:100%;overflow:hidden">') + bodyHtml + '</div></div></div>';
         if (!can('monitoring')) return '<div style="box-sizing:border-box;display:flex;height:calc(111.112vh - 78px);min-height:460px;background:#f4f6fb;overflow:hidden">'
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>' + monLocked() + '</div>';
         return '<div style="box-sizing:border-box;display:flex;height:calc(111.112vh - 78px);min-height:460px;background:#f4f6fb;overflow:hidden">'
@@ -9116,6 +9155,9 @@
         if ((t = e.target.closest('[data-coprchatsend]'))) { monCopilotChatSend(t.dataset.coprchatsend); return true }
         if (e.target.closest('[data-monsum]')) { MS.summary = !MS.summary; localStorage.setItem('ucaas.monSummary', MS.summary ? 'on' : 'off'); anRepaint(); return true }
         if ((t = e.target.closest('[data-monextview]'))) { MS.extView = t.dataset.monextview; anRepaint(); return true }
+        if ((t = e.target.closest('[data-chatduty]'))) { var cp = personById(t.dataset.chatduty); if (cp) { CHAT_DUTY[t.dataset.chatduty] = !monChatDuty(cp); anRepaint() } return true }
+        if ((t = e.target.closest('[data-chatoverride]'))) { var cp2 = personById(t.dataset.chatoverride); if (cp2) { CHAT_DUTY[t.dataset.chatoverride] = !monChatDuty(cp2); note('Set ' + cp2.dataset.name + (CHAT_DUTY[t.dataset.chatoverride] ? ' online for chat' : ' offline for chat')); anRepaint() } return true }
+        if (e.target.closest('[data-monchatrefresh]')) { note('Chat queues refreshed'); anRepaint(); return true }
         if (e.target.closest('[data-monalerttoggle]')) { MS.alertsOn = !MS.alertsOn; localStorage.setItem('ucaas.monAlertsOn', MS.alertsOn ? 'on' : 'off'); anRepaint(); return true }
         if (e.target.closest('[data-monqwait]')) { MS.qWaitOpen = !MS.qWaitOpen; anRepaint(); return true }
         if ((t = e.target.closest('[data-monperson]'))) { var mp = personById(t.dataset.monperson); if (mp) openDrawer(mp); return true }
