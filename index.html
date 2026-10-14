@@ -8334,20 +8334,6 @@
           + '</div>';
       }
       function monExtView() {
-        var people = monScopePeople();
-        var online = people.filter(function (p) { return p.dataset.presence === 'Available' }).length;
-        var busy = people.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
-        var offline = people.length - online - busy;
-        var waiting = qData().waiting;
-        var card = function (label, value, icon, tone) {
-          var c = { grey: ['#eef2f7', '#334155'], green: ['#dcfce7', '#15803d'], amber: ['#fef3c7', '#b45309'], red: ['#fee2e2', '#b91c1c'] }[tone];
-          return '<div style="box-sizing:border-box;flex:1;min-width:0;background:#fff;border:1px solid #e3e8f1;border-radius:11px;padding:10px 13px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
-            + '<div><div style="font-size:11.5px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">' + label + '</div><div style="font-size:21px;font-weight:700;color:#0f172a;margin-top:4px">' + value + '</div></div>'
-            + '<span style="width:28px;height:28px;border-radius:50%;background:' + c[0] + ';color:' + c[1] + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(icon, 14, c[1]) + '</span></div>';
-        };
-        var cards = MS.summary ? '<div style="display:flex;gap:10px;margin-bottom:10px">'
-          + card('Calls waiting', String(waiting), MON_ICON.phone, 'grey') + card('Online users', String(online), MON_ICON.users, 'green')
-          + card('Offline users', String(offline), MON_ICON.chev, 'red') + card('Users on call', String(busy), MON_ICON.phone, 'amber') + '</div>' : '';
         var sel = 'box-sizing:border-box;height:34px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:12.5px;background:#fff';
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #eef1f5">'
           + '<div><div style="font-size:15px;font-weight:700;color:#0f172a">All extensions</div><div id="monExtCount" style="font-size:12px;color:#64748b;margin-top:1px">' + esc(monExtCountText()) + '</div></div>'
@@ -8357,7 +8343,7 @@
           ? '<div id="monExtBody" style="box-sizing:border-box;overflow-x:auto">' + monExtTableHtml() + '</div>'
           : '<div id="monExtBody" style="box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:12px;padding:12px">' + monExtCardsHtml() + '</div>';
         var grid = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:14px;overflow:hidden">' + toolbar + bodyHtml + '</div>';
-        return cards + grid;
+        return grid;
       }
       /* Monitoring quick wins: alert thresholds for queues and CSV export of the tables */
       function monLimits() {
@@ -9046,6 +9032,27 @@
           + '</div>';
         return header + waiting + agents;
       }
+      /* A small always-on KPI strip above the content, the same "wallboard" convention Genesys Cloud, RingEX
+         and NICE CXone all lead their supervisor monitoring screens with — summary tiles first, detail table
+         or cards underneath. Used to only render on All Extensions (and only there, inside monExtView); now
+         it's one shared strip monPage() puts above every Monitoring sub-tab, so the org-wide snapshot is
+         visible no matter which section a supervisor is looking at. The Summary toggle still hides it for
+         anyone who'd rather not see it — same control, just no longer limited to a single tab. */
+      function monKpiStrip() {
+        var people = monScopePeople(), waiting = qData().waiting;
+        var online = people.filter(function (p) { return p.dataset.presence === 'Available' }).length;
+        var busy = people.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
+        var offline = people.length - online - busy;
+        var tile = function (label, value, icon, tone) {
+          var c = { grey: ['#eef2f7', '#334155'], green: ['#dcfce7', '#15803d'], amber: ['#fef3c7', '#b45309'], red: ['#fee2e2', '#b91c1c'] }[tone];
+          return '<div style="box-sizing:border-box;flex:1;min-width:0;background:#fff;border:1px solid #e3e8f1;border-radius:11px;padding:10px 13px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+            + '<div><div style="font-size:11.5px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px">' + label + '</div><div style="font-size:21px;font-weight:700;color:#0f172a;margin-top:4px">' + value + '</div></div>'
+            + '<span style="width:28px;height:28px;border-radius:50%;background:' + c[0] + ';color:' + c[1] + ';display:grid;place-items:center;flex-shrink:0">' + ixSvg(icon, 14, c[1]) + '</span></div>';
+        };
+        return '<div style="box-sizing:border-box;display:flex;gap:10px;padding:10px 14px 0">'
+          + tile('Calls waiting', String(waiting), MON_ICON.phone, 'grey') + tile('Online users', String(online), MON_ICON.users, 'green')
+          + tile('Offline users', String(offline), MON_ICON.chev, 'red') + tile('Users on call', String(busy), MON_ICON.phone, 'amber') + '</div>';
+      }
       function monEmpty(title, sub) {
         return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:24px">'
           + '<svg width="150" height="110" viewBox="0 0 150 110" style="display:block;margin-bottom:12px"><rect x="22" y="14" width="46" height="60" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2" transform="rotate(-8 45 44)"/><rect x="62" y="20" width="46" height="60" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2" transform="rotate(6 85 50)"/><circle cx="82" cy="72" r="14" fill="#fff" stroke="#64748b" stroke-width="3"/><path d="M92 82l12 12" stroke="#64748b" stroke-width="4" stroke-linecap="round"/><path d="M40 34h22M40 44h22M40 54h16" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/></svg>'
@@ -9109,7 +9116,7 @@
         var camps = CGROUPS.filter(function (g) { return g.kind === 'lead' });
         var select = MS.sub === 'Campaign' ? '<select data-moncamp style="box-sizing:border-box;height:38px;min-width:220px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font:inherit;font-size:13.5px;background:#fff">'
           + '<option value="">Select Campaign</option>' + camps.map(function (c) { return '<option' + (c.name === MS.campaign ? ' selected' : '') + '>' + esc(c.name) + '</option>' }).join('') + '</select>' : '';
-        var sumBtn = MS.sub === 'All Extensions' ? '<label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;color:#0f172a"><span>Summary</span><button data-monsum role="switch" aria-checked="' + MS.summary + '" style="box-sizing:border-box;width:42px;height:24px;border:0;border-radius:999px;background:' + (MS.summary ? '#2563eb' : '#cbd5e1') + ';position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:' + (MS.summary ? '21px' : '3px') + ';width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s"></span></button></label>' : '';
+        var sumBtn = '<label style="display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;color:#0f172a"><span>Summary</span><button data-monsum role="switch" aria-checked="' + MS.summary + '" style="box-sizing:border-box;width:42px;height:24px;border:0;border-radius:999px;background:' + (MS.summary ? '#2563eb' : '#cbd5e1') + ';position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;left:' + (MS.summary ? '21px' : '3px') + ';width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s"></span></button></label>';
         /* was a 220px left sidebar (All Calls/All Extensions/Groups/Call Queue/Campaign stacked vertically) —
            moved to a horizontal tab strip above the content instead. Two wins: it gives every table back that
            220px of width (the exact margin the Monitor dropdown and Contact/DID columns were short on before),
@@ -9129,6 +9136,7 @@
         }).join('') + ((crumb || select || sumBtn) ? '<div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-left:12px">' + crumb + select + sumBtn + '</div>' : '') + '</div>';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + pageTitle + subTabs
+          + (MS.summary ? monKpiStrip() : '')
           + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;background:#f8fafc;padding:' + (MS.sub === 'Campaign' && !MS.campaign ? '0' : '10px 14px') + '">'
           /* All Calls and Campaign render their table/toolbar bare (no white background of their own), so
              this wrapper supplies the card chrome — and used to only grow to fit the rows inside it, leaving
