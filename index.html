@@ -9258,7 +9258,15 @@
         if ((t = e.target.closest('[data-monact]'))) { monAct(t.dataset.monact, +t.dataset.monidx); return true }
         if ((t = e.target.closest('[data-monpin]'))) { monTogglePin(t.dataset.monpin); anRepaint(); return true }
         if ((t = e.target.closest('[data-aidismiss]'))) { MS.aiDismissed[t.dataset.aidismiss] = true; anRepaint(); return true }
-        if ((t = e.target.closest('[data-aibarge]'))) { monSetListen(t.dataset.aibarge, 'barge'); MS.aiDismissed[t.dataset.aibarge] = true; anRepaint(); return true }
+        if ((t = e.target.closest('[data-aibarge]'))) {
+          var aiBargeId = t.dataset.aibarge;
+          monSetListen(aiBargeId, 'barge');
+          /* only dismiss the alert if the barge actually took effect — monSetListen silently rejects it when
+             a different agent is already being monitored, and dismissing anyway would hide a still-unresolved,
+             still-frustrated call just because the click happened to land while busy elsewhere */
+          if (MON_MODE[aiBargeId] === 'barge') MS.aiDismissed[aiBargeId] = true;
+          anRepaint(); return true;
+        }
         if (e.target.closest('[data-aialerttoggle]')) { MS.aiAlertOpen = !MS.aiAlertOpen; anRepaint(); return true }
         if (e.target.closest('[data-aidismissall]')) {
           monScopePeople().forEach(function (r) { if (personSentiment(r) === 'frustrated') MS.aiDismissed[r.dataset.id] = true });
