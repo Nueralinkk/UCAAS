@@ -8498,6 +8498,17 @@
       }
       function monSetListen(id, mode) {
         var p = personById(id), pname = p ? p.dataset.name : 'agent';
+        if (mode !== 'off') {
+          var otherId = Object.keys(MON_MODE).filter(function (k) { return k !== id && (MON_MODE[k] || 'off') !== 'off' })[0];
+          if (otherId) {
+            var otherP = personById(otherId), otherName = otherP ? otherP.dataset.name : 'another agent';
+            var otherWord = { listen: 'listening in on', whisper: 'whispering to', barge: 'barging into', takeover: 'taken over' }[MON_MODE[otherId]] || 'monitoring';
+            monSetBlockMsg('Already ' + otherWord + ' the call with ' + otherName + ' — stop that first.');
+            if ($('#viewAnalytics').style.display !== 'none') anRepaint();
+            if (drawer.style.display === 'flex' && ctx && ctx.dataset.id === id) paintDrawerExtra(ctx);
+            return;
+          }
+        }
         var cur = MON_MODE[id] || 'off';
         var changed = cur !== mode;
         if (changed) {
@@ -8644,6 +8655,24 @@
          supervisor keep watching Whisper/Barge/Takeover (sentiment + a Stop control) while working elsewhere
          on the page, instead of the dialog blocking the whole screen until monitoring ends */
       var MON_COPILOT_MIN = false;
+      /* a supervisor is one person — they can't really be barging into one call while listening to another at
+         the same time, so MON_MODE only ever holds one active (non-off) entry. When a second Listen/Whisper/
+         Barge/Takeover is attempted on a different agent, it's rejected with this message instead of silently
+         running two monitoring sessions at once. */
+      var MON_BLOCK_MSG = null, MON_BLOCK_T = null;
+      function monSetBlockMsg(msg) {
+        MON_BLOCK_MSG = msg;
+        clearTimeout(MON_BLOCK_T);
+        MON_BLOCK_T = setTimeout(function () { MON_BLOCK_MSG = null; if ($('#viewAnalytics').style.display !== 'none') anRepaint() }, 3200);
+      }
+      /* small, separate from the shared top-center #toast on purpose — it needs to coexist with (and sit
+         above) the minimized Copilot widget in the same corner, and auto-clears on its own timer rather than
+         waiting for the next anRepaint() to catch up */
+      function monBlockToast() {
+        if (!MON_BLOCK_MSG) return '';
+        var lift = (MON_COPILOT_OPEN && MON_COPILOT_MIN) ? 110 : 24;
+        return '<div style="position:fixed;right:24px;bottom:' + lift + 'px;z-index:160;max-width:300px;background:#1e293b;color:#fff;font-size:12.5px;line-height:1.5;border-radius:10px;padding:12px 14px;box-shadow:0 14px 30px -10px rgba(0,0,0,.4)">' + esc(MON_BLOCK_MSG) + '</div>';
+      }
       /* per-agent private supervisor notes typed into the Copilot dialog's Notes tab — in-memory only, same
          caveat as MON_MODE/ACTLOG: nothing here survives a page reload, there's no real backend yet */
       var COPILOT_NOTES = {};
@@ -9220,7 +9249,7 @@
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>' + monLocked() + '</div>';
         return '<div style="box-sizing:border-box;display:flex;height:calc(111.112vh - 78px);min-height:460px;background:#f4f6fb;overflow:hidden">'
           + '<nav class="an-rail" style="box-sizing:border-box;width:88px;flex-shrink:0;background:#fff;border-right:1px solid #e8ecf3;padding:10px 6px;display:flex;flex-direction:column;gap:4px;overflow-y:auto">' + anRailHtml() + '</nav>'
-          + content + '</div>' + monCopilotDialog();
+          + content + '</div>' + monCopilotDialog() + monBlockToast();
       }
       function monClick(e) {
         var t;
