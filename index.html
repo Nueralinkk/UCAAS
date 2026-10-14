@@ -8546,7 +8546,12 @@
         var t = e.target.closest('[data-monlistenbtn]'); if (!t) return;
         var id = t.dataset.monlistenbtn, m = t.dataset.monmode, cur = MON_MODE[id] || 'off';
         if (cur === m) {
-          if ((m === 'whisper' || m === 'barge' || m === 'takeover') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
+          /* Takeover never gets the "reopen instead of stop" treatment below — Whisper/Barge have sibling
+             buttons, so re-clicking the active one is ambiguous enough to deserve a recovery path, but Takeover
+             only ever renders this one button labeled Stop. Treating a click on it as "reopen" instead of
+             "stop" meant the very first click after the dialog got stolen by another agent's monitoring
+             silently did nothing visible — the supervisor had to click Stop twice to actually stop. */
+          if ((m === 'whisper' || m === 'barge') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
           else monSetListen(id, 'off');
         } else monSetListen(id, m);
       });
