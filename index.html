@@ -8825,16 +8825,25 @@
         var id = MON_COPILOT_OPEN;
         if (!id) return '';
         var r = personById(id);
-        var call = r && personActiveCall(r);
-        if (!r || !call) { MON_COPILOT_OPEN = null; return ''; } /* the call ended while the dialog was open */
+        if (!r) { MON_COPILOT_OPEN = null; return ''; } /* the person was removed while the dialog was open */
+        /* Listen/Whisper/Barge are available on every agent now, not just ones mid-call, so this dialog has to
+           handle opening on someone who isn't actually on a call — it used to require personActiveCall(r) and
+           silently reset MON_COPILOT_OPEN back to null the instant it rendered, which looked like Whisper/Barge
+           doing nothing at all (and left Barge stuck: the dialog's own Stop control lives inside this dialog,
+           so if it can never open, there's no way to stop). A placeholder "call" fills the same fields with a
+           real one's shape so every panel below still renders instead of needing its own null-check. */
+        var realCall = personActiveCall(r);
+        var call = realCall || { contact: '—', did: '—', dur: '00:00', dir: '', path: 'Not currently on a call' };
         var sent = personSentiment(r);
-        var sentCfg = SENTIMENT_CFG[sent] || { score: 0, trend: 'Unknown', color: '#64748b', bg: '#f1f5f9' };
+        var sentCfg = SENTIMENT_CFG[sent] || { score: 0, trend: 'No active call', color: '#64748b', bg: '#f1f5f9' };
         var adh = personAdherence(r);
-        var recommend = sent === 'frustrated'
-          ? { text: 'High frustration detected — recommend an immediate Barge-in to assist directly.', tone: '#b91c1c', bg: '#fee2e2', bd: '#fecaca' }
-          : sent === 'neutral'
-            ? { text: 'Sentiment is neutral — consider Listening in to confirm call quality.', tone: '#b45309', bg: '#fef3c7', bd: '#fde68a' }
-            : { text: 'Call sentiment is positive — no action needed right now.', tone: '#15803d', bg: '#dcfce7', bd: '#bbf7d0' };
+        var recommend = !realCall
+          ? { text: 'Not currently on a call — Listen, Whisper or Barge will apply as soon as one starts.', tone: '#475569', bg: '#f1f5f9', bd: '#e2e8f0' }
+          : sent === 'frustrated'
+            ? { text: 'High frustration detected — recommend an immediate Barge-in to assist directly.', tone: '#b91c1c', bg: '#fee2e2', bd: '#fecaca' }
+            : sent === 'neutral'
+              ? { text: 'Sentiment is neutral — consider Listening in to confirm call quality.', tone: '#b45309', bg: '#fef3c7', bd: '#fde68a' }
+              : { text: 'Call sentiment is positive — no action needed right now.', tone: '#15803d', bg: '#dcfce7', bd: '#bbf7d0' };
         var parties = monCopilotParties(r, call);
         var callerHist = monCopilotCallerHistory(r, call);
         var partyCard = function (p) { return '<div style="flex:1;min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:9px 11px">' + '<div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#94a3b8;margin-bottom:3px">' + p.label + '</div>' + '<div style="font-size:12.5px;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.name) + '</div>' + '<div style="font-size:11px;color:#64748b">' + esc(p.sub) + '</div></div>' };
