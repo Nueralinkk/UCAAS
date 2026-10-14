@@ -8242,7 +8242,7 @@
         var th = 'text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#334155;font-weight:700;padding:10px 14px;border-bottom:1px solid #dbe7fb;background:#eef4ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
         var sel = 'box-sizing:border-box;height:34px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:12.5px;background:#fff';
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #eef1f5">'
-          + '<div><div style="font-size:15px;font-weight:700;color:#0f172a">All calls</div><div id="monCallsCount" style="font-size:12px;color:#64748b;margin-top:1px">' + esc(monCountText()) + '</div></div>'
+          + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All Calls</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">Every call through this organization, live or completed.</div><div id="monCallsCount" style="font-size:12px;color:#94a3b8;margin-top:3px">' + esc(monCountText()) + '</div></div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monq value="' + esc(MS.q) + '" placeholder="Search number, name or path" autocomplete="off" style="box-sizing:border-box;height:34px;width:220px;border:1px solid #cbd5e1;border-radius:9px;padding:0 12px;font:inherit;font-size:12.5px;outline:0">'
           + monExportSelect('data-monexportsel="calls"') + '<select data-monst style="' + sel + '">' + ['All', 'Completed', 'Missed'].map(function (o) { return '<option' + (o === MS.status ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select>'
           + '<select data-mondir style="' + sel + '">' + ['All', 'Inbound', 'Outbound'].map(function (o) { return '<option' + (o === MS.dir ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
@@ -8338,7 +8338,7 @@
       function monExtView() {
         var sel = 'box-sizing:border-box;height:34px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font:inherit;font-size:12.5px;background:#fff';
         var toolbar = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #eef1f5">'
-          + '<div><div style="font-size:15px;font-weight:700;color:#0f172a">All extensions</div><div id="monExtCount" style="font-size:12px;color:#64748b;margin-top:1px">' + esc(monExtCountText()) + '</div></div>'
+          + '<div><div style="font-size:16px;font-weight:700;color:#0f172a">All Extensions</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">Every extension in the organization, with live presence and one-click monitoring.</div><div id="monExtCount" style="font-size:12px;color:#94a3b8;margin-top:3px">' + esc(monExtCountText()) + '</div></div>'
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input data-monexq value="' + esc(MS.exq) + '" placeholder="Search name, extension or group" autocomplete="off" style="box-sizing:border-box;height:34px;width:220px;border:1px solid #cbd5e1;border-radius:9px;padding:0 12px;font:inherit;font-size:12.5px;outline:0">'
           + monExtViewToggle() + monExportSelect('data-monexportsel="ext"') + '<select data-monexs style="' + sel + '">' + ['All', 'Online', 'On call', 'Offline'].map(function (o) { return '<option' + (o === MS.exs ? ' selected' : '') + '>' + o + '</option>' }).join('') + '</select></div></div>';
         var bodyHtml = MS.extView === 'table'
@@ -8946,7 +8946,7 @@
       function monGroupsView() {
         var list = monScopeGroups();
         if (!list.length) return monEmpty('No departments yet', 'Create a group in the directory to see it here.');
-        var hint = '<div style="font-size:12.5px;color:#64748b;margin:0 2px 12px">Select a department to see its members and live calls.</div>';
+        var hint = '<div style="margin:0 2px 12px"><div style="font-size:16px;font-weight:700;color:#0f172a">Groups</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">Select a department to see its members and live calls.</div></div>';
         return hint + list.map(function (g) {
           var av0 = AVS[(g.ci + 4) % AVS.length], accent = av0[1];
           var mem = gMembers(g), open = !!MS.open[g.name], busy = mem.filter(function (p) { return p.dataset.presence === 'Busy' }).length;
@@ -8995,7 +8995,8 @@
           + '<span style="transition:transform .2s;transform:rotate(' + (waitOpen ? '180' : '0') + 'deg);display:flex">' + ixSvg('<path d="M6 9l6 6 6-6"/>', 16, '#64748b') + '</span></button>';
         var waiting = '<div style="background:#fff;border:1px solid #e3e8f1;border-radius:13px;overflow:hidden;margin-bottom:10px">' + waitHead
           + (waitOpen ? '<div style="border-top:1px solid #eef1f5">' + (callers.length ? waitTable : monEmpty('No queue calls available', 'Calls routed through queues will appear here.')) + '</div>' : '') + '</div>';
-        return monAlertsCard() + agents + waiting;
+        var qHeader = '<div style="margin:0 2px 12px"><div style="font-size:16px;font-weight:700;color:#0f172a">Call Queue</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">Who’s handling ' + esc(q.name) + ' right now, and who’s waiting.</div></div>';
+        return qHeader + monAlertsCard() + agents + waiting;
       }
       /* Chat Queue: same idea as Call Queue (who's waiting, who can take it) for chat instead of voice — modeled
          on the reference site's Monitoring > Chat Queue screen. There's no simulated chat traffic the way calls
@@ -9077,7 +9078,8 @@
           var st = ['Not reached', 'Answered', 'No answer'][i % 3];
           return [esc(cxName(c)), esc(fmtNum(c.phone || '')), esc(st)];
         });
-        return monTable(['Contact', 'Number', 'Status'], campRows, 'No contacts in this campaign.');
+        var campHeader = '<div style="padding:14px 16px;border-bottom:1px solid #eef1f5"><div style="font-size:16px;font-weight:700;color:#0f172a">Campaign</div><div style="font-size:12.5px;color:#64748b;margin-top:2px">Contacts being worked through ' + esc(MS.campaign) + ', and the outcome of each call so far.</div></div>';
+        return campHeader + monTable(['Contact', 'Number', 'Status'], campRows, 'No contacts in this campaign.');
       }
       /* "My queues": a supervisor can pin the queues they personally watch; pinned ones float to the top of
          the queue picker with a star, so a long queue list doesn't bury the handful you actually care about. */
@@ -9138,12 +9140,14 @@
           + '<div style="display:flex;align-items:center"><h2 style="margin:0;font-size:18px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>'
           + '<div style="font-size:12px;color:#94a3b8;margin-top:2px">Listen is silent &middot; Whisper is heard only by the agent &middot; Barge joins the call &mdash; every action is logged.</div>'
           + '</div>';
-        /* underline tabs (reference site's own style) instead of filled pill backgrounds — the active tab is
-           just bolder + blue with a bottom border, no background fill, which reads as a flatter, calmer strip
-           of five/six tabs than a row of blue pills did */
-        var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:18px;padding:0 14px;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
+        /* underline tabs, reference-site style, but with a light background on the active one too — pure
+           underline-only read as too subtle at a glance (hard to tell which tab is active without looking
+           closely), so the active tab keeps a soft blue fill + bolder, darker bottom border on top of the
+           underline, the same two-signal combination the original pill tabs gave just with far less visual
+           weight than a fully filled pill */
+        var subTabs = '<div id="monSubTabs" style="box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:8px 14px 0;border-bottom:1px solid #e8ecf3;background:#fff;overflow-x:auto">' + MON_SUB.map(function (x) {
           var on = MS.sub === x[0];
-          return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;padding:10px 2px;border:0;border-bottom:2px solid ' + (on ? '#2563eb' : 'transparent') + ';background:none;color:' + (on ? '#1d4ed8' : '#64748b') + ';font:inherit;font-size:13px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 15, on ? '#1d4ed8' : '#94a3b8') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
+          return '<button data-monsub="' + x[0] + '" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:0;border-bottom:3px solid ' + (on ? '#2563eb' : 'transparent') + ';border-radius:8px 8px 0 0;background:' + (on ? '#eff6ff' : 'none') + ';color:' + (on ? '#1d4ed8' : '#475569') + ';font:inherit;font-size:13px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap">' + ixSvg(MON_ICON[x[1]], 15, on ? '#1d4ed8' : '#94a3b8') + esc(x[0]) + (x[0] === 'Call Queue' && monAlerts().length ? '<span style="background:#dc2626;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px">' + monAlerts().length + '</span>' : '') + '</button>';
         }).join('') + ((crumb || select || sumBtn) ? '<div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-left:12px">' + crumb + select + sumBtn + '</div>' : '') + '</div>';
         var content = '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
           + pageTitle + subTabs
