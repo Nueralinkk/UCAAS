@@ -8448,8 +8448,8 @@
          dropdown to open first, and so the idle state doesn't need the dropdown's slightly odd "Off reads as
          'Monitor'" relabeling trick: with buttons, idle just means none of the three are filled in. */
       function monListenBtn(id, noHist) {
-        var canL = can('listenCall'), canW = can('whisperCall'), canB = can('bargeCall');
-        if (!canL && !canW && !canB) return '<span style="color:#94a3b8;font-size:11.5px">No access</span>';
+        var canL = can('listenCall'), canW = can('whisperCall'), canB = can('bargeCall'), canT = can('takeoverCall');
+        if (!canL && !canW && !canB && !canT) return '<span style="color:#94a3b8;font-size:11.5px">No access</span>';
         var mode = MON_MODE[id] || 'off';
         var p = personById(id);
         /* "danger" styling: nobody's intervening yet (mode is off) but the AI reads this call as frustrated —
@@ -8466,18 +8466,23 @@
         var THEME = {
           listen: { on: '#2563eb', fg: '#eff6ff', bg: '#eff6ff', bd: '#bfdbfe', tx: '#1d4ed8' },
           whisper: { on: '#d97706', fg: '#fffbeb', bg: '#fffbeb', bd: '#fde68a', tx: '#b45309' },
-          barge: { on: '#dc2626', fg: '#fef2f2', bg: danger ? '#fef2f2' : '#fff', bd: danger ? '#fca5a5' : '#cbd5e1', tx: '#b91c1c' }
+          barge: { on: '#dc2626', fg: '#fef2f2', bg: danger ? '#fef2f2' : '#fff', bd: danger ? '#fca5a5' : '#cbd5e1', tx: '#b91c1c' },
+          takeover: { on: '#7c2d12', fg: '#fff7ed', bg: '#fff7ed', bd: '#fdba74', tx: '#9a3412' }
         };
         var ICON = {
           listen: '<path d="M4 14v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
           whisper: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
-          barge: IX_ICON.phone
+          barge: IX_ICON.phone,
+          takeover: '<path d="M8 7h12M8 7l3-3M8 7l3 3M16 17H4M16 17l-3-3M16 17l-3 3"/>'
         };
-        var LABEL = { listen: 'Listen', whisper: 'Whisper', barge: 'Barge' };
-        /* the Genesys one-way-door rule — once barged in, the only legal next step is stopping, never a direct
-           jump to Listen/Whisper — is enforced here at the UI level too (only Barge renders at all while
-           barged in) as well as inside monSetListen itself, which doesn't trust the DOM blindly */
-        var modes = mode === 'barge' ? ['barge'] : ['listen', 'whisper', 'barge'].filter(function (m) { return { listen: canL, whisper: canW, barge: canB && bargeWorthy }[m] });
+        var LABEL = { listen: 'Listen', whisper: 'Whisper', barge: 'Barge', takeover: 'Takeover' };
+        /* the Genesys/Dialpad one-way-door ladder — Listen/Whisper/Barge, then Takeover as the final step once
+           already barged in (moves the call to the supervisor; the agent is disconnected) — is enforced here at
+           the UI level too (barged-in state only offers Stop-barge or Takeover; taken-over state only offers
+           Stop) as well as inside monSetListen itself, which doesn't trust the DOM blindly */
+        var modes = mode === 'takeover' ? ['takeover']
+          : mode === 'barge' ? ['barge'].concat(canT ? ['takeover'] : [])
+            : ['listen', 'whisper', 'barge'].filter(function (m) { return { listen: canL, whisper: canW, barge: canB && bargeWorthy }[m] });
         var btns = modes.map(function (m) {
           var on = mode === m, t = THEME[m];
           return '<button data-monlistenbtn="' + esc(id) + '" data-monmode="' + m + '" title="' + (on ? 'Stop ' + LABEL[m].toLowerCase() + 'ing' : LABEL[m]) + '" style="box-sizing:border-box;flex:1;min-width:0;height:26px;padding:0 3px;border:1px solid ' + (on ? t.on : t.bd) + ';border-radius:6px;background:' + (on ? t.on : t.bg) + ';color:' + (on ? t.fg : t.tx) + ';font:inherit;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;overflow:hidden">' + ixSvg(ICON[m], 10, on ? t.fg : t.tx) + '<span style="overflow:hidden;text-overflow:ellipsis">' + (on ? 'Stop' : LABEL[m]) + '</span></button>';
@@ -8497,12 +8502,14 @@
              never a direct jump to Listen/Whisper. Defense in depth: the dropdown already only offers Barge/
              Stop Barging while barged in, but a client can't be trusted to only ever send what its own UI
              offered. An invalid transition is rejected outright — no mode change, no dialog change either. */
-          if (cur === 'barge' && mode !== 'off') return;
-          var allowed = mode === 'off' || (mode === 'listen' && can('listenCall')) || (mode === 'whisper' && can('whisperCall')) || (mode === 'barge' && can('bargeCall'));
+          if (cur === 'barge' && mode !== 'off' && mode !== 'takeover') return;
+          if (cur === 'takeover' && mode !== 'off') return; /* takeover is terminal — the call is already moved, nothing left to escalate to */
+          if (mode === 'takeover' && cur !== 'barge') return; /* takeover only escalates from an active barge, never a direct jump */
+          var allowed = mode === 'off' || (mode === 'listen' && can('listenCall')) || (mode === 'whisper' && can('whisperCall')) || (mode === 'barge' && can('bargeCall')) || (mode === 'takeover' && can('takeoverCall'));
           if (!allowed) return; /* shouldn't happen — the option wouldn't be in the list — but don't trust the DOM blindly */
-          var modeWord = { listen: 'listening in on', whisper: 'whispering to', barge: 'barging into' };
+          var modeWord = { listen: 'listening in on', whisper: 'whispering to', barge: 'barging into', takeover: 'taking over' };
           if (mode === 'off') { note('Stopped monitoring ' + pname); delete MON_MODE[id] }
-          else { MON_MODE[id] = mode; note((mode === 'listen' ? 'Listening in on ' : mode === 'whisper' ? 'Whispering to ' : 'Barged into the call with ') + pname + ' — simulated, no phone system connected') }
+          else { MON_MODE[id] = mode; note((mode === 'listen' ? 'Listening in on ' : mode === 'whisper' ? 'Whispering to ' : mode === 'barge' ? 'Barged into the call with ' : 'Took over the call from ') + pname + (mode === 'takeover' ? ' — agent disconnected, simulated' : ' — simulated, no phone system connected')) }
           /* audit trail: reuses the same per-person Activity log the rest of the Directory already uses (the
              "View activity" row action / the history button inside the Copilot dialog), rather than a
              separate monitoring-only log nobody would think to check */
@@ -8516,7 +8523,7 @@
            unnoticed (by agent and caller alike) so it stays out of the way, same as Off. This runs even when
            the mode doesn't actually change, so re-picking Whisper/Barge on a dropdown that's already set to
            that value still re-opens a dialog the supervisor closed, without logging a duplicate audit entry. */
-        if (mode === 'whisper' || mode === 'barge') { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary' }
+        if (mode === 'whisper' || mode === 'barge' || mode === 'takeover') { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary' }
         else if (MON_COPILOT_OPEN === id) { MON_COPILOT_OPEN = null }
         /* this control can be changed from three different places — the Monitoring tables (inside
            #viewAnalytics), the profile drawer (global, opens from any page), or the Copilot dialog's own
@@ -8536,7 +8543,7 @@
         var t = e.target.closest('[data-monlistenbtn]'); if (!t) return;
         var id = t.dataset.monlistenbtn, m = t.dataset.monmode, cur = MON_MODE[id] || 'off';
         if (cur === m) {
-          if ((m === 'whisper' || m === 'barge') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
+          if ((m === 'whisper' || m === 'barge' || m === 'takeover') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
           else monSetListen(id, 'off');
         } else monSetListen(id, m);
       });
@@ -9138,7 +9145,7 @@
            up on three different tabs (All Extensions, Groups, Call Queue) and is worth explaining exactly once */
         var pageTitle = '<div style="box-sizing:border-box;padding:11px 14px 0;background:#fff">'
           + '<div style="display:flex;align-items:center"><h2 style="margin:0;font-size:18px;color:#0f172a">Monitoring</h2>' + monAiAlertBadge() + '</div>'
-          + '<div style="font-size:12px;color:#94a3b8;margin-top:2px">Listen is silent &middot; Whisper is heard only by the agent &middot; Barge joins the call &mdash; every action is logged.</div>'
+          + '<div style="font-size:12px;color:#94a3b8;margin-top:2px">Listen is silent &middot; Whisper is heard only by the agent &middot; Barge joins the call &middot; Takeover moves the call to you and disconnects the agent &mdash; every action is logged.</div>'
           + '</div>';
         /* underline tabs, reference-site style, but with a light background on the active one too — pure
            underline-only read as too subtle at a glance (hard to tell which tab is active without looking
@@ -11492,7 +11499,7 @@
         { n: 'Campaign', a: [['Power dialer'], ['Predictive dialer'], ['Progressive dialer']], x: [['Campaign'], ['Call list']] },
         { n: 'Messages', a: [['SMS'], ['MMS']], x: [['Conversation', '', ['View', 'Add', 'Delete']], ['Template']] },
         { n: 'Settings', a: [['Own settings']], x: [['People'], ['Group'], ['Role'], ['Location']] },
-        { n: 'Monitoring', a: [['Live dashboard'], ['Listen', 'Silently join a call'], ['Whisper', 'Coach the agent; the caller cannot hear'], ['Barge', 'Join the call openly']], x: [] },
+        { n: 'Monitoring', a: [['Live dashboard'], ['Listen', 'Silently join a call'], ['Whisper', 'Coach the agent; the caller cannot hear'], ['Barge', 'Join the call openly'], ['Takeover', 'Move the call to yourself; the agent is disconnected']], x: [] },
         { n: 'Integration', a: [['Connected apps']], x: [['Integration'], ['API key', '', ['View', 'Add', 'Delete']]] },
         { n: 'Omni channel', a: [['Email'], ['WhatsApp'], ['Social']], x: [['Channel']] },
         { n: 'Calling rates', a: [['Rates']], x: [['Rate plan', '', ['View', 'Edit']]] },
@@ -11991,7 +11998,7 @@
       syncRoleOptions();
 
       /* ---------- session: who is signed in, and what their role lets them do ---------- */
-      var NEED = { people: '8.x.0.2', roles: '8.x.2.2', locations: '8.x.3.2', locationsAdd: '8.x.3.1', locationsDel: '8.x.3.3', numbers: '14.x.0.2', fax: '14.x.0.1', export: '5.a.0', monitoring: '9.a.0', listenCall: '9.a.1', whisperCall: '9.a.2', bargeCall: '9.a.3' };
+      var NEED = { people: '8.x.0.2', roles: '8.x.2.2', locations: '8.x.3.2', locationsAdd: '8.x.3.1', locationsDel: '8.x.3.3', numbers: '14.x.0.2', fax: '14.x.0.1', export: '5.a.0', monitoring: '9.a.0', listenCall: '9.a.1', whisperCall: '9.a.2', bargeCall: '9.a.3', takeoverCall: '9.a.4' };
       function me() { return $('tr[data-self="1"]') }
       function can(k) { if (!ROLES) return true; var r = me(); if (!r) return false; var x = roleByName(r.dataset.role); return !!(x && x.perms[NEED[k] || k]) }
       function canSelect() { return can('people') || can('export') }
