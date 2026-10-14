@@ -8526,8 +8526,8 @@
            unnoticed (by agent and caller alike) so it stays out of the way, same as Off. This runs even when
            the mode doesn't actually change, so re-picking Whisper/Barge on a dropdown that's already set to
            that value still re-opens a dialog the supervisor closed, without logging a duplicate audit entry. */
-        if (mode === 'whisper' || mode === 'barge' || mode === 'takeover') { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary' }
-        else if (MON_COPILOT_OPEN === id) { MON_COPILOT_OPEN = null }
+        if (mode === 'whisper' || mode === 'barge' || mode === 'takeover') { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; MON_COPILOT_MIN = false }
+        else if (MON_COPILOT_OPEN === id) { MON_COPILOT_OPEN = null; MON_COPILOT_MIN = false }
         /* this control can be changed from three different places — the Monitoring tables (inside
            #viewAnalytics), the profile drawer (global, opens from any page), or the Copilot dialog's own
            sidebar — so refresh whichever of those is actually showing */
@@ -8551,7 +8551,7 @@
              only ever renders this one button labeled Stop. Treating a click on it as "reopen" instead of
              "stop" meant the very first click after the dialog got stolen by another agent's monitoring
              silently did nothing visible — the supervisor had to click Stop twice to actually stop. */
-          if ((m === 'whisper' || m === 'barge') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; anRepaint() }
+          if ((m === 'whisper' || m === 'barge') && MON_COPILOT_OPEN !== id) { MON_COPILOT_OPEN = id; MS.copilotTab = 'copilot'; MS.copilotHistOpen = false; MS.copilotHistView = 'summary'; MON_COPILOT_MIN = false; anRepaint() }
           else monSetListen(id, 'off');
         } else monSetListen(id, m);
       });
@@ -8640,6 +8640,10 @@
       /* which agent's AI Copilot monitoring dialog is open, if any — replaces the old inline
          Listen/Whisper/Barge dropdown + history icon that used to live directly in every on-call row */
       var MON_COPILOT_OPEN = null;
+      /* true while the open dialog is shrunk to the small floating widget instead of the full panel — lets a
+         supervisor keep watching Whisper/Barge/Takeover (sentiment + a Stop control) while working elsewhere
+         on the page, instead of the dialog blocking the whole screen until monitoring ends */
+      var MON_COPILOT_MIN = false;
       /* per-agent private supervisor notes typed into the Copilot dialog's Notes tab — in-memory only, same
          caveat as MON_MODE/ACTLOG: nothing here survives a page reload, there's no real backend yet */
       var COPILOT_NOTES = {};
@@ -8820,6 +8824,29 @@
         COPILOT_CHAT[id].push({ who: 'ai', text: monCopilotChatReply(q, personSentiment(rr), rr, personAdherence(rr)) });
         anRepaint();
       }
+      /* The minimized AI Copilot widget — everything judged worth keeping visible while shrunk: who, which
+         mode (Whisper/Barge/Takeover have their own colors, matching monListenBtn's palette), live sentiment,
+         and the one control that actually matters when you're not looking at the full dialog: Stop. */
+      function monCopilotMiniWidget(id, r, mode, sentCfg) {
+        var modeCfg = {
+          listen: { label: 'Listening', bg: '#eff6ff', fg: '#1d4ed8' },
+          whisper: { label: 'Whispering', bg: '#fffbeb', fg: '#b45309' },
+          barge: { label: 'Barging', bg: '#fef2f2', fg: '#b91c1c' },
+          takeover: { label: 'Taken over', bg: '#fff7ed', fg: '#9a3412' }
+        }[mode] || { label: mode, bg: '#f1f5f9', fg: '#475569' };
+        var av = AVS[(+r.dataset.av) % AVS.length];
+        return '<div data-moncopilotmini style="position:fixed;right:24px;bottom:24px;z-index:150;width:260px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 20px 45px -15px rgba(0,0,0,.35);overflow:hidden">'
+          + '<div style="display:flex;align-items:center;gap:10px;padding:12px 12px 10px">'
+          + '<span style="width:30px;height:30px;border-radius:50%;background:' + av[0] + ';color:' + av[1] + ';display:grid;place-items:center;font-weight:700;font-size:12px;flex-shrink:0">' + esc(ini(r.dataset.name)) + '</span>'
+          + '<div style="min-width:0;flex:1"><div style="font-weight:700;font-size:13px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.dataset.name) + '</div>'
+          + '<span style="display:inline-block;margin-top:2px;font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 8px;background:' + modeCfg.bg + ';color:' + modeCfg.fg + '">' + modeCfg.label + '</span></div>'
+          + '<button data-monminexpand="' + esc(id) + '" title="Expand" aria-label="Expand" style="flex-shrink:0;width:26px;height:26px;border:0;border-radius:7px;background:#f1f5f9;color:#475569;cursor:pointer;display:grid;place-items:center">' + ixSvg('<path d="M9 3H3v6M15 21h6v-6M21 3l-7 7M3 21l7-7"/>', 13, '#475569') + '</button>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px 12px">'
+          + '<span title="AI sentiment score, -100 to +100" style="font-size:11.5px;font-weight:700;color:' + sentCfg.color + '">' + (sentCfg.score > 0 ? '+' : '') + sentCfg.score + ' &middot; ' + sentCfg.trend + '</span>'
+          + '<button data-monminstop="' + esc(id) + '" style="box-sizing:border-box;height:28px;padding:0 14px;border:0;border-radius:8px;background:#dc2626;color:#fff;font:inherit;font-size:12px;font-weight:600;cursor:pointer">Stop</button>'
+          + '</div></div>';
+      }
       /* The AI Copilot dialog: opened from a row's Monitor button, or straight from the alert banner's
          Barge-in action. Two panels side by side — left is the call itself (who's on it, the quick issue
          summary, a collapsible history), right is the Copilot chatbot (Copilot/Summary/Transcript/Notes/
@@ -8839,6 +8866,10 @@
         var call = realCall || { contact: '—', did: '—', dur: '00:00', dir: '', path: 'Not currently on a call' };
         var sent = personSentiment(r);
         var sentCfg = SENTIMENT_CFG[sent] || { score: 0, trend: 'No active call', color: '#64748b', bg: '#f1f5f9' };
+        /* minimized: a small floating widget (name, mode, sentiment, Stop) instead of the full panel, so a
+           supervisor can keep an eye on an active Whisper/Barge/Takeover while working elsewhere on the page,
+           the same "keep it on screen while you use something else" pattern as a video call's picture-in-picture */
+        if (MON_COPILOT_MIN) return monCopilotMiniWidget(id, r, MON_MODE[id] || 'off', sentCfg);
         var adh = personAdherence(r);
         var recommend = !realCall
           ? { text: 'Not currently on a call — Listen, Whisper or Barge will apply as soon as one starts.', tone: '#475569', bg: '#f1f5f9', bd: '#e2e8f0' }
@@ -8919,11 +8950,12 @@
           + '<span style="width:32px;height:32px;border-radius:9px;background:#eef2ff;display:grid;place-items:center;flex-shrink:0">' + ixSvg('<path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/>', 17, '#4f46e5') + '</span>'
           + '<div style="font-weight:700;font-size:15.5px;color:#0f172a">AI Copilot</div>'
           + '<span title="Sentiment score, -100 to +100" style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:' + sentCfg.bg + ';color:' + sentCfg.color + ';font-variant-numeric:tabular-nums">' + (sentCfg.score > 0 ? '+' : '') + sentCfg.score + ' &middot; ' + sentCfg.trend + '</span>'
-          /* no manual close button or backdrop-click-to-dismiss on purpose — while actively Whispering or
-             Barging, this dialog is where the real Listen/Whisper/Barge control lives, so dismissing it with
-             the mode still active would hide the one place that control is reachable. The only way out is
-             the Monitoring action control below switching back to Off/"Monitor", which closes it automatically. */
-          + '<span style="margin-left:auto;font-size:11.5px;color:#94a3b8;white-space:nowrap">Closes when you stop monitoring</span>'
+          /* no backdrop-click-to-dismiss on purpose — while actively Whispering, Barging or in Takeover, this
+             dialog is where the real monitoring control lives, so dismissing it entirely would hide the one
+             place that control is reachable. Minimize solves the same "I want this out of the way" impulse
+             without losing that control: the floating widget it shrinks to still carries Stop. */
+          + '<span style="margin-left:auto;font-size:11.5px;color:#94a3b8;white-space:nowrap">Minimize to keep watching while you work elsewhere</span>'
+          + '<button data-monminimize="' + esc(id) + '" title="Minimize" aria-label="Minimize" style="flex-shrink:0;width:28px;height:28px;border:0;border-radius:7px;background:#f1f5f9;color:#475569;cursor:pointer;display:grid;place-items:center">' + ixSvg('<path d="M5 12h14"/>', 14, '#475569') + '</button>'
           + '</div>';
         var rightPanel = '<div style="flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden">' + monCopilotTabBar(tab) + body + '</div>';
         return '<div data-moncopilotbackdrop style="position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:150;display:flex;align-items:center;justify-content:center;padding:24px">'
@@ -9208,6 +9240,9 @@
         if (e.target.closest('[data-coprhisttoggle]')) { MS.copilotHistOpen = !MS.copilotHistOpen; anRepaint(); return true }
         if ((t = e.target.closest('[data-coprhistview]'))) { MS.copilotHistView = t.dataset.coprhistview; anRepaint(); return true }
         if ((t = e.target.closest('[data-coprchatsend]'))) { monCopilotChatSend(t.dataset.coprchatsend); return true }
+        if ((t = e.target.closest('[data-monminimize]'))) { MON_COPILOT_MIN = true; anRepaint(); return true }
+        if ((t = e.target.closest('[data-monminexpand]'))) { MON_COPILOT_MIN = false; anRepaint(); return true }
+        if ((t = e.target.closest('[data-monminstop]'))) { monSetListen(t.dataset.monminstop, 'off'); return true }
         if (e.target.closest('[data-monsum]')) { MS.summary = !MS.summary; localStorage.setItem('ucaas.monSummary', MS.summary ? 'on' : 'off'); anRepaint(); return true }
         if ((t = e.target.closest('[data-monextview]'))) { MS.extView = t.dataset.monextview; anRepaint(); return true }
         if ((t = e.target.closest('[data-chatduty]'))) { var cp = personById(t.dataset.chatduty); if (cp) { CHAT_DUTY[t.dataset.chatduty] = !monChatDuty(cp); anRepaint() } return true }
