@@ -7880,8 +7880,13 @@
           rowsHtml += aaRow(h, evs);
         }
         if (!rowsHtml) rowsHtml = monEmpty('No hours to show', 'Try a wider time range or a different status filter.');
+        /* only the timeline below the timezone line scrolls — the agent picker, filters and timezone stay put
+           so they're never scrolled out of reach while paging through a long list of hours */
         return '<div style="box-sizing:border-box;display:flex;height:calc(111.112vh - 78px);min-height:460px;background:#f4f6fb;overflow:hidden">' + railHtml
-          + '<div style="box-sizing:border-box;flex:1;min-width:0;padding:16px 20px;overflow-y:auto">' + toolbar + tzLine + summaryLine + axis + rowsHtml + aaTotalsHtml(sum) + '</div></div>';
+          + '<div style="box-sizing:border-box;flex:1;min-width:0;display:flex;flex-direction:column;min-height:0">'
+          + '<div style="box-sizing:border-box;flex-shrink:0;padding:16px 20px 0">' + toolbar + tzLine + '</div>'
+          + '<div style="box-sizing:border-box;flex:1;min-height:0;overflow-y:auto;padding:0 20px 16px">' + summaryLine + axis + rowsHtml + aaTotalsHtml(sum) + '</div>'
+          + '</div></div>';
       }
       function anPage() {
         if (anState.sel === 'Monitoring') return monPage();
