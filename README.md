@@ -36,32 +36,49 @@ auto-reloads on save.
 
 **Analytics**
 - **Queues** — a live-style queue performance dashboard (chart, right-now tiles, per-queue table)
-- **Monitoring** — supervisor tools:
-  - All Calls / All Extensions / Groups / Call Queue / Campaign sub-views
-  - An **AI Copilot dialog** for any on-call agent — replaces the old inline
-    Listen/Whisper/Barge dropdown with a two-panel view: call details, issue summary,
-    caller history, and schedule adherence on the left; a Copilot/Summary/Transcript/
-    Notes/Contact tabbed assistant (with a simulated chat you can ask about sentiment,
-    adherence, or next steps) on the right
-  - Live Listen → Whisper → Barge controls inside that dialog, gated by the matching
-    Roles → Monitoring sub-permissions
+- **Monitoring** — supervisor tools, laid out as a tab strip (All Calls, All Extensions,
+  Groups, Call Queue, Chat Queue, Campaign), each with its own title + one-line
+  description; the Call Queue/Campaign picker and the Summary on/off toggle live at the
+  right end of that same strip:
+  - A persistent **KPI wallboard** (Calls waiting, Online users, Offline users, Users
+    on call) stays visible across every sub-tab, not just one
+  - Per-agent **Supervise controls** — Listen, Whisper, Barge, and Takeover as a 4th
+    escalation step — shown only for agents currently on a call. Barge/Takeover are
+    further limited to agents who actually need it (out of adherence or reading as
+    frustrated); escalation is one-way (once barged in, the only options are Stop or
+    Takeover)
+  - Starting Whisper, Barge, or Takeover opens an **AI Copilot dialog**: call details,
+    issue summary, caller history, and adherence on the left; a tabbed Copilot/Summary/
+    Transcript/Notes/Contact assistant (simulated chat — ask it about sentiment,
+    adherence, or next steps) on the right. Listen stays silent and doesn't open it
   - Simulated **AI sentiment** per live call (positive/neutral/frustrated, scored
     -100 to +100) and a **schedule adherence** badge per agent, with a configurable
     adherence threshold in Alerts
-  - An AI Copilot alert banner that surfaces when a live call reads as frustrated, with
-    a one-click Barge-in action
-  - Configurable waiting-caller / service-level / adherence alerts, with a cross-page
-    badge and clickable chips that jump straight to the affected queue
+  - A compact **AI Alert pill** next to the page title — one click to barge straight
+    into a flagged call; with more than one flagged call it becomes a dropdown listing
+    each one, with per-agent and "Dismiss all" actions
+  - Configurable waiting-caller / service-level / adherence **alert thresholds**, with
+    a nav-rail badge showing the active alert count and clickable chips that jump
+    straight to the affected queue
+  - Card/table view toggle on All Extensions (a responsive card grid by default)
+  - CSV, print-to-PDF, and Excel (`.xls`) export, shared across All Calls, All
+    Extensions, and Agent Activity
   - "My queues" pinning on the Call Queue picker
+  - Every Listen/Whisper/Barge/Takeover start/stop is logged to the same per-person
+    Activity log used elsewhere, viewable via a history icon or inside the Copilot
+    dialog
   - Click an agent's avatar or name anywhere to open their profile drawer (with a quick
     edit shortcut into the Directory edit page)
-- **Agent Activity** — a per-agent, hour-by-hour Online/Offline session timeline with
-  device/IP/browser/OS detail on hover, filterable by agent, time range, and status
-  - Distinguishes a real gap during the scheduled shift ("No action") from an empty
-    hour outside it ("Outside shift")
-  - A totals panel below the timeline (session counts + minutes per status) and a
-    CSV export of the events in the selected range
-  - Shows the agent's schedule adherence badge next to the agent picker
+- **Agent Activity** — Individual/Team mode toggle:
+  - **Individual** — a per-agent, hour-by-hour Online/Offline session timeline with
+    device/IP/browser/OS detail on hover, filterable by agent, time range, and status.
+    Distinguishes a real gap during the scheduled shift ("No action") from an empty
+    hour outside it ("Outside shift"); shows a totals panel (session counts + minutes
+    per status) and the agent's adherence badge next to the picker
+  - **Team** — the same per-agent summary numbers (adherence, online/offline sessions
+    and time) for everyone at once in one table; click an agent to drop into their
+    Individual timeline
+  - Both views share the CSV/PDF/Excel export
 
 ## Architecture notes
 
@@ -81,6 +98,11 @@ auto-reloads on save.
 - `rows()` is the single source of truth for the People directory (reads live `<tr>`
   elements, not a JS array) — don't shadow that name in a local scope, several things
   depend on it.
+- The whole app runs at `zoom: 0.9` on `<body>`, paired with `width/min-height:
+  111.112%` (1/0.9) so the shrunk page still fills the real viewport instead of
+  leaving a gap. That 111.112 factor is baked into every `calc(111.112vh - Npx)`
+  height used throughout (nav rail, `<main>`, modals, Monitoring, Agent Activity) — if
+  the zoom level ever changes, those `calc()` values need to change with it.
 
 ## Known limitations
 
